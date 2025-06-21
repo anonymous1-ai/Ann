@@ -4,77 +4,131 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const { toast } = useToast();
+
+  const handleDownload = () => {
+    toast({
+      title: "Download Started",
+      description: "Silently AI installer is being prepared for download...",
+    });
+    // In a real app, this would trigger the actual download
+    console.log("Download button clicked");
+  };
+
+  const handlePricing = () => {
+    document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+    toast({
+      title: "Viewing Pricing",
+      description: "Check out our transparent pricing plans below",
+    });
+  };
+
+  const handlePlanSelect = (planName: string, price: string) => {
+    toast({
+      title: `${planName} Plan Selected`,
+      description: `You selected the ${planName} plan at ${price}. Redirecting to payment...`,
+    });
+    console.log(`Selected plan: ${planName} at ${price}`);
+    // In a real app, this would redirect to payment gateway
+  };
+
+  const handleContactUs = () => {
+    toast({
+      title: "Contact Us",
+      description: "Opening contact form...",
+    });
+    console.log("Contact us clicked");
+  };
+
+  const handleSocialLink = (platform: string) => {
+    toast({
+      title: `Opening ${platform}`,
+      description: `Redirecting to ${platform} page...`,
+    });
+    console.log(`${platform} link clicked`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white overflow-hidden">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-blue-500/5 via-transparent to-purple-500/5 rounded-full animate-spin [animation-duration:60s]"></div>
+        <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[800px] h-[400px] md:h-[800px] bg-gradient-conic from-blue-500/5 via-transparent to-purple-500/5 rounded-full animate-spin [animation-duration:60s]"></div>
       </div>
 
       {/* Hero Section */}
-      <section className="relative px-6 pt-20 pb-24 overflow-hidden">
+      <section className="relative px-4 md:px-6 pt-12 md:pt-20 pb-16 md:pb-24 overflow-hidden">
         <div className="relative max-w-7xl mx-auto">
           {/* Circuit Pattern Overlay */}
           <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-20 left-10 w-32 h-32 border border-blue-400/30 rounded-lg transform rotate-12"></div>
-            <div className="absolute top-40 right-20 w-24 h-24 border border-purple-400/30 rounded-full"></div>
-            <div className="absolute bottom-20 left-1/3 w-16 h-16 border border-cyan-400/30 rounded-lg transform -rotate-12"></div>
+            <div className="absolute top-10 md:top-20 left-5 md:left-10 w-16 md:w-32 h-16 md:h-32 border border-blue-400/30 rounded-lg transform rotate-12"></div>
+            <div className="absolute top-20 md:top-40 right-10 md:right-20 w-12 md:w-24 h-12 md:h-24 border border-purple-400/30 rounded-full"></div>
+            <div className="absolute bottom-10 md:bottom-20 left-1/4 md:left-1/3 w-8 md:w-16 h-8 md:h-16 border border-cyan-400/30 rounded-lg transform -rotate-12"></div>
           </div>
 
           <div className="text-center relative z-10">
-            <div className="mb-12">
-              <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 backdrop-blur-xl border border-blue-400/30 mb-8 relative">
-                <Code className="w-12 h-12 text-blue-400" />
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-400/20 to-purple-500/20 blur-xl"></div>
+            <div className="mb-8 md:mb-12">
+              <div className="inline-flex items-center justify-center w-16 md:w-24 h-16 md:h-24 rounded-2xl md:rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 backdrop-blur-xl border border-blue-400/30 mb-6 md:mb-8 relative">
+                <Code className="w-8 md:w-12 h-8 md:h-12 text-blue-400" />
+                <div className="absolute inset-0 rounded-2xl md:rounded-3xl bg-gradient-to-br from-blue-400/20 to-purple-500/20 blur-xl"></div>
               </div>
-              <Badge variant="secondary" className="mb-6 bg-blue-950/50 text-blue-300 border-blue-400/30 backdrop-blur-sm px-4 py-2">
+              <Badge variant="secondary" className="mb-4 md:mb-6 bg-blue-950/50 text-blue-300 border-blue-400/30 backdrop-blur-sm px-3 md:px-4 py-1 md:py-2 text-xs md:text-sm">
                 <span className="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></span>
                 Desktop AI Tool • Undetectable • Offline Ready
               </Badge>
             </div>
 
-            <h1 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-white via-blue-200 to-purple-300 bg-clip-text text-transparent leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-6 md:mb-8 bg-gradient-to-r from-white via-blue-200 to-purple-300 bg-clip-text text-transparent leading-tight">
               Silently AI
             </h1>
             
-            <div className="max-w-4xl mx-auto mb-12">
-              <p className="text-3xl md:text-4xl text-blue-100 mb-6 font-light">
+            <div className="max-w-4xl mx-auto mb-8 md:mb-12">
+              <p className="text-xl md:text-3xl lg:text-4xl text-blue-100 mb-4 md:mb-6 font-light">
                 Code in silence. Work undetected.
               </p>
-              <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed px-4 md:px-0">
                 The intelligent desktop tool that converts text to code, screenshots to implementations, 
                 and solves aptitude problems — all while staying completely invisible to monitoring systems.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-8">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 hover:from-blue-700 hover:via-blue-600 hover:to-purple-700 text-white px-12 py-5 text-xl rounded-xl shadow-2xl shadow-blue-500/25 border border-blue-400/30 group relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-6 md:mb-8 px-4">
+              <Button 
+                size="lg" 
+                onClick={handleDownload}
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 hover:from-blue-700 hover:via-blue-600 hover:to-purple-700 text-white px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl rounded-xl shadow-2xl shadow-blue-500/25 border border-blue-400/30 group relative overflow-hidden"
+              >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                <Download className="mr-3 h-7 w-7 relative z-10" />
+                <Download className="mr-2 md:mr-3 h-5 md:h-7 w-5 md:w-7 relative z-10" />
                 <span className="relative z-10">Download Free</span>
               </Button>
-              <Button variant="outline" size="lg" className="border-blue-400/50 text-blue-300 hover:bg-blue-950/50 hover:border-blue-400 px-12 py-5 text-xl rounded-xl backdrop-blur-sm group">
-                <CreditCard className="mr-3 h-6 w-6" />
-                <span className="mr-3">View Pricing</span>
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={handlePricing}
+                className="w-full sm:w-auto border-blue-400/50 text-blue-300 hover:bg-blue-950/50 hover:border-blue-400 px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl rounded-xl backdrop-blur-sm group"
+              >
+                <CreditCard className="mr-2 md:mr-3 h-5 md:h-6 w-5 md:w-6" />
+                <span className="mr-2 md:mr-3">View Pricing</span>
+                <ArrowRight className="h-4 md:h-5 w-4 md:w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-400">
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 px-4">
               <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-400" />
+                <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
                 <span>Works 100% offline</span>
               </div>
               <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-400" />
+                <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
                 <span>Undetectable typing simulation</span>
               </div>
               <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-400" />
+                <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
                 <span>Instant kill switch</span>
               </div>
             </div>
@@ -83,18 +137,18 @@ const Index = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="px-6 py-20 relative">
+      <section className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
               Stealth Features That Actually Work
             </h2>
-            <p className="text-slate-400 text-xl max-w-3xl mx-auto leading-relaxed">
+            <p className="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed px-4 md:px-0">
               Built for students, freelancers, and professionals who need results without detection
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[
               {
                 icon: Code,
@@ -141,20 +195,20 @@ const Index = () => {
             ].map((feature, index) => (
               <Card key={index} className="bg-slate-900/50 border-slate-700/50 hover:border-blue-400/50 transition-all duration-500 backdrop-blur-xl group hover:shadow-2xl hover:shadow-blue-500/10 rounded-2xl overflow-hidden">
                 <CardHeader className="relative">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                      <span className="text-2xl">{feature.emoji}</span>
+                  <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                    <div className={`w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <span className="text-xl md:text-2xl">{feature.emoji}</span>
                     </div>
-                    <Badge variant="secondary" className="bg-slate-800/50 text-slate-300 border-slate-600/50">
+                    <Badge variant="secondary" className="bg-slate-800/50 text-slate-300 border-slate-600/50 text-xs">
                       Core Feature
                     </Badge>
                   </div>
-                  <CardTitle className="text-white text-xl group-hover:text-blue-200 transition-colors">
+                  <CardTitle className="text-white text-lg md:text-xl group-hover:text-blue-200 transition-colors">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-slate-300 leading-relaxed text-base">
+                  <CardDescription className="text-slate-300 leading-relaxed text-sm md:text-base">
                     {feature.description}
                   </CardDescription>
                 </CardContent>
@@ -165,12 +219,12 @@ const Index = () => {
       </section>
 
       {/* How It Works */}
-      <section className="px-6 py-20 relative">
+      <section className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-5xl mx-auto relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
             Get Started in 3 Minutes
           </h2>
-          <div className="space-y-12">
+          <div className="space-y-8 md:space-y-12">
             {[
               {
                 step: "01",
@@ -191,20 +245,20 @@ const Index = () => {
                 action: "Ready to use immediately"
               }
             ].map((item, index) => (
-              <div key={index} className="flex items-start gap-8 group">
-                <div className="flex-shrink-0 w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 font-bold text-2xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+              <div key={index} className="flex flex-col md:flex-row items-start gap-6 md:gap-8 group">
+                <div className="flex-shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 font-bold text-xl md:text-2xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0">
                   {item.step}
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-4">
-                    <h3 className="text-2xl font-semibold text-white group-hover:text-blue-200 transition-colors">
+                <div className="flex-1 text-center md:text-left">
+                  <div className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 mb-3 md:mb-4">
+                    <h3 className="text-xl md:text-2xl font-semibold text-white group-hover:text-blue-200 transition-colors">
                       {item.title}
                     </h3>
-                    <Badge variant="secondary" className="bg-green-950/50 text-green-300 border-green-400/30">
+                    <Badge variant="secondary" className="bg-green-950/50 text-green-300 border-green-400/30 text-xs">
                       {item.action}
                     </Badge>
                   </div>
-                  <p className="text-slate-300 text-lg leading-relaxed">
+                  <p className="text-slate-300 text-base md:text-lg leading-relaxed">
                     {item.description}
                   </p>
                 </div>
@@ -215,18 +269,18 @@ const Index = () => {
       </section>
 
       {/* Pricing */}
-      <section className="px-6 py-20 relative">
+      <section id="pricing" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
               Fair & Transparent Pricing
             </h2>
-            <p className="text-slate-400 text-xl max-w-3xl mx-auto">
+            <p className="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto px-4 md:px-0">
               No yearly lock-ins. No hidden fees. Pay for what you use.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[
               {
                 name: "Free",
@@ -275,37 +329,40 @@ const Index = () => {
                   : 'bg-slate-900/50 border-slate-700/50 hover:border-blue-400/50 hover:shadow-blue-500/10'
               }`}>
                 {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 px-4 py-1">
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 px-3 md:px-4 py-1 text-xs">
                     {plan.badge}
                   </Badge>
                 )}
-                <CardHeader className="text-center pb-6">
-                  <div className="mb-4">
-                    <CardTitle className="text-xl text-white mb-2">{plan.name}</CardTitle>
+                <CardHeader className="text-center pb-4 md:pb-6">
+                  <div className="mb-3 md:mb-4">
+                    <CardTitle className="text-lg md:text-xl text-white mb-2">{plan.name}</CardTitle>
                     <Badge variant="secondary" className="bg-slate-800/50 text-slate-300 border-slate-600/50 text-xs">
                       {plan.badge}
                     </Badge>
                   </div>
-                  <div className="mb-4">
-                    <span className="text-4xl font-bold text-white">{plan.price}</span>
-                    <span className="text-slate-400 text-base">{plan.period}</span>
+                  <div className="mb-3 md:mb-4">
+                    <span className="text-3xl md:text-4xl font-bold text-white">{plan.price}</span>
+                    <span className="text-slate-400 text-sm md:text-base">{plan.period}</span>
                   </div>
-                  <p className="text-slate-300 text-sm">{plan.description}</p>
+                  <p className="text-slate-300 text-xs md:text-sm">{plan.description}</p>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
+                <CardContent className="space-y-4 md:space-y-6">
+                  <ul className="space-y-2 md:space-y-3">
                     {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-3 text-slate-300 text-sm">
-                        <Check className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                      <li key={featureIndex} className="flex items-center gap-2 md:gap-3 text-slate-300 text-xs md:text-sm">
+                        <Check className="h-3 md:h-4 w-3 md:w-4 text-blue-400 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}
                   </ul>
-                  <Button className={`w-full rounded-xl py-3 text-base font-semibold transition-all duration-300 ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:shadow-blue-500/25'
-                      : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 hover:border-blue-400/50'
-                  }`}>
+                  <Button 
+                    onClick={() => handlePlanSelect(plan.name, plan.price + plan.period)}
+                    className={`w-full rounded-xl py-2 md:py-3 text-sm md:text-base font-semibold transition-all duration-300 ${
+                      plan.popular
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:shadow-blue-500/25'
+                        : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 hover:border-blue-400/50'
+                    }`}
+                  >
                     {plan.buttonText}
                   </Button>
                 </CardContent>
@@ -313,8 +370,8 @@ const Index = () => {
             ))}
           </div>
 
-          <div className="text-center mt-12">
-            <p className="text-slate-400 text-lg">
+          <div className="text-center mt-8 md:mt-12">
+            <p className="text-slate-400 text-base md:text-lg px-4 md:px-0">
               All plans include <span className="text-blue-300 font-semibold">undetectable typing simulation</span> and <span className="text-blue-300 font-semibold">master kill switch</span>
             </p>
           </div>
@@ -322,14 +379,14 @@ const Index = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="px-6 py-20">
+      <section className="px-4 md:px-6 py-16 md:py-20">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
             Trusted by 10,000+ Users
           </h2>
-          <p className="text-center text-slate-400 text-lg mb-16">Students, freelancers, and professionals love the stealth approach</p>
+          <p className="text-center text-slate-400 text-base md:text-lg mb-12 md:mb-16">Students, freelancers, and professionals love the stealth approach</p>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[
               { 
                 name: "Arjun K.", 
@@ -354,20 +411,20 @@ const Index = () => {
               }
             ].map((testimonial, index) => (
               <Card key={index} className="bg-slate-900/50 border-slate-700/50 backdrop-blur-xl rounded-2xl hover:border-blue-400/50 transition-all duration-500">
-                <CardContent className="pt-8">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+                <CardContent className="pt-6 md:pt-8">
+                  <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+                    <div className="w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg md:text-xl">
                       {testimonial.initials}
                     </div>
                     <div>
-                      <div className="font-semibold text-white text-lg">{testimonial.name}</div>
-                      <div className="text-slate-400 text-sm">{testimonial.role}</div>
+                      <div className="font-semibold text-white text-base md:text-lg">{testimonial.name}</div>
+                      <div className="text-slate-400 text-xs md:text-sm">{testimonial.role}</div>
                       <Badge variant="secondary" className="bg-blue-950/50 text-blue-300 border-blue-400/30 text-xs mt-1">
                         {testimonial.plan}
                       </Badge>
                     </div>
                   </div>
-                  <p className="text-slate-300 leading-relaxed italic">
+                  <p className="text-slate-300 leading-relaxed italic text-sm md:text-base">
                     "{testimonial.quote}"
                   </p>
                 </CardContent>
@@ -378,14 +435,14 @@ const Index = () => {
       </section>
 
       {/* FAQ */}
-      <section className="px-6 py-20 relative">
+      <section className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
             Frequently Asked Questions
           </h2>
-          <p className="text-center text-slate-400 text-lg mb-16">Everything you need to know about using Silently AI</p>
+          <p className="text-center text-slate-400 text-base md:text-lg mb-12 md:mb-16">Everything you need to know about using Silently AI</p>
           
-          <Accordion type="single" collapsible className="space-y-6">
+          <Accordion type="single" collapsible className="space-y-4 md:space-y-6">
             {[
               {
                 value: "item-1",
@@ -419,10 +476,10 @@ const Index = () => {
               }
             ].map((item, index) => (
               <AccordionItem key={index} value={item.value} className="border-slate-700/50 rounded-xl bg-slate-900/30 backdrop-blur-sm">
-                <AccordionTrigger className="text-white hover:text-blue-300 px-6 py-4 text-lg font-medium">
+                <AccordionTrigger className="text-white hover:text-blue-300 px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-medium">
                   {item.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-slate-300 px-6 pb-6 leading-relaxed">
+                <AccordionContent className="text-slate-300 px-4 md:px-6 pb-4 md:pb-6 leading-relaxed text-sm md:text-base">
                   {item.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -432,20 +489,20 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-16 border-t border-slate-800/50 backdrop-blur-xl relative">
+      <footer className="px-4 md:px-6 py-12 md:py-16 border-t border-slate-800/50 backdrop-blur-xl relative">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-5 gap-12">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <Code className="w-6 h-6 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-3 mb-4 md:mb-6">
+                <div className="w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  <Code className="w-5 md:w-6 h-5 md:h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-white">Silently AI</span>
+                <span className="text-xl md:text-2xl font-bold text-white">Silently AI</span>
               </div>
-              <p className="text-slate-400 leading-relaxed mb-6">
+              <p className="text-slate-400 leading-relaxed mb-4 md:mb-6 text-sm md:text-base">
                 The undetectable desktop AI tool for students, developers, and professionals who need results without detection.
               </p>
-              <Badge variant="secondary" className="bg-green-950/50 text-green-300 border-green-400/30">
+              <Badge variant="secondary" className="bg-green-950/50 text-green-300 border-green-400/30 text-xs">
                 <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
                 10,000+ Active Users
               </Badge>
@@ -453,37 +510,55 @@ const Index = () => {
             {[
               {
                 title: "Product",
-                links: ["Download", "Features", "Pricing", "Roadmap"]
+                links: [
+                  { name: "Download", action: handleDownload },
+                  { name: "Features", action: () => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }) },
+                  { name: "Pricing", action: handlePricing },
+                  { name: "Roadmap", action: () => handleSocialLink("Roadmap") }
+                ]
               },
               {
                 title: "Support", 
-                links: ["Help Center", "API Docs", "Contact Us", "Bug Reports"]
+                links: [
+                  { name: "Help Center", action: handleContactUs },
+                  { name: "API Docs", action: () => handleSocialLink("API Docs") },
+                  { name: "Contact Us", action: handleContactUs },
+                  { name: "Bug Reports", action: () => handleSocialLink("Bug Reports") }
+                ]
               },
               {
                 title: "Legal",
-                links: ["Privacy Policy", "Terms of Service", "Refund Policy", "GDPR"]
+                links: [
+                  { name: "Privacy Policy", action: () => handleSocialLink("Privacy Policy") },
+                  { name: "Terms of Service", action: () => handleSocialLink("Terms of Service") },
+                  { name: "Refund Policy", action: () => handleSocialLink("Refund Policy") },
+                  { name: "GDPR", action: () => handleSocialLink("GDPR") }
+                ]
               }
             ].map((section, index) => (
               <div key={index}>
-                <h3 className="font-semibold text-white mb-6 text-lg">{section.title}</h3>
-                <ul className="space-y-3">
+                <h3 className="font-semibold text-white mb-4 md:mb-6 text-base md:text-lg">{section.title}</h3>
+                <ul className="space-y-2 md:space-y-3">
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <a href="#" className="text-slate-400 hover:text-blue-300 transition-colors">
-                        {link}
-                      </a>
+                      <button 
+                        onClick={link.action}
+                        className="text-slate-400 hover:text-blue-300 transition-colors text-sm md:text-base text-left"
+                      >
+                        {link.name}
+                      </button>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-          <div className="border-t border-slate-800/50 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-slate-400">
-            <div>© 2024 Silently AI. All rights reserved.</div>
-            <div className="flex items-center gap-6 mt-4 md:mt-0">
-              <span className="text-sm">Made in India 🇮🇳</span>
-              <span className="text-sm">•</span>
-              <span className="text-sm">Powered by Razorpay</span>
+          <div className="border-t border-slate-800/50 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-slate-400 space-y-4 md:space-y-0">
+            <div className="text-sm md:text-base">© 2024 Silently AI. All rights reserved.</div>
+            <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm">
+              <span>Made in India 🇮🇳</span>
+              <span>•</span>
+              <span>Powered by Razorpay</span>
             </div>
           </div>
         </div>
