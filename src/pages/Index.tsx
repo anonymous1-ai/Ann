@@ -1,12 +1,15 @@
-
 import { Download, Code, Camera, Brain, Shield, Zap, ArrowRight, Check, CreditCard, Activity, Settings, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const handleDownload = () => {
@@ -51,86 +54,105 @@ const Index = () => {
     console.log(`${platform} link clicked`);
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
+    }
+  };
+
+  const handleLogin = () => {
+    navigate('/auth');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[800px] h-[400px] md:h-[800px] bg-gradient-conic from-blue-500/5 via-transparent to-purple-500/5 rounded-full animate-spin [animation-duration:60s]"></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 bg-slate-900/90 backdrop-blur-sm border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg"></div>
+              <span className="text-white font-bold text-xl">Silently AI</span>
+            </div>
+            <div className="hidden md:flex items-center space-x-8">
+              <button onClick={() => scrollToSection('features')} className="text-slate-300 hover:text-white transition-colors">Features</button>
+              <button onClick={() => scrollToSection('pricing')} className="text-slate-300 hover:text-white transition-colors">Pricing</button>
+              <button onClick={() => scrollToSection('faq')} className="text-slate-300 hover:text-white transition-colors">FAQ</button>
+              {user ? (
+                <Button onClick={() => navigate('/dashboard')} className="bg-purple-600 hover:bg-purple-700">
+                  Dashboard
+                </Button>
+              ) : (
+                <Button onClick={handleLogin} variant="outline" className="border-slate-600 text-white hover:bg-slate-800">
+                  Login
+                </Button>
+              )}
+            </div>
+            <div className="md:hidden">
+              <Button variant="ghost" size="sm" className="text-white">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       {/* Hero Section */}
-      <section className="relative px-4 md:px-6 pt-12 md:pt-20 pb-16 md:pb-24 overflow-hidden">
-        <div className="relative max-w-7xl mx-auto">
-          {/* Circuit Pattern Overlay */}
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-10 md:top-20 left-5 md:left-10 w-16 md:w-32 h-16 md:h-32 border border-blue-400/30 rounded-lg transform rotate-12"></div>
-            <div className="absolute top-20 md:top-40 right-10 md:right-20 w-12 md:w-24 h-12 md:h-24 border border-purple-400/30 rounded-full"></div>
-            <div className="absolute bottom-10 md:bottom-20 left-1/4 md:left-1/3 w-8 md:w-16 h-8 md:h-16 border border-cyan-400/30 rounded-lg transform -rotate-12"></div>
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="mb-8">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+              Convert Anything to
+              <span className="block bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                Clean Code
+              </span>
+            </h1>
+            <p className="text-xl sm:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto">
+              Screenshots, text, aptitude problems - transform them into working code instantly. 
+              Undetectable typing simulation for seamless coding tests.
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <Button 
+              onClick={handleGetStarted}
+              size="lg" 
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold shadow-2xl transform hover:scale-105 transition-all duration-200"
+            >
+              {user ? 'Go to Dashboard' : 'Get Started Free'}
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button 
+              onClick={() => scrollToSection('pricing')}
+              variant="outline" 
+              size="lg"
+              className="border-slate-600 text-white hover:bg-slate-800 px-8 py-4 text-lg font-semibold"
+            >
+              View Pricing
+            </Button>
           </div>
 
-          <div className="text-center relative z-10">
-            <div className="mb-8 md:mb-12">
-              <div className="inline-flex items-center justify-center w-16 md:w-24 h-16 md:h-24 rounded-2xl md:rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 backdrop-blur-xl border border-blue-400/30 mb-6 md:mb-8 relative">
-                <Code className="w-8 md:w-12 h-8 md:h-12 text-blue-400" />
-                <div className="absolute inset-0 rounded-2xl md:rounded-3xl bg-gradient-to-br from-blue-400/20 to-purple-500/20 blur-xl"></div>
-              </div>
-              <Badge variant="secondary" className="mb-4 md:mb-6 bg-blue-950/50 text-blue-300 border-blue-400/30 backdrop-blur-sm px-3 md:px-4 py-1 md:py-2 text-xs md:text-sm">
-                <span className="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></span>
-                Desktop AI Tool • Undetectable • Offline Ready
-              </Badge>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 px-4">
+            <div className="flex items-center gap-2">
+              <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
+              <span>Works 100% offline</span>
             </div>
-
-            <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-6 md:mb-8 bg-gradient-to-r from-white via-blue-200 to-purple-300 bg-clip-text text-transparent leading-tight">
-              Silently AI
-            </h1>
-            
-            <div className="max-w-4xl mx-auto mb-8 md:mb-12">
-              <p className="text-xl md:text-3xl lg:text-4xl text-blue-100 mb-4 md:mb-6 font-light">
-                Code in silence. Work undetected.
-              </p>
-              <p className="text-base md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed px-4 md:px-0">
-                The intelligent desktop tool that converts text to code, screenshots to implementations, 
-                and solves aptitude problems — all while staying completely invisible to monitoring systems.
-              </p>
+            <div className="flex items-center gap-2">
+              <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
+              <span>Undetectable typing simulation</span>
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-6 md:mb-8 px-4">
-              <Button 
-                size="lg" 
-                onClick={handleDownload}
-                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 hover:from-blue-700 hover:via-blue-600 hover:to-purple-700 text-white px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl rounded-xl shadow-2xl shadow-blue-500/25 border border-blue-400/30 group relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                <Download className="mr-2 md:mr-3 h-5 md:h-7 w-5 md:w-7 relative z-10" />
-                <span className="relative z-10">Download Free</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                onClick={handlePricing}
-                className="w-full sm:w-auto border-blue-400/50 text-blue-300 hover:bg-blue-950/50 hover:border-blue-400 px-8 md:px-12 py-4 md:py-5 text-lg md:text-xl rounded-xl backdrop-blur-sm group"
-              >
-                <CreditCard className="mr-2 md:mr-3 h-5 md:h-6 w-5 md:w-6" />
-                <span className="mr-2 md:mr-3">View Pricing</span>
-                <ArrowRight className="h-4 md:h-5 w-4 md:w-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 px-4">
-              <div className="flex items-center gap-2">
-                <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
-                <span>Works 100% offline</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
-                <span>Undetectable typing simulation</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
-                <span>Instant kill switch</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
+              <span>Instant kill switch</span>
             </div>
           </div>
         </div>
@@ -359,7 +381,7 @@ const Index = () => {
                     onClick={() => handlePlanSelect(plan.name, plan.price + plan.period)}
                     className={`w-full rounded-xl py-2 md:py-3 text-sm md:text-base font-semibold transition-all duration-300 ${
                       plan.popular
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:shadow-blue-500/25'
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:via-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:shadow-blue-500/25'
                         : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 hover:border-blue-400/50'
                     }`}
                   >
