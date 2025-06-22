@@ -97,7 +97,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         },
         body: JSON.stringify({
           plan: 'custom-payment',
-          amount: amount / 100, // Convert from paise to rupees
+          amount: amount, // Amount already in paise
           paymentMethod
         })
       });
@@ -116,13 +116,50 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         name: 'Silently AI',
         description: description,
         order_id: orderData.data.orderId,
-        handler: function (response: any) {
-          onSuccess(response);
+        handler: async function (response: any) {
+          try {
+            // Verify payment with backend
+            const verifyResponse = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                orderId: orderData.data.orderId,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                plan: 'custom-payment'
+              })
+            });
+
+            const verifyResult = await verifyResponse.json();
+            
+            if (verifyResult.success) {
+              onSuccess({
+                ...response,
+                verified: true,
+                newBalance: verifyResult.data.newBalance,
+                addedCalls: verifyResult.data.addedCalls,
+                message: verifyResult.data.message
+              });
+              toast({
+                title: "Payment Successful!",
+                description: `Added ${verifyResult.data.addedCalls} API credits to your account`
+              });
+            } else {
+              throw new Error(verifyResult.error || 'Payment verification failed');
+            }
+          } catch (error: any) {
+            console.error('Payment verification error:', error);
+            onError(error);
+            toast({
+              title: "Payment Verification Failed",
+              description: error.message || 'Please contact support',
+              variant: "destructive"
+            });
+          }
           onClose();
-          toast({
-            title: "Payment Successful!",
-            description: `Payment completed successfully via ${paymentMethod.toUpperCase()}`
-          });
         },
         prefill: {
           email: userDetails.email,
@@ -237,6 +274,28 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
             {/* UPI Payment */}
             <TabsContent value="upi" className="space-y-4">
+              {/* Amount Selection for Top-up */}
+              {description.includes('₹9 per call') && (
+                <div className="space-y-2">
+                  <Label className="text-gold">Number of API Credits</Label>
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      type="number"
+                      min="1"
+                      max="1000"
+                      value={Math.floor(amount / 900)}
+                      onChange={(e) => {
+                        const credits = parseInt(e.target.value) || 1;
+                        // Update amount based on credits (₹9 per credit = 900 paise)
+                        window.dispatchEvent(new CustomEvent('updateAmount', { detail: credits * 900 }));
+                      }}
+                      className="bg-slate-800 border-yellow-400/30 text-white w-24"
+                    />
+                    <span className="text-yellow-200/70">credits × ₹9 = ₹{Math.floor(amount / 900) * 9}</span>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="upi" className="text-gold">UPI ID</Label>
                 <Input

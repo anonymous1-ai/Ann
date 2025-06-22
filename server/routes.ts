@@ -5,8 +5,16 @@ import { insertUserSchema, loginUserSchema, licenseValidationSchema } from "@sha
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
+import Razorpay from "razorpay";
+import crypto from "crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key";
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+  key_id: process.env.VITE_RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+});
 
 // Pricing plans
 const PRICING_PLANS = {
@@ -264,28 +272,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Razorpay payment routes
   app.post("/api/create-order", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { plan } = req.body;
+      const { plan, amount, paymentMethod } = req.body;
       
-      if (!PRICING_PLANS[plan as keyof typeof PRICING_PLANS]) {
+      let orderAmount: number;
+      let orderDescription: string;
+
+      if (plan === 'custom-payment' || plan === 'topup-9') {
+        // Handle ₹9 per call top-up
+        orderAmount = amount || 900; // Default ₹9 in paise
+        orderDescription = "API Credits - ₹9 per call";
+      } else if (PRICING_PLANS[plan as keyof typeof PRICING_PLANS]) {
+        // Handle subscription plans
+        const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+        orderAmount = planDetails.price * 100; // Convert to paise
+        orderDescription = `${plan} subscription plan`;
+      } else {
         return res.status(400).json({ success: false, error: "Invalid plan" });
       }
 
-      const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
-      
-      // Mock Razorpay order creation (replace with actual Razorpay integration)
-      const orderId = `order_${Date.now()}`;
+      // Create Razorpay order
+      const options = {
+        amount: orderAmount,
+        currency: 'INR',
+        receipt: `receipt_${Date.now()}`,
+        notes: {
+          plan: plan,
+          userId: req.user.userId,
+          paymentMethod: paymentMethod || 'card'
+        }
+      };
+
+      const order = await razorpay.orders.create(options);
       
       res.json({
         success: true,
         data: {
-          orderId,
-          amount: planDetails.price * 100, // Amount in paise
-          currency: "INR",
+          orderId: order.id,
+          amount: order.amount,
+          currency: order.currency,
           plan
         }
       });
-    } catch (error) {
-      res.status(500).json({ success: false, error: "Internal server error" });
+    } catch (error: any) {
+      console.error('Razorpay order creation error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error.message || "Failed to create payment order" 
+      });
     }
   });
 
@@ -293,14 +326,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { orderId, paymentId, signature, plan } = req.body;
       
-      // Mock payment verification (replace with actual Razorpay verification)
-      const isPaymentValid = true; // In real implementation, verify with Razorpay
+      // Verify Razorpay payment signature
+      const body = orderId + "|" + paymentId;
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+        .update(body.toString())
+        .digest("hex");
+
+      const isPaymentValid = expectedSignature === signature;
       
       if (!isPaymentValid) {
         return res.status(400).json({ success: false, error: "Payment verification failed" });
       }
 
+      // Handle top-up payments
+      if (plan === 'custom-payment' || plan === 'topup-9') {
+        // Get payment details from Razorpay to determine amount
+        const payment = await razorpay.payments.fetch(paymentId);
+        const paymentAmount = payment.amount as number;
+        const amountInRupees = paymentAmount / 100;
+        const creditsToAdd = Math.floor(amountInRupees / 9); // ₹9 per credit
+
+        // Get current user
+        const user = await storage.getUser(req.user.userId);
+        if (!user) {
+          return res.status(404).json({ success: false, error: "User not found" });
+        }
+
+        // Add API calls to user's account
+        const newBalance = user.apiCallsLeft + creditsToAdd;
+        await storage.updateUser(req.user.userId, { apiCallsLeft: newBalance });
+
+        // Track the top-up transaction
+        await storage.trackApiUsage(req.user.userId, `topup-${creditsToAdd}`, -creditsToAdd);
+
+        return res.json({
+          success: true,
+          data: {
+            newBalance,
+            addedCalls: creditsToAdd,
+            amountPaid: amountInRupees,
+            message: `Successfully added ${creditsToAdd} API calls to your account`
+          }
+        });
+      }
+
+      // Handle subscription payments
       const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+      if (!planDetails) {
+        return res.status(400).json({ success: false, error: "Invalid plan" });
+      }
+
       const expiryDate = new Date(Date.now() + planDetails.duration * 24 * 60 * 60 * 1000);
 
       // Update user plan and create subscription
@@ -322,8 +398,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           licenseKey
         }
       });
-    } catch (error) {
-      res.status(500).json({ success: false, error: "Internal server error" });
+    } catch (error: any) {
+      console.error('Payment verification error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error.message || "Payment verification failed" 
+      });
     }
   });
 

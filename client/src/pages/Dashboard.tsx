@@ -119,65 +119,26 @@ const Dashboard = () => {
 
   const handlePaymentSuccess = async (response: any) => {
     try {
-      const paymentType = paymentModal.type;
-      
-      if (paymentType.startsWith('topup-')) {
-        // Handle top-up verification
-        const verifyResponse = await fetch('/api/verify-topup-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            paymentId: response.razorpay_payment_id,
-            signature: response.razorpay_signature,
-            topupType: paymentType
-          })
+      // Payment verification is now handled in PaymentModal
+      // Just refresh user data and show success message
+      if (response.verified && response.newBalance) {
+        toast({
+          title: "Payment Successful!",
+          description: response.message || `Added ${response.addedCalls} API credits to your account`
         });
-
-        const verifyData = await verifyResponse.json();
-        
-        if (verifyData.success) {
-          toast({
-            title: "Top-up Successful!",
-            description: "API credits have been added to your account."
-          });
-          await refreshUser();
-        } else {
-          throw new Error(verifyData.error || 'Top-up verification failed');
-        }
+        await refreshUser();
       } else {
-        // Handle subscription verification
-        const verifyResponse = await fetch('/api/verify-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            paymentId: response.razorpay_payment_id,
-            signature: response.razorpay_signature,
-            plan: paymentType
-          })
+        // Fallback for older payment flows
+        toast({
+          title: "Payment Completed",
+          description: "Please refresh to see updated credits"
         });
-
-        const verifyData = await verifyResponse.json();
-        
-        if (verifyData.success) {
-          toast({
-            title: "Subscription Successful!",
-            description: "Your account has been upgraded successfully."
-          });
-          await refreshUser();
-        } else {
-          throw new Error(verifyData.error || 'Subscription verification failed');
-        }
+        await refreshUser();
       }
     } catch (error: any) {
       toast({
-        title: "Payment Verification Failed",
-        description: error.message || "Please contact support if payment was deducted.",
+        title: "Error",
+        description: error.message || "Please refresh your dashboard",
         variant: "destructive"
       });
     }
