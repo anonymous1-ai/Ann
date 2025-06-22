@@ -9,9 +9,17 @@ import { Badge } from '@/components/ui/badge';
 import { LogOut, Download, CreditCard, TrendingUp, Calendar, Clock } from 'lucide-react';
 import { getLogoPath } from '@/assets/logo-config';
 
+// Add Razorpay type declaration
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const { toast } = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
   const [recentActivity] = useState([
     { id: 1, feature: 'Screenshot to Code', timestamp: '2 minutes ago', status: 'success' },
     { id: 2, feature: 'Text to Code', timestamp: '15 minutes ago', status: 'success' },
@@ -38,11 +46,134 @@ const Dashboard = () => {
     advanced: 300
   };
 
-  const handleTopUp = () => {
-    toast({
-      title: "Redirecting to payment",
-      description: "Opening Razorpay checkout...",
-    });
+  const handleTopUp = async (topupType: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to purchase API credits",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(topupType);
+
+    try {
+      const topupOptions = {
+        'topup-50': { calls: 50, price: 450 },
+        'topup-100': { calls: 100, price: 800 },
+        'topup-250': { calls: 250, price: 1750 }
+      };
+
+      const selected = topupOptions[topupType as keyof typeof topupOptions];
+      if (!selected) {
+        throw new Error('Invalid top-up option');
+      }
+
+      // Create top-up order
+      const response = await fetch('/api/create-topup-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          topupType,
+          calls: selected.calls,
+          price: selected.price
+        })
+      });
+
+      const orderData = await response.json();
+      
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to create top-up order');
+      }
+
+      // Initialize Razorpay payment for top-up
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key',
+        amount: orderData.data.amount,
+        currency: orderData.data.currency,
+        name: 'Silently AI',
+        description: `${selected.calls} API Credits Top-up`,
+        order_id: orderData.data.orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify top-up payment
+            const verifyResponse = await fetch('/api/verify-topup-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                orderId: orderData.data.orderId,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                topupType,
+                calls: selected.calls
+              })
+            });
+
+            const verifyData = await verifyResponse.json();
+            
+            if (verifyData.success) {
+              toast({
+                title: "Top-up Successful!",
+                description: `${selected.calls} API credits added to your account.`
+              });
+              
+              // Refresh user data
+              await refreshUser();
+            } else {
+              throw new Error(verifyData.error || 'Top-up verification failed');
+            }
+          } catch (error: any) {
+            toast({
+              title: "Top-up Verification Failed",
+              description: error.message || "Please contact support if payment was deducted.",
+              variant: "destructive"
+            });
+          }
+        },
+        prefill: {
+          email: user.email,
+          name: user.name
+        },
+        theme: {
+          color: '#D4AF37'
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(null);
+          }
+        }
+      };
+
+      // Load Razorpay script if not already loaded
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => {
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+        };
+        document.body.appendChild(script);
+      } else {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
+
+    } catch (error: any) {
+      toast({
+        title: "Top-up Failed",
+        description: error.message || "Unable to process top-up. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(null);
+    }
   };
 
   const handleDownloadLogs = () => {
@@ -202,11 +333,15 @@ const Dashboard = () => {
               </div>
 
               <Button
-                onClick={handleTopUp}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleTopUp('topup-100');
+                }}
+                disabled={loading === 'topup-100'}
                 className="w-full btn-luxury"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
-                Buy More Credits
+                {loading === 'topup-100' ? 'Processing...' : 'Buy More Credits'}
               </Button>
             </CardContent>
           </Card>
