@@ -391,15 +391,15 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="luxury-card golden-glow cursor-pointer hover:ring-2 hover:ring-gold/50 transition-all duration-300" 
+          <Card className="bg-gradient-to-br from-yellow-600 to-yellow-700 border-2 border-yellow-400 cursor-pointer hover:from-yellow-500 hover:to-yellow-600 hover:shadow-[0_0_30px_rgba(212,175,55,0.8)] transition-all duration-300" 
                 onClick={() => setLocation('/pricing')}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-yellow-200/70 text-sm">View All Plans</p>
-                  <p className="text-lg font-bold text-gold">Pricing</p>
+                  <p className="text-black/70 text-sm font-medium">View All Plans</p>
+                  <p className="text-lg font-bold text-black">Pricing</p>
                 </div>
-                <div className="w-12 h-12 gold-gradient rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-black/20 rounded-lg flex items-center justify-center">
                   <ExternalLink className="w-6 h-6 text-black" />
                 </div>
               </div>
