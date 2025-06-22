@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 const Index = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const {
     user
   } = useAuth();
@@ -61,13 +61,13 @@ const Index = () => {
   };
   const handleGetStarted = () => {
     if (user) {
-      navigate('/dashboard');
+      setLocation('/dashboard');
     } else {
-      navigate('/auth');
+      setLocation('/auth');
     }
   };
   const handleLogin = () => {
-    navigate('/auth');
+    setLocation('/auth');
   };
   return <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 circuit-pattern">
       {/* Navigation */}
@@ -82,7 +82,7 @@ const Index = () => {
               <button onClick={() => scrollToSection('features')} className="text-slate-300 hover:text-cyan-400 transition-colors">Features</button>
               <button onClick={() => scrollToSection('pricing')} className="text-slate-300 hover:text-cyan-400 transition-colors">Pricing</button>
               <button onClick={() => scrollToSection('faq')} className="text-slate-300 hover:text-cyan-400 transition-colors">FAQ</button>
-              {user ? <Button onClick={() => navigate('/dashboard')} className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 neon-glow">
+              {user ? <Button onClick={() => setLocation('/dashboard')} className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 neon-glow">
                   Dashboard
                 </Button> : <Button onClick={handleLogin} variant="outline" className="tech-border text-cyan-400 hover:bg-cyan-500/10">
                   Login

@@ -1,12 +1,7 @@
-import { loadStripe } from '@stripe/stripe-js';
+// Mock Stripe for demo purposes
+const mockStripePromise = Promise.resolve(null);
 
-const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-
-if (!stripePublishableKey) {
-  throw new Error('Missing Stripe publishable key');
-}
-
-export const stripePromise = loadStripe(stripePublishableKey);
+export const stripePromise = mockStripePromise;
 
 export const STRIPE_PLANS = {
   pro: {
