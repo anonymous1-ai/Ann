@@ -547,8 +547,116 @@ export default function Pricing() {
       </div>
 
       {/* Universal Payment Modal */}
+      {upiModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="luxury-card max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gradient flex items-center gap-2">
+                  <Shield className="w-6 h-6 text-gold" />
+                  Secure Payment
+                </h2>
+                <button
+                  onClick={() => setUpiModal({ ...upiModal, isOpen: false })}
+                  className="text-yellow-200/70 hover:text-gold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="bg-slate-800/50 rounded-lg p-4 border border-yellow-400/20 mb-4">
+                    <p className="text-gold font-semibold text-lg">₹{(upiModal.amount / 100).toFixed(2)}</p>
+                    <p className="text-yellow-200/80 text-sm">{upiModal.description}</p>
+                    <p className="text-yellow-200/60 text-xs mt-1">Order ID: {upiModal.orderId}</p>
+                  </div>
+                </div>
+
+                {/* UPI Payment Section */}
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-gold font-semibold mb-3">Choose UPI App</h3>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <Button
+                      onClick={() => {
+                        const upiString = `upi://pay?pa=payments@yourapp.upi&pn=YourApp&am=${(upiModal.amount / 100).toFixed(2)}&tr=${upiModal.orderId}&tn=${encodeURIComponent(upiModal.description)}`;
+                        window.location.href = `tez://upi/pay?pa=payments@yourapp.upi&pn=YourApp&am=${(upiModal.amount / 100).toFixed(2)}&tr=${upiModal.orderId}&tn=${encodeURIComponent(upiModal.description)}`;
+                      }}
+                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
+                    >
+                      <div className="w-8 h-8 bg-blue-600 rounded-lg mb-2 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">G</span>
+                      </div>
+                      <span className="text-xs">Google Pay</span>
+                    </Button>
+
+                    <Button
+                      onClick={() => {
+                        window.location.href = `phonepe://pay?pa=payments@yourapp.upi&pn=YourApp&am=${(upiModal.amount / 100).toFixed(2)}&tr=${upiModal.orderId}&tn=${encodeURIComponent(upiModal.description)}`;
+                      }}
+                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
+                    >
+                      <div className="w-8 h-8 bg-purple-600 rounded-lg mb-2 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">P</span>
+                      </div>
+                      <span className="text-xs">PhonePe</span>
+                    </Button>
+
+                    <Button
+                      onClick={() => {
+                        window.location.href = `paytmmp://pay?pa=payments@yourapp.upi&pn=YourApp&am=${(upiModal.amount / 100).toFixed(2)}&tr=${upiModal.orderId}&tn=${encodeURIComponent(upiModal.description)}`;
+                      }}
+                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
+                    >
+                      <div className="w-8 h-8 bg-blue-500 rounded-lg mb-2 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">P</span>
+                      </div>
+                      <span className="text-xs">Paytm</span>
+                    </Button>
+                  </div>
+
+                  <div className="border-t border-yellow-400/20 pt-4">
+                    <p className="text-yellow-200/80 text-sm mb-2">Or pay manually using UPI ID:</p>
+                    <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-3 border border-yellow-400/20">
+                      <span className="text-gold font-mono text-sm flex-1">payments@yourapp.upi</span>
+                      <Button
+                        onClick={() => {
+                          navigator.clipboard.writeText('payments@yourapp.upi');
+                          toast({
+                            title: "UPI ID Copied",
+                            description: "UPI ID has been copied to clipboard"
+                          });
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="luxury-button-outline"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setUpiModal({ ...upiModal, isOpen: false })}
+                    className="flex-1 luxury-button-outline"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <UniversalPaymentModal
-        isOpen={upiModal.isOpen}
+        isOpen={false}
         onClose={() => setUpiModal({ ...upiModal, isOpen: false })}
         amount={upiModal.amount}
         description={upiModal.description}
