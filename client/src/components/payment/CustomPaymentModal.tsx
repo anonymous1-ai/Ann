@@ -219,30 +219,30 @@ export default function CustomPaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div className="bg-slate-900/95 backdrop-blur-sm rounded-2xl max-w-md w-full mx-4 border border-slate-700/50 shadow-2xl">
+      <div className="bg-gradient-to-br from-amber-950/95 to-yellow-900/95 backdrop-blur-sm rounded-2xl max-w-md w-full mx-4 border border-yellow-600/30 shadow-2xl shadow-yellow-900/20">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-yellow-400 mb-1">Complete Payment</h2>
-              <p className="text-slate-400 text-sm">{description}</p>
+              <h2 className="text-xl font-semibold text-yellow-200 mb-1">Complete Payment</h2>
+              <p className="text-yellow-300/70 text-sm">{description}</p>
             </div>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white transition-colors"
+              className="text-yellow-300/70 hover:text-yellow-200 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex bg-slate-800/50 rounded-lg p-1 mb-6">
+          <div className="flex bg-amber-900/30 rounded-lg p-1 mb-6 border border-yellow-600/20">
             <button
               onClick={() => setActiveTab('UPI')}
               className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                 activeTab === 'UPI'
-                  ? 'bg-yellow-600 text-black font-semibold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold shadow-lg'
+                  : 'text-yellow-300/70 hover:text-yellow-200'
               }`}
             >
               <Smartphone className="w-4 h-4" />
@@ -252,8 +252,8 @@ export default function CustomPaymentModal({
               onClick={() => setActiveTab('Card')}
               className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                 activeTab === 'Card'
-                  ? 'bg-yellow-600 text-black font-semibold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold shadow-lg'
+                  : 'text-yellow-300/70 hover:text-yellow-200'
               }`}
             >
               <CreditCard className="w-4 h-4" />
@@ -263,8 +263,8 @@ export default function CustomPaymentModal({
               onClick={() => setActiveTab('Bank')}
               className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                 activeTab === 'Bank'
-                  ? 'bg-yellow-600 text-black font-semibold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold shadow-lg'
+                  : 'text-yellow-300/70 hover:text-yellow-200'
               }`}
             >
               <Building2 className="w-4 h-4" />
@@ -276,43 +276,28 @@ export default function CustomPaymentModal({
           {activeTab === 'UPI' && (
             <div className="space-y-4">
               <div>
-                <label className="text-yellow-400 text-sm font-medium block mb-2">UPI ID</label>
+                <label className="text-yellow-200 text-sm font-medium block mb-2">UPI ID</label>
                 <Input
                   placeholder="yourname@paytm"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                  className="bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 h-12 rounded-lg"
+                  className="bg-amber-900/30 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60 h-12 rounded-lg focus:border-yellow-500 focus:ring-yellow-500/20"
                 />
-                <p className="text-slate-500 text-xs mt-2">
+                <p className="text-yellow-300/60 text-xs mt-2">
                   Enter your UPI ID (e.g., 9876543210@paytm, user@googlepay)
                 </p>
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  onClick={() => handleQuickUPI('Google Pay')}
-                  variant="outline"
-                  size="sm"
-                  className="bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30 rounded-lg px-4 py-2"
-                >
+                <div className="bg-blue-600/20 border border-blue-500/30 text-blue-300 rounded-lg px-4 py-2 text-sm cursor-not-allowed opacity-70">
                   Google Pay
-                </Button>
-                <Button
-                  onClick={() => handleQuickUPI('PhonePe')}
-                  variant="outline"
-                  size="sm"
-                  className="bg-purple-600/20 border-purple-500/30 text-purple-300 hover:bg-purple-600/30 rounded-lg px-4 py-2"
-                >
+                </div>
+                <div className="bg-purple-600/20 border border-purple-500/30 text-purple-300 rounded-lg px-4 py-2 text-sm cursor-not-allowed opacity-70">
                   PhonePe
-                </Button>
-                <Button
-                  onClick={() => handleQuickUPI('Paytm')}
-                  variant="outline"
-                  size="sm"
-                  className="bg-green-600/20 border-green-500/30 text-green-300 hover:bg-green-600/30 rounded-lg px-4 py-2"
-                >
+                </div>
+                <div className="bg-green-600/20 border border-green-500/30 text-green-300 rounded-lg px-4 py-2 text-sm cursor-not-allowed opacity-70">
                   Paytm
-                </Button>
+                </div>
               </div>
             </div>
           )}
@@ -320,28 +305,28 @@ export default function CustomPaymentModal({
           {/* Card Tab Content */}
           {activeTab === 'Card' && (
             <div className="text-center py-8">
-              <CreditCard className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-400 mb-4">Click below to pay with Credit/Debit Card</p>
-              <p className="text-lg text-white font-semibold">Secure card payment</p>
+              <CreditCard className="w-12 h-12 text-yellow-400/60 mx-auto mb-4" />
+              <p className="text-yellow-300/70 mb-4">Click below to pay with Credit/Debit Card</p>
+              <p className="text-lg text-yellow-200 font-semibold">Secure card payment</p>
             </div>
           )}
 
           {/* Bank Tab Content */}
           {activeTab === 'Bank' && (
             <div className="text-center py-8">
-              <Building2 className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-400 mb-4">Click below to pay with Net Banking</p>
-              <p className="text-lg text-white font-semibold">Choose your bank</p>
+              <Building2 className="w-12 h-12 text-yellow-400/60 mx-auto mb-4" />
+              <p className="text-yellow-300/70 mb-4">Click below to pay with Net Banking</p>
+              <p className="text-lg text-yellow-200 font-semibold">Choose your bank</p>
             </div>
           )}
 
           {/* Amount Section */}
-          <div className="bg-slate-800/30 rounded-lg p-4 mt-6 border border-slate-600/30">
+          <div className="bg-amber-900/40 rounded-lg p-4 mt-6 border border-yellow-600/40">
             <div className="flex justify-between items-center">
-              <span className="text-yellow-400 font-medium">Amount to Pay</span>
-              <span className="text-yellow-400 text-xl font-bold">₹{formattedAmount}</span>
+              <span className="text-yellow-200 font-medium">Amount to Pay</span>
+              <span className="text-yellow-200 text-xl font-bold">₹{formattedAmount}</span>
             </div>
-            <p className="text-slate-500 text-xs mt-1">
+            <p className="text-yellow-300/60 text-xs mt-1">
               Secure payment powered by advanced encryption
             </p>
           </div>
@@ -350,7 +335,7 @@ export default function CustomPaymentModal({
           <div className="flex gap-3 mt-6">
             <Button
               onClick={onClose}
-              className="flex-1 bg-slate-800/50 border border-slate-600/50 text-white hover:bg-slate-700/50 rounded-lg h-12 font-medium"
+              className="flex-1 bg-amber-900/30 border border-yellow-600/30 text-yellow-200 hover:bg-amber-900/50 rounded-lg h-12 font-medium"
             >
               Cancel
             </Button>
@@ -361,7 +346,7 @@ export default function CustomPaymentModal({
                 else if (activeTab === 'Bank') handleBankPayment();
               }}
               disabled={loading || (activeTab === 'UPI' && !upiId.trim())}
-              className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-black font-semibold rounded-lg h-12"
+              className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-lg h-12 shadow-lg hover:shadow-yellow-500/20 transition-all"
             >
               {loading ? 'Processing...' : `Pay ₹${formattedAmount}`}
             </Button>
