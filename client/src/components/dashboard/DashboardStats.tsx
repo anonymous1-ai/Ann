@@ -22,9 +22,10 @@ import { toast } from 'sonner';
 
 interface DashboardStatsProps {
   onGenerateLicense?: () => void;
+  onTopUpCredits?: () => void;
 }
 
-export const DashboardStats: React.FC<DashboardStatsProps> = ({ onGenerateLicense }) => {
+export const DashboardStats: React.FC<DashboardStatsProps> = ({ onGenerateLicense, onTopUpCredits }) => {
   const { user, refreshUser } = useAuth();
   const [stats, setStats] = useState<{
     totalCalls: number;

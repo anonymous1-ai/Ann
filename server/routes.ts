@@ -183,6 +183,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API Top-up routes
+  app.post("/api/create-topup-order", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { topupType, calls, price } = req.body;
+      
+      if (!topupType || !calls || !price) {
+        return res.status(400).json({ success: false, error: "Invalid top-up parameters" });
+      }
+
+      // Mock Razorpay order creation for top-up
+      const orderId = `topup_${Date.now()}`;
+      
+      res.json({
+        success: true,
+        data: {
+          orderId,
+          amount: price * 100, // Amount in paise
+          currency: "INR",
+          topupType,
+          calls
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/verify-topup-payment", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { orderId, paymentId, signature, topupType, calls } = req.body;
+      
+      // Mock payment verification (replace with actual Razorpay verification)
+      const isPaymentValid = true;
+      
+      if (!isPaymentValid) {
+        return res.status(400).json({ success: false, error: "Payment verification failed" });
+      }
+
+      // Get current user
+      const user = await storage.getUser(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ success: false, error: "User not found" });
+      }
+
+      // Add API calls to user's account
+      const newBalance = user.apiCallsLeft + calls;
+      await storage.updateUser(req.user.userId, { apiCallsLeft: newBalance });
+
+      // Track the top-up as a transaction
+      await storage.trackApiUsage(req.user.userId, `topup-${calls}`, -calls); // Negative to indicate credit
+
+      res.json({
+        success: true,
+        data: {
+          newBalance,
+          addedCalls: calls,
+          message: `Successfully added ${calls} API calls to your account`
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  });
+
   // Razorpay payment routes
   app.post("/api/create-order", authenticateToken, async (req: AuthRequest, res) => {
     try {
