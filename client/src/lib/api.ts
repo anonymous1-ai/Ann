@@ -1,34 +1,6 @@
+import { supabase } from './supabase';
+import { User, ApiUsage, Subscription } from './supabase';
 import { PlanType } from './stripe';
-
-// Import types from shared schema
-interface User {
-  id: number;
-  email: string;
-  name: string;
-  plan: string;
-  apiCredits: number;
-  totalCalls: number;
-  licenseKey?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface ApiUsage {
-  id: number;
-  userId: number;
-  endpoint: string;
-  creditsUsed: number;
-  createdAt: Date;
-}
-
-interface Subscription {
-  id: number;
-  userId: number;
-  plan: string;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export interface LoginCredentials {
   email: string;
@@ -54,151 +26,181 @@ export interface ApiResponse<T> {
 }
 
 class ApiService {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-    try {
-      const response = await fetch(`/api${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
-        ...options,
-      });
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Network error',
-      };
-    }
-  }
   // Authentication methods
   async signup(credentials: SignupCredentials): Promise<User> {
-    const response = await this.request<User>('/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: credentials.email,
+        password: credentials.password,
+        options: {
+          data: {
+            name: credentials.name,
+          },
+        },
+      });
 
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Signup failed');
+      if (error) throw error;
+      if (!data.user) throw new Error('Registration failed');
+
+      // Create user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user.id,
+          email: credentials.email,
+          name: credentials.name,
+          plan: 'free',
+          api_credits: 5,
+          total_calls: 0,
+        })
+        .select()
+        .single();
+
+      if (profileError) throw profileError;
+      return profile;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Signup failed');
     }
-
-    return response.data;
   }
 
   async login(credentials: LoginCredentials): Promise<User> {
-    const response = await this.request<User>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password,
+      });
 
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Login failed');
+      if (error) throw error;
+      if (!data.user) throw new Error('Login failed');
+
+      // Get user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError) throw profileError;
+      return profile;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Login failed');
     }
-
-    return response.data;
   }
 
   async logout(): Promise<void> {
-    const response = await this.request<void>('/auth/logout', {
-      method: 'POST',
-    });
-
-    if (!response.success) {
-      throw new Error(response.error || 'Logout failed');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Logout failed');
     }
   }
 
   async getCurrentUser(): Promise<User | null> {
-    const response = await this.request<User | null>('/auth/me');
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) throw error;
+      if (!user) return null;
 
-    if (!response.success) {
-      console.error('Error getting current user:', response.error);
+      // Get user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+      return profile;
+    } catch (error) {
+      console.error('Error getting current user:', error);
       return null;
     }
-
-    return response.data || null;
   }
 
-  // Payment methods
+  // Payment methods (using mock for demo)
   async createCheckoutSession(request: CreateCheckoutSessionRequest): Promise<{ sessionId: string }> {
-    const response = await this.request<{ sessionId: string }>('/payment/create-checkout-session', {
-      method: 'POST',
-      body: JSON.stringify(request),
-    });
-
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Failed to create checkout session');
-    }
-
-    return response.data;
+    // Mock payment session for demo
+    return { sessionId: `mock_session_${Date.now()}` };
   }
 
   async createPortalSession(): Promise<{ url: string }> {
-    const response = await this.request<{ url: string }>('/payment/create-portal-session', {
-      method: 'POST',
-    });
-
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Failed to create portal session');
-    }
-
-    return response.data;
+    // Mock portal session for demo
+    return { url: '/dashboard' };
   }
 
   // User management
   async updateUserProfile(userId: string, updates: Partial<User>): Promise<User> {
-    const response = await this.request<User>(`/users/${userId}`, {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    });
+    const { data, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
 
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Failed to update user profile');
-    }
-
-    return response.data;
+    if (error) throw new Error(error.message);
+    return data;
   }
 
   async getUserSubscription(userId: string): Promise<Subscription | null> {
-    // Mock subscription for demo - can be implemented later
-    return null;
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw new Error(error.message);
+    return data;
   }
 
   // API usage tracking
   async trackApiUsage(userId: string, endpoint: string, creditsUsed: number): Promise<void> {
-    const response = await this.request<void>(`/users/${userId}/usage`, {
-      method: 'POST',
-      body: JSON.stringify({ endpoint, creditsUsed }),
-    });
+    const { error } = await supabase
+      .from('api_usage')
+      .insert({
+        user_id: userId,
+        endpoint,
+        credits_used: creditsUsed,
+      });
 
-    if (!response.success) {
-      throw new Error(response.error || 'Failed to track API usage');
-    }
+    if (error) throw new Error(error.message);
+
+    // Update user's total calls and credits
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        total_calls: supabase.rpc('increment', { row_id: userId, x: 1 }),
+        api_credits: supabase.rpc('decrement', { row_id: userId, x: creditsUsed }),
+      })
+      .eq('id', userId);
+
+    if (updateError) throw new Error(updateError.message);
   }
 
   async getApiUsageHistory(userId: string, limit = 50): Promise<ApiUsage[]> {
-    const response = await this.request<ApiUsage[]>(`/users/${userId}/usage?limit=${limit}`);
+    const { data, error } = await supabase
+      .from('api_usage')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
-    if (!response.success) {
-      throw new Error(response.error || 'Failed to get API usage history');
-    }
-
-    return response.data || [];
+    if (error) throw new Error(error.message);
+    return data || [];
   }
 
   // License key generation
   async generateLicenseKey(userId: string): Promise<{ licenseKey: string }> {
-    const response = await this.request<{ licenseKey: string }>(`/users/${userId}/license`, {
-      method: 'POST',
-    });
+    const licenseKey = `LIC-${Math.random().toString(36).substring(2, 18).toUpperCase()}`;
+    
+    const { error } = await supabase
+      .from('users')
+      .update({ license_key: licenseKey })
+      .eq('id', userId);
 
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Failed to generate license key');
-    }
-
-    return response.data;
+    if (error) throw new Error(error.message);
+    return { licenseKey };
   }
 
   // Dashboard analytics
@@ -206,20 +208,46 @@ class ApiService {
     totalCalls: number;
     remainingCredits: number;
     plan: string;
-    recentUsage: ApiUsage[];
+    subscriptionStatus?: string;
+    usageThisMonth: number;
   }> {
-    const response = await this.request<{
-      totalCalls: number;
-      remainingCredits: number;
-      plan: string;
-      recentUsage: ApiUsage[];
-    }>(`/users/${userId}/stats`);
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('total_calls, api_credits, plan')
+      .eq('id', userId)
+      .single();
 
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Failed to get dashboard stats');
-    }
+    if (userError) throw new Error(userError.message);
 
-    return response.data;
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    // Get usage for current month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { data: monthlyUsage, error: usageError } = await supabase
+      .from('api_usage')
+      .select('credits_used')
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    if (usageError) throw new Error(usageError.message);
+
+    const usageThisMonth = monthlyUsage?.reduce((sum: number, usage: any) => sum + usage.credits_used, 0) || 0;
+
+    return {
+      totalCalls: user.total_calls,
+      remainingCredits: user.api_credits,
+      plan: user.plan,
+      subscriptionStatus: subscription?.status,
+      usageThisMonth,
+    };
   }
 }
 

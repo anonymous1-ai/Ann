@@ -69,7 +69,7 @@ const Index = () => {
   const handleLogin = () => {
     setLocation('/auth');
   };
-  return <div className="min-h-screen">
+  return <div className="min-h-screen floating-shapes">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 tech-border border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
