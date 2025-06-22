@@ -8,7 +8,7 @@ interface AuthContextType {
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
-  updateCredits: (newCredits: number) => void;
+  token: string | null;
   refreshUser: () => Promise<void>;
 }
 

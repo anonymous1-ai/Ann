@@ -1,200 +1,379 @@
-import React from 'react';
-import { PaymentPlans } from '../components/payment/PaymentPlans';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Check, Star, Zap, Users, Shield, Headphones } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Check, Download, Zap, Crown, Star } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
-const Pricing: React.FC = () => {
+const PRICING_PLANS = [
+  {
+    id: 'free',
+    name: 'Free',
+    price: 0,
+    currency: '₹',
+    period: 'Forever',
+    apiCalls: 0,
+    description: 'Try out the tool with download access',
+    features: [
+      'Download AI tool',
+      'Tool remains inactive',
+      'Community support',
+      'Basic documentation'
+    ],
+    limitations: [
+      'No API calls included',
+      'License validation fails',
+      'Tool functionality disabled'
+    ],
+    buttonText: 'Download Free',
+    popular: false,
+    icon: Download
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 800,
+    currency: '₹',
+    period: 'month',
+    apiCalls: 100,
+    description: 'Perfect for individuals and small projects',
+    features: [
+      'Full AI tool activation',
+      '100 API calls per month',
+      'License validation',
+      'Email support',
+      'Regular updates',
+      'Usage analytics'
+    ],
+    buttonText: 'Subscribe to Pro',
+    popular: true,
+    icon: Zap
+  },
+  {
+    id: 'advanced',
+    name: 'Advanced',
+    price: 2000,
+    currency: '₹',
+    period: 'year',
+    apiCalls: 300,
+    description: 'Best value for power users and businesses',
+    features: [
+      'Full AI tool activation',
+      '300 API calls per month',
+      'Annual billing (save 37%)',
+      'Priority support',
+      'Advanced analytics',
+      'Hardware hash binding',
+      'Commercial usage rights'
+    ],
+    buttonText: 'Subscribe to Advanced',
+    popular: false,
+    icon: Crown
+  }
+];
+
+export default function Pricing() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleSubscribe = async (planId: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to subscribe to a plan",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (planId === 'free') {
+      // Handle free plan download
+      try {
+        const response = await fetch('/api/download');
+        const data = await response.json();
+        
+        if (data.success) {
+          toast({
+            title: "Download Ready",
+            description: "Your download will begin shortly. Note: The tool requires a paid license to activate.",
+          });
+          // In a real implementation, trigger actual download
+          window.open(data.downloadUrl, '_blank');
+        }
+      } catch (error) {
+        toast({
+          title: "Download Error",
+          description: "Failed to initiate download. Please try again.",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+
+    setLoading(planId);
+
+    try {
+      // Create order
+      const orderResponse = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ plan: planId })
+      });
+
+      const orderData = await orderResponse.json();
+
+      if (!orderData.success) {
+        throw new Error(orderData.error);
+      }
+
+      // Mock Razorpay payment process (replace with actual Razorpay integration)
+      const mockPaymentSuccess = await simulatePayment(orderData.data);
+
+      if (mockPaymentSuccess) {
+        // Verify payment
+        const verifyResponse = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            orderId: orderData.data.orderId,
+            paymentId: `pay_${Date.now()}`,
+            signature: 'mock_signature',
+            plan: planId
+          })
+        });
+
+        const verifyData = await verifyResponse.json();
+
+        if (verifyData.success) {
+          toast({
+            title: "Payment Successful!",
+            description: `You've successfully subscribed to the ${planId} plan. Your license key has been generated.`,
+          });
+
+          // Refresh user data
+          window.location.reload();
+        } else {
+          throw new Error(verifyData.error);
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Payment Failed",
+        description: error instanceof Error ? error.message : "Payment processing failed. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const simulatePayment = (orderData: any): Promise<boolean> => {
+    // Mock payment simulation - replace with actual Razorpay integration
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true); // Simulate successful payment
+      }, 2000);
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="container mx-auto px-4 py-16">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-16">
+          <Badge className="mb-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold">
+            SaaS Pricing
+          </Badge>
+          <h1 className="text-4xl md:text-6xl font-bold text-gradient mb-6">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Start with our free plan and upgrade as you grow. All plans include our core features with different usage limits.
+          <p className="text-xl text-yellow-200/70 max-w-3xl mx-auto">
+            Get access to our powerful AI tool with flexible pricing options. 
+            Download for free or unlock full functionality with our paid plans.
           </p>
         </div>
 
-        {/* Features Comparison */}
-        <div className="mb-12">
-          <Card className="max-w-4xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-center">Feature Comparison</CardTitle>
-              <CardDescription className="text-center">
-                Compare what's included in each plan
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="space-y-4">
-                  <div className="font-semibold text-gray-900">Features</div>
-                  <div className="space-y-3 text-sm">
-                    <div>API Credits</div>
-                    <div>License Key Generation</div>
-                    <div>Advanced Analytics</div>
-                    <div>Priority Support</div>
-                    <div>Custom Integrations</div>
-                    <div>Dedicated Support</div>
-                    <div>All Features</div>
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {PRICING_PLANS.map((plan) => {
+            const Icon = plan.icon;
+            const isCurrentPlan = user?.plan === plan.id;
+            
+            return (
+              <Card 
+                key={plan.id}
+                className={`luxury-card relative ${
+                  plan.popular 
+                    ? 'golden-glow ring-2 ring-gold/50 scale-105' 
+                    : ''
+                } ${isCurrentPlan ? 'ring-2 ring-green-500/50' : ''}`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold">
+                      <Star className="w-3 h-3 mr-1" />
+                      Most Popular
+                    </Badge>
                   </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="font-semibold text-gray-900 text-center">Free</div>
-                  <div className="space-y-3 text-sm text-center">
-                    <div>5 credits</div>
-                    <div className="text-gray-400">❌</div>
-                    <div className="text-gray-400">❌</div>
-                    <div className="text-gray-400">❌</div>
-                    <div className="text-gray-400">❌</div>
-                    <div className="text-gray-400">❌</div>
-                    <div className="text-gray-400">❌</div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="font-semibold text-blue-600 text-center">Pro</div>
-                  <div className="space-y-3 text-sm text-center">
-                    <div>100 credits</div>
-                    <div className="text-green-600">✅</div>
-                    <div className="text-green-600">✅</div>
-                    <div className="text-green-600">✅</div>
-                    <div className="text-gray-400">❌</div>
-                    <div className="text-gray-400">❌</div>
-                    <div className="text-gray-400">❌</div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="font-semibold text-purple-600 text-center">Advanced</div>
-                  <div className="space-y-3 text-sm text-center">
-                    <div>300 credits</div>
-                    <div className="text-green-600">✅</div>
-                    <div className="text-green-600">✅</div>
-                    <div className="text-green-600">✅</div>
-                    <div className="text-green-600">✅</div>
-                    <div className="text-green-600">✅</div>
-                    <div className="text-green-600">✅</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                )}
 
-        {/* Payment Plans */}
-        <PaymentPlans />
+                {isCurrentPlan && (
+                  <div className="absolute -top-4 right-4">
+                    <Badge className="bg-green-500 text-white">
+                      Current Plan
+                    </Badge>
+                  </div>
+                )}
+
+                <CardHeader className="text-center pb-8">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-black" />
+                  </div>
+                  
+                  <CardTitle className="text-gold text-2xl font-bold">
+                    {plan.name}
+                  </CardTitle>
+                  
+                  <CardDescription className="text-yellow-200/70">
+                    {plan.description}
+                  </CardDescription>
+
+                  <div className="mt-4">
+                    <div className="flex items-baseline justify-center">
+                      <span className="text-4xl font-bold text-gradient">
+                        {plan.currency}{plan.price}
+                      </span>
+                      {plan.period !== 'Forever' && (
+                        <span className="text-yellow-200/70 ml-2">
+                          /{plan.period}
+                        </span>
+                      )}
+                    </div>
+                    {plan.apiCalls > 0 && (
+                      <p className="text-gold text-sm mt-2">
+                        {plan.apiCalls} API calls {plan.id === 'advanced' ? 'per month' : 'included'}
+                      </p>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                  {/* Features */}
+                  <div className="space-y-3">
+                    {plan.features.map((feature, index) => (
+                      <div key={index} className="flex items-center">
+                        <Check className="w-4 h-4 text-gold mr-3 flex-shrink-0" />
+                        <span className="text-yellow-200/90 text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Limitations (for free plan) */}
+                  {plan.limitations && (
+                    <div className="space-y-3 pt-3 border-t border-yellow-400/20">
+                      <p className="text-yellow-200/70 text-xs font-medium">Limitations:</p>
+                      {plan.limitations.map((limitation, index) => (
+                        <div key={index} className="flex items-center">
+                          <div className="w-4 h-4 rounded-full bg-red-500/20 mr-3 flex-shrink-0 flex items-center justify-center">
+                            <div className="w-2 h-2 rounded-full bg-red-400"></div>
+                          </div>
+                          <span className="text-red-200/70 text-sm">{limitation}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <Button
+                    onClick={() => handleSubscribe(plan.id)}
+                    disabled={loading === plan.id || isCurrentPlan}
+                    className={`w-full ${
+                      plan.popular 
+                        ? 'btn-luxury' 
+                        : 'bg-yellow-900/30 hover:bg-yellow-900/50 text-gold border border-yellow-400/30'
+                    }`}
+                  >
+                    {loading === plan.id ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                        Processing...
+                      </div>
+                    ) : isCurrentPlan ? (
+                      'Current Plan'
+                    ) : (
+                      plan.buttonText
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
         {/* FAQ Section */}
-        <div className="mt-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+        <div className="mt-20 text-center">
+          <h2 className="text-3xl font-bold text-gradient mb-8">
+            Frequently Asked Questions
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto text-left">
+            <Card className="luxury-card">
               <CardHeader>
-                <CardTitle className="text-lg">How do API credits work?</CardTitle>
+                <CardTitle className="text-gold">How does license validation work?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
-                  Each API call consumes credits based on the complexity and length of the generated code. 
-                  Credits are replenished monthly with your subscription.
+                <p className="text-yellow-200/70">
+                  Our AI tool validates your license key and hardware hash with every use. 
+                  This ensures secure access and tracks your API call usage in real-time.
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="luxury-card">
               <CardHeader>
-                <CardTitle className="text-lg">Can I upgrade or downgrade my plan?</CardTitle>
+                <CardTitle className="text-gold">What happens when I run out of API calls?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
-                  Yes! You can change your plan at any time. Upgrades take effect immediately, 
-                  while downgrades take effect at the next billing cycle.
+                <p className="text-yellow-200/70">
+                  The tool will show an error message and stop functioning until you upgrade 
+                  your plan or wait for your monthly quota to reset.
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="luxury-card">
               <CardHeader>
-                <CardTitle className="text-lg">What happens if I run out of credits?</CardTitle>
+                <CardTitle className="text-gold">Can I use the tool on multiple devices?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
-                  You'll receive notifications when you're running low on credits. 
-                  You can either upgrade your plan or wait for the next billing cycle for more credits.
+                <p className="text-yellow-200/70">
+                  Each license is bound to a specific hardware hash for security. 
+                  Contact support if you need to transfer your license to a new device.
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="luxury-card">
               <CardHeader>
-                <CardTitle className="text-lg">How do license keys work?</CardTitle>
+                <CardTitle className="text-gold">Do you offer refunds?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
-                  License keys are automatically generated for paid subscribers and can be used 
-                  to activate your desktop application. Each key is unique and tied to your account.
+                <p className="text-yellow-200/70">
+                  We offer a 7-day money-back guarantee for all paid plans. 
+                  Contact our support team if you're not satisfied with the service.
                 </p>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Is there a free trial?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Yes! Start with our free plan that includes 5 API credits. 
-                  You can upgrade to a paid plan anytime to get more features and credits.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">What payment methods do you accept?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  We accept all major credit cards, debit cards, and digital wallets 
-                  through our secure Stripe payment processing.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Trust Indicators */}
-        <div className="mt-16 text-center">
-          <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
-            <div className="flex flex-col items-center">
-              <Shield className="h-12 w-12 text-green-600 mb-4" />
-              <h3 className="font-semibold mb-2">Secure & Reliable</h3>
-              <p className="text-gray-600 text-sm">
-                Enterprise-grade security with 99.9% uptime guarantee
-              </p>
-            </div>
-            <div className="flex flex-col items-center">
-              <Headphones className="h-12 w-12 text-blue-600 mb-4" />
-              <h3 className="font-semibold mb-2">24/7 Support</h3>
-              <p className="text-gray-600 text-sm">
-                Get help whenever you need it with our dedicated support team
-              </p>
-            </div>
-            <div className="flex flex-col items-center">
-              <Zap className="h-12 w-12 text-purple-600 mb-4" />
-              <h3 className="font-semibold mb-2">Lightning Fast</h3>
-              <p className="text-gray-600 text-sm">
-                Generate code in seconds with our optimized AI models
-              </p>
-            </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default Pricing; 
+}

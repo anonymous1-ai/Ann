@@ -1,8 +1,48 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, loginUserSchema } from "@shared/schema";
+import { insertUserSchema, loginUserSchema, licenseValidationSchema } from "@shared/schema";
 import { z } from "zod";
+import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key";
+
+// Pricing plans
+const PRICING_PLANS = {
+  free: { price: 0, apiCalls: 0, duration: 0 },
+  pro: { price: 800, apiCalls: 100, duration: 30 }, // 30 days
+  advanced: { price: 2000, apiCalls: 3600, duration: 365 } // 365 days (300 calls per month * 12)
+};
+
+// Rate limiting for license validation
+const licenseValidationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: { success: false, error: "Too many license validation attempts, try again later" }
+});
+
+// JWT middleware
+interface AuthRequest extends Request {
+  user?: any;
+}
+
+const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: "Access token required" });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ success: false, error: "Invalid or expired token" });
+    }
+    req.user = user;
+    next();
+  });
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize database
@@ -20,9 +60,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.createUser(validatedData);
+      const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
       const { password, ...userWithoutPassword } = user;
       
-      res.json({ success: true, data: userWithoutPassword });
+      res.json({ 
+        success: true, 
+        data: { user: userWithoutPassword, token }
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ success: false, error: "Invalid input data" });
@@ -40,8 +84,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ success: false, error: "Invalid credentials" });
       }
 
+      const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
       const { password, ...userWithoutPassword } = user;
-      res.json({ success: true, data: userWithoutPassword });
+      
+      res.json({ 
+        success: true, 
+        data: { user: userWithoutPassword, token }
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ success: false, error: "Invalid input data" });
@@ -50,101 +99,191 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/logout", async (req, res) => {
+  app.post("/api/auth/logout", (req, res) => {
     res.json({ success: true });
   });
 
-  app.get("/api/auth/me", async (req, res) => {
-    // For now, return null (user not authenticated)
-    res.json({ success: true, data: null });
-  });
-
-  // User management routes
-  app.put("/api/users/:id", async (req, res) => {
+  app.get("/api/auth/me", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      const updates = req.body;
-      
-      const updatedUser = await storage.updateUser(userId, updates);
-      if (!updatedUser) {
+      const user = await storage.getUser(req.user.userId);
+      if (!user) {
         return res.status(404).json({ success: false, error: "User not found" });
       }
 
-      const { password, ...userWithoutPassword } = updatedUser;
-      res.json({ success: true, data: userWithoutPassword });
+      const { password, licenseKey, ...userWithoutSensitiveData } = user;
+      res.json({ success: true, data: userWithoutSensitiveData });
     } catch (error) {
       res.status(500).json({ success: false, error: "Internal server error" });
     }
   });
 
-  // License generation
-  app.post("/api/users/:id/license", async (req, res) => {
+  // License validation API (used by .exe file)
+  app.post("/api/validate-license", licenseValidationLimiter, async (req, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      const licenseKey = await storage.generateLicenseKey(userId);
-      
-      res.json({ success: true, data: { licenseKey } });
+      const validatedData = licenseValidationSchema.parse(req.body);
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.headers['user-agent'];
+
+      const result = await storage.validateLicense(
+        validatedData.licenseKey,
+        validatedData.hardwareHash,
+        ipAddress,
+        userAgent
+      );
+
+      if (result.valid) {
+        res.json({
+          valid: true,
+          apiCallsLeft: result.apiCallsLeft,
+          daysRemaining: result.daysRemaining
+        });
+      } else {
+        res.status(400).json({
+          valid: false,
+          message: result.message
+        });
+      }
     } catch (error) {
-      res.status(500).json({ success: false, error: "Internal server error" });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ valid: false, message: "Invalid request format" });
+      }
+      res.status(500).json({ valid: false, message: "Internal server error" });
     }
   });
 
-  // Dashboard stats
-  app.get("/api/users/:id/stats", async (req, res) => {
+  // Dashboard data API (JWT-protected)
+  app.get("/api/user-dashboard", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      const stats = await storage.getDashboardStats(userId);
-      
+      const stats = await storage.getDashboardStats(req.user.userId);
       res.json({ success: true, data: stats });
     } catch (error) {
       res.status(500).json({ success: false, error: "Internal server error" });
     }
   });
 
-  // API usage tracking
-  app.post("/api/users/:id/usage", async (req, res) => {
+  // Generate license key (JWT-protected)
+  app.post("/api/generate-license", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      const { endpoint, creditsUsed } = req.body;
+      const user = await storage.getUser(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ success: false, error: "User not found" });
+      }
+
+      // Only generate license if user has a paid plan
+      if (user.plan === 'free') {
+        return res.status(400).json({ success: false, error: "License key requires a paid plan" });
+      }
+
+      const licenseKey = await storage.generateLicenseKey(req.user.userId);
+      res.json({ success: true, data: { licenseKey } });
+    } catch (error) {
+      res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  });
+
+  // Razorpay payment routes
+  app.post("/api/create-order", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { plan } = req.body;
       
-      await storage.trackApiUsage(userId, endpoint, creditsUsed);
+      if (!PRICING_PLANS[plan as keyof typeof PRICING_PLANS]) {
+        return res.status(400).json({ success: false, error: "Invalid plan" });
+      }
+
+      const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+      
+      // Mock Razorpay order creation (replace with actual Razorpay integration)
+      const orderId = `order_${Date.now()}`;
+      
+      res.json({
+        success: true,
+        data: {
+          orderId,
+          amount: planDetails.price * 100, // Amount in paise
+          currency: "INR",
+          plan
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/verify-payment", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { orderId, paymentId, signature, plan } = req.body;
+      
+      // Mock payment verification (replace with actual Razorpay verification)
+      const isPaymentValid = true; // In real implementation, verify with Razorpay
+      
+      if (!isPaymentValid) {
+        return res.status(400).json({ success: false, error: "Payment verification failed" });
+      }
+
+      const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+      const expiryDate = new Date(Date.now() + planDetails.duration * 24 * 60 * 60 * 1000);
+
+      // Update user plan and create subscription
+      await storage.updateUserPlan(req.user.userId, plan, planDetails.apiCalls, expiryDate);
+      await storage.createSubscription(req.user.userId, plan, paymentId, planDetails.price);
+
+      // Generate license key for paid plans
+      let licenseKey = null;
+      if (plan !== 'free') {
+        licenseKey = await storage.generateLicenseKey(req.user.userId);
+      }
+
+      res.json({
+        success: true,
+        data: {
+          plan,
+          apiCallsLeft: planDetails.apiCalls,
+          expiryDate,
+          licenseKey
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  });
+
+  // Download route (public)
+  app.get("/api/download", (req, res) => {
+    // In a real implementation, this would serve the actual .exe file
+    res.json({
+      success: true,
+      message: "Download link would be provided here",
+      downloadUrl: "/downloads/ai-tool.exe" // Mock download URL
+    });
+  });
+
+  // API usage tracking (for internal use)
+  app.post("/api/track-usage", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { endpoint, creditsUsed } = req.body;
+      await storage.trackApiUsage(req.user.userId, endpoint, creditsUsed);
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ success: false, error: "Internal server error" });
     }
   });
 
-  // API usage history
-  app.get("/api/users/:id/usage", async (req, res) => {
+  // Get user's API usage history
+  app.get("/api/usage-history", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-      
-      const usage = await storage.getApiUsageHistory(userId, limit);
+      const limit = parseInt(req.query.limit as string) || 50;
+      const usage = await storage.getApiUsageHistory(req.user.userId, limit);
       res.json({ success: true, data: usage });
     } catch (error) {
       res.status(500).json({ success: false, error: "Internal server error" });
     }
   });
 
-  // Payment routes (simplified for demo)
-  app.post("/api/payment/create-checkout-session", async (req, res) => {
-    // Mock payment session creation
-    res.json({ 
-      success: true, 
-      data: { sessionId: "mock_session_" + Date.now() } 
-    });
-  });
-
-  app.post("/api/payment/create-portal-session", async (req, res) => {
-    // Mock portal session creation
-    res.json({ 
-      success: true, 
-      data: { url: "/dashboard" } 
-    });
+  // Health check
+  app.get("/api/health", (req, res) => {
+    res.json({ success: true, message: "SaaS backend is running" });
   });
 
   const httpServer = createServer(app);
-
   return httpServer;
 }
