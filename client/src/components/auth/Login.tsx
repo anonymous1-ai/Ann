@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Code, Eye, EyeOff } from 'lucide-react';
+import { getLogoPath } from '@/assets/logo-config';
 
 interface LoginProps {
   onToggleMode: () => void;
@@ -40,7 +41,7 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
           <img 
-            src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+            src={getLogoPath()} 
             alt="Silently AI Logo" 
             className="w-12 h-12 object-contain"
           />

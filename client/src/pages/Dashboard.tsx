@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, Download, CreditCard, TrendingUp, Calendar, Clock } from 'lucide-react';
+import { getLogoPath } from '@/assets/logo-config';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -59,7 +60,7 @@ const Dashboard = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <img 
-                src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+                src={getLogoPath()} 
                 alt="Silently AI Logo" 
                 className="w-8 h-8 object-contain logo-reveal"
               />

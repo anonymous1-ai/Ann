@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Code, Check, Eye, EyeOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { getLogoPath } from '@/assets/logo-config';
 
 interface SignupProps {
   onToggleMode: () => void;
@@ -54,7 +55,7 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
           <img 
-            src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+            src={getLogoPath()} 
             alt="Silently AI Logo" 
             className="w-12 h-12 object-contain"
           />

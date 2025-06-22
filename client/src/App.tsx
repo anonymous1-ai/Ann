@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Router, Route, Switch } from "wouter";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { getLogoPath } from "@/assets/logo-config";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -27,7 +28,7 @@ const LoadingScreen = () => (
     </div>
     <div className="text-center relative z-10">
       <img 
-        src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+        src={getLogoPath()} 
         alt="Silently AI Logo" 
         className="w-16 h-16 object-contain mx-auto mb-4 animate-pulse"
       />
