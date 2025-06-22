@@ -289,7 +289,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         // Update amount based on credits (₹9 per credit = 900 paise)
                         window.dispatchEvent(new CustomEvent('updateAmount', { detail: credits * 900 }));
                       }}
-                      className="bg-slate-800 border-yellow-400/30 text-white w-24"
+                      className="border-yellow-400/30 text-white bg-[#000000cc] w-24"
                     />
                     <span className="text-yellow-200/70">credits × ₹9 = ₹{Math.floor(amount / 900) * 9}</span>
                   </div>
