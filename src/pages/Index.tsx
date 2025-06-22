@@ -103,7 +103,7 @@ const Index = () => {
           <div className="mb-8">
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
               Convert Anything to
-              <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent neon-text">Silently AI
+              <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent neon-text mx-0 px-0 font-bold py-[10px]">Silently AI
             </span>
             </h1>
             <p className="text-xl sm:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto">
