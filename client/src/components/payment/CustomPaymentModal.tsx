@@ -219,7 +219,9 @@ export default function CustomPaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div className="bg-gradient-to-br from-amber-950/95 to-yellow-900/95 backdrop-blur-sm rounded-2xl max-w-md w-full mx-4 border border-yellow-600/30 shadow-2xl shadow-yellow-900/20">
+      <div className="rounded-2xl max-w-md w-full mx-4 border border-yellow-600/30 shadow-2xl shadow-yellow-900/20" style={{
+        background: `radial-gradient(ellipse at top, hsl(218, 23%, 6%) 0%, hsl(218, 23%, 4%) 50%), linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%)`
+      }}>
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -236,7 +238,7 @@ export default function CustomPaymentModal({
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex bg-amber-900/30 rounded-lg p-1 mb-6 border border-yellow-600/20">
+          <div className="flex bg-background/50 rounded-lg p-1 mb-6 border border-yellow-600/20">
             <button
               onClick={() => setActiveTab('UPI')}
               className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
@@ -281,7 +283,7 @@ export default function CustomPaymentModal({
                   placeholder="yourname@paytm"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                  className="bg-amber-900/30 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60 h-12 rounded-lg focus:border-yellow-500 focus:ring-yellow-500/20"
+                  className="bg-background/80 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60 h-12 rounded-lg focus:border-yellow-500 focus:ring-yellow-500/20"
                 />
                 <p className="text-yellow-300/60 text-xs mt-2">
                   Enter your UPI ID (e.g., 9876543210@paytm, user@googlepay)
@@ -321,7 +323,7 @@ export default function CustomPaymentModal({
           )}
 
           {/* Amount Section */}
-          <div className="bg-amber-900/40 rounded-lg p-4 mt-6 border border-yellow-600/40">
+          <div className="bg-background/80 rounded-lg p-4 mt-6 border border-yellow-600/40">
             <div className="flex justify-between items-center">
               <span className="text-yellow-200 font-medium">Amount to Pay</span>
               <span className="text-yellow-200 text-xl font-bold">₹{formattedAmount}</span>
@@ -335,7 +337,7 @@ export default function CustomPaymentModal({
           <div className="flex gap-3 mt-6">
             <Button
               onClick={onClose}
-              className="flex-1 bg-amber-900/30 border border-yellow-600/30 text-yellow-200 hover:bg-amber-900/50 rounded-lg h-12 font-medium"
+              className="flex-1 bg-background/60 border border-yellow-600/30 text-yellow-200 hover:bg-background/80 rounded-lg h-12 font-medium"
             >
               Cancel
             </Button>
