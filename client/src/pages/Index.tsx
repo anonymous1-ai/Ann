@@ -221,8 +221,8 @@ const Index = () => {
     try {
       const topupOptions = {
         'topup-50': { calls: 50, price: 450 },
-        'topup-100': { calls: 100, price: 900 },
-        'topup-250': { calls: 250, price: 2250 }
+        'topup-100': { calls: 100, price: 800 },
+        'topup-250': { calls: 250, price: 1750 }
       };
 
       const selected = topupOptions[topupType as keyof typeof topupOptions];
@@ -687,8 +687,8 @@ const Index = () => {
                   <CardTitle className="text-gold text-xl">100 Calls</CardTitle>
                   <CardDescription className="text-yellow-200/70">Best value</CardDescription>
                   <div className="mt-4">
-                    <span className="text-3xl font-bold text-gradient">₹900</span>
-                    <p className="text-yellow-200/70 text-sm">₹9 per call</p>
+                    <span className="text-3xl font-bold text-gradient">₹800</span>
+                    <p className="text-yellow-200/70 text-sm">₹8 per call</p>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -710,8 +710,8 @@ const Index = () => {
                   <CardTitle className="text-gold text-xl">250 Calls</CardTitle>
                   <CardDescription className="text-yellow-200/70">Maximum value</CardDescription>
                   <div className="mt-4">
-                    <span className="text-3xl font-bold text-gradient">₹2250</span>
-                    <p className="text-yellow-200/70 text-sm">₹9 per call</p>
+                    <span className="text-3xl font-bold text-gradient">₹1750</span>
+                    <p className="text-yellow-200/70 text-sm">₹7 per call</p>
                   </div>
                 </CardHeader>
                 <CardContent>
