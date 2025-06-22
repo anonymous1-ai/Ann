@@ -304,7 +304,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   placeholder="yourname@paytm"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                  className="bg-slate-800 border-yellow-400/30 text-white"
+                  className="border-yellow-400/30 text-white bg-[#000000cc]"
                 />
                 <p className="text-xs text-yellow-200/60">
                   Enter your UPI ID (e.g., 9876543210@paytm, user@googlepay)
@@ -329,7 +329,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     placeholder="John Doe"
                     value={cardDetails.name}
                     onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
-                    className="bg-slate-800 border-yellow-400/30 text-white"
+                    className="border-yellow-400/30 text-white bg-[#000000cc]"
                   />
                 </div>
                 
@@ -341,7 +341,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     placeholder="1234 5678 9012 3456"
                     value={cardDetails.number}
                     onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
-                    className="bg-slate-800 border-yellow-400/30 text-white"
+                    className="border-yellow-400/30 text-white bg-[#000000cc]"
                   />
                 </div>
                 
@@ -354,7 +354,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       placeholder="MM/YY"
                       value={cardDetails.expiry}
                       onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
-                      className="bg-slate-800 border-yellow-400/30 text-white"
+                      className="border-yellow-400/30 text-white bg-[#000000cc]"
                     />
                   </div>
                   <div className="space-y-2">
@@ -365,7 +365,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       placeholder="123"
                       value={cardDetails.cvv}
                       onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
-                      className="bg-slate-800 border-yellow-400/30 text-white"
+                      className="border-yellow-400/30 text-white bg-[#000000cc]"
                     />
                   </div>
                 </div>
@@ -383,7 +383,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     placeholder="John Doe"
                     value={bankDetails.accountName}
                     onChange={(e) => setBankDetails({...bankDetails, accountName: e.target.value})}
-                    className="bg-slate-800 border-yellow-400/30 text-white"
+                    className="border-yellow-400/30 text-white bg-[#000000cc]"
                   />
                 </div>
                 
@@ -395,7 +395,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     placeholder="1234567890123456"
                     value={bankDetails.accountNumber}
                     onChange={(e) => setBankDetails({...bankDetails, accountNumber: e.target.value})}
-                    className="bg-slate-800 border-yellow-400/30 text-white"
+                    className="border-yellow-400/30 text-white bg-[#000000cc]"
                   />
                 </div>
                 
@@ -407,7 +407,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     placeholder="SBIN0001234"
                     value={bankDetails.ifsc}
                     onChange={(e) => setBankDetails({...bankDetails, ifsc: e.target.value.toUpperCase()})}
-                    className="bg-slate-800 border-yellow-400/30 text-white"
+                    className="border-yellow-400/30 text-white bg-[#000000cc]"
                   />
                 </div>
               </div>
