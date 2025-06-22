@@ -345,7 +345,7 @@ const Index = () => {
       {/* Testimonials */}
       <section className="px-4 md:px-6 py-16 md:py-20">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">Trusted by 10,000+ Users
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text py-[10px] lg:text-5xl">Trusted by 10,000+ Users
 
         </h2>
           <p className="text-center text-slate-400 text-base md:text-lg mb-12 md:mb-16">Students, freelancers, and professionals love the stealth approach</p>
