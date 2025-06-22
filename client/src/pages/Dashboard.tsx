@@ -176,6 +176,134 @@ const Dashboard = () => {
     }
   };
 
+  const handleSubscription = async (planType: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to purchase a subscription plan",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(planType);
+
+    try {
+      const planOptions = {
+        'pro-monthly': { plan: 'pro', price: 800, duration: 'monthly' },
+        'pro-annual': { plan: 'pro', price: 9500, duration: 'annual' },
+        'advanced-monthly': { plan: 'advanced', price: 2000, duration: 'monthly' },
+        'advanced-annual': { plan: 'advanced', price: 20000, duration: 'annual' }
+      };
+
+      const selected = planOptions[planType as keyof typeof planOptions];
+      if (!selected) {
+        throw new Error('Invalid subscription plan');
+      }
+
+      // Create subscription order
+      const response = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          plan: planType
+        })
+      });
+
+      const orderData = await response.json();
+      
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to create subscription order');
+      }
+
+      // Initialize Razorpay payment for subscription
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key',
+        amount: orderData.data.amount,
+        currency: orderData.data.currency,
+        name: 'Silently AI',
+        description: `${selected.plan.toUpperCase()} Plan - ${selected.duration}`,
+        order_id: orderData.data.orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify subscription payment
+            const verifyResponse = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                orderId: orderData.data.orderId,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                plan: planType
+              })
+            });
+
+            const verifyData = await verifyResponse.json();
+            
+            if (verifyData.success) {
+              toast({
+                title: "Subscription Successful!",
+                description: `Welcome to ${selected.plan.toUpperCase()} plan! Your account has been upgraded.`
+              });
+              
+              // Refresh user data
+              await refreshUser();
+            } else {
+              throw new Error(verifyData.error || 'Subscription verification failed');
+            }
+          } catch (error: any) {
+            toast({
+              title: "Subscription Verification Failed",
+              description: error.message || "Please contact support if payment was deducted.",
+              variant: "destructive"
+            });
+          }
+        },
+        prefill: {
+          email: user.email,
+          name: user.name
+        },
+        theme: {
+          color: '#D4AF37'
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(null);
+          }
+        }
+      };
+
+      // Load Razorpay script if not already loaded
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => {
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+        };
+        document.body.appendChild(script);
+      } else {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
+
+    } catch (error: any) {
+      toast({
+        title: "Subscription Failed",
+        description: error.message || "Unable to process subscription. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
   const handleDownloadLogs = () => {
     toast({
       title: "Downloading logs",
@@ -289,6 +417,125 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Current Plan Display for Paid Users */}
+        {user.plan !== 'free' && (
+          <div className="mb-8">
+            <Card className="luxury-card golden-glow">
+              <CardHeader>
+                <CardTitle className="text-gradient">Current Plan</CardTitle>
+                <CardDescription className="text-yellow-200/70">
+                  You're currently on the {user.plan.toUpperCase()} plan
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-4 bg-yellow-900/20 rounded-lg border border-yellow-400/30">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-gold text-lg font-semibold capitalize">{user.plan} Plan</h3>
+                      <p className="text-yellow-200/70 text-sm">
+                        {user.plan === 'pro' ? '100 API calls/month' : '300 API calls/month'}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className="bg-green-600 text-white">Active</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Subscription Plans Section */}
+        {user.plan === 'free' && (
+          <div className="mb-8">
+            <Card className="luxury-card golden-glow">
+              <CardHeader>
+                <CardTitle className="text-gradient">Upgrade Your Plan</CardTitle>
+                <CardDescription className="text-yellow-200/70">
+                  Unlock more features and API calls with our premium plans
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Pro Plan */}
+                  <Card className="luxury-card hover:golden-glow transition-all duration-300 border-yellow-400/30">
+                    <CardHeader className="text-center">
+                      <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-white" />
+                      </div>
+                      <CardTitle className="text-gold text-xl">Pro Plan</CardTitle>
+                      <CardDescription className="text-yellow-200/70">Perfect for professionals</CardDescription>
+                      <div className="mt-4">
+                        <span className="text-3xl font-bold text-gradient">₹800</span>
+                        <p className="text-yellow-200/70 text-sm">/month</p>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ul className="space-y-2 text-yellow-200/80 text-sm">
+                        <li>• 100 API calls/month</li>
+                        <li>• Priority support</li>
+                        <li>• License key generation</li>
+                        <li>• Advanced analytics</li>
+                      </ul>
+                      <Button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleSubscription('pro-monthly');
+                        }}
+                        disabled={loading === 'pro-monthly'}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        {loading === 'pro-monthly' ? 'Processing...' : 'Upgrade to Pro'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Advanced Plan */}
+                  <Card className="luxury-card golden-glow ring-2 ring-gold/50 relative">
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                      <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold px-4 py-1">
+                        Most Popular
+                      </Badge>
+                    </div>
+                    <CardHeader className="text-center">
+                      <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                        <CreditCard className="w-6 h-6 text-white" />
+                      </div>
+                      <CardTitle className="text-gold text-xl">Advanced Plan</CardTitle>
+                      <CardDescription className="text-yellow-200/70">For power users</CardDescription>
+                      <div className="mt-4">
+                        <span className="text-3xl font-bold text-gradient">₹2000</span>
+                        <p className="text-yellow-200/70 text-sm">/month</p>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ul className="space-y-2 text-yellow-200/80 text-sm">
+                        <li>• 300 API calls/month</li>
+                        <li>• Priority support</li>
+                        <li>• License key generation</li>
+                        <li>• Advanced analytics</li>
+                        <li>• Custom integrations</li>
+                      </ul>
+                      <Button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleSubscription('advanced-monthly');
+                        }}
+                        disabled={loading === 'advanced-monthly'}
+                        className="w-full btn-luxury"
+                      >
+                        {loading === 'advanced-monthly' ? 'Processing...' : 'Upgrade to Advanced'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Main Content Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
