@@ -354,10 +354,9 @@ const Index = () => {
       {/* Testimonials */}
       <section className="px-4 md:px-6 py-16 md:py-20">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text py-[10px] lg:text-5xl">Trusted by 10,000+ Users
-
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-3 md:mb-4 text-gradient py-[10px] lg:text-5xl">Trusted by 10,000+ Users
         </h2>
-          <p className="text-center text-slate-400 text-base md:text-lg mb-12 md:mb-16">Students, freelancers, and professionals love the stealth approach</p>
+          <p className="text-center text-yellow-200/70 text-base md:text-lg mb-12 md:mb-16">Students, freelancers, and professionals love the stealth approach</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[{
@@ -378,21 +377,21 @@ const Index = () => {
             initials: "RM",
             quote: "Used it during 10+ technical interviews. The kill switch saved me twice when interviewer looked closely.",
             plan: "Top-up Credits"
-          }].map((testimonial, index) => <Card key={index} className="tech-border rounded-2xl hover:neon-glow transition-all duration-500">
+          }].map((testimonial, index) => <Card key={index} className="luxury-card rounded-2xl hover:golden-glow transition-all duration-500">
                 <CardContent className="pt-6 md:pt-8">
                   <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-                    <div className="w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg md:text-xl pulse-glow">
+                    <div className="w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl gold-gradient flex items-center justify-center text-black font-bold text-lg md:text-xl">
                       {testimonial.initials}
                     </div>
                     <div>
-                      <div className="font-semibold text-white text-base md:text-lg">{testimonial.name}</div>
-                      <div className="text-slate-400 text-xs md:text-sm">{testimonial.role}</div>
-                      <Badge variant="secondary" className="bg-cyan-950/50 text-cyan-300 border-cyan-400/30 text-xs mt-1">
+                      <div className="font-semibold text-foreground text-base md:text-lg">{testimonial.name}</div>
+                      <div className="text-yellow-200/60 text-xs md:text-sm">{testimonial.role}</div>
+                      <Badge variant="secondary" className="badge-luxury text-xs mt-1">
                         {testimonial.plan}
                       </Badge>
                     </div>
                   </div>
-                  <p className="text-slate-300 leading-relaxed italic text-sm md:text-base">
+                  <p className="text-yellow-200/70 leading-relaxed italic text-sm md:text-base">
                     "{testimonial.quote}"
                   </p>
                 </CardContent>
@@ -404,8 +403,7 @@ const Index = () => {
       {/* FAQ */}
       <section id="faq" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text py-[10px] lg:text-5xl">Frequently Asked Questions
-
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-3 md:mb-4 text-gradient py-[10px] lg:text-5xl">Frequently Asked Questions
         </h2>
           
           
@@ -434,11 +432,11 @@ const Index = () => {
             value: "item-6",
             question: "Does it work on Mac/Linux or only Windows?",
             answer: "Currently only Windows (.exe) is supported. Mac and Linux versions are in development. You can use Windows in a VM on Mac/Linux as a temporary solution."
-          }].map((item, index) => <AccordionItem key={index} value={item.value} className="tech-border rounded-xl">
-                <AccordionTrigger className="text-white hover:text-cyan-300 px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-medium">
+          }].map((item, index) => <AccordionItem key={index} value={item.value} className="luxury-card rounded-xl">
+                <AccordionTrigger className="text-foreground hover:text-gold px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-medium">
                   {item.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-slate-300 px-4 md:px-6 pb-4 md:pb-6 leading-relaxed text-sm md:text-base">
+                <AccordionContent className="text-yellow-200/70 px-4 md:px-6 pb-4 md:pb-6 leading-relaxed text-sm md:text-base">
                   {item.answer}
                 </AccordionContent>
               </AccordionItem>)}
@@ -447,21 +445,21 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="px-4 md:px-6 py-12 md:py-16 border-t border-cyan-800/50 tech-border relative">
+      <footer className="px-4 md:px-6 py-12 md:py-16 border-t border-yellow-500/20 luxury-card relative">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div className="w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center neon-glow">
-                  <Code className="w-5 md:w-6 h-5 md:h-6 text-white" />
+                <div className="w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl gold-gradient flex items-center justify-center golden-glow">
+                  <Code className="w-5 md:w-6 h-5 md:h-6 text-black" />
                 </div>
-                <span className="text-xl md:text-2xl font-bold text-white neon-text">Silently AI</span>
+                <span className="text-xl md:text-2xl font-bold text-gold">Silently AI</span>
               </div>
-              <p className="text-slate-400 leading-relaxed mb-4 md:mb-6 text-sm md:text-base">
+              <p className="text-yellow-200/70 leading-relaxed mb-4 md:mb-6 text-sm md:text-base">
                 The undetectable desktop AI tool for students, developers, and professionals who need results without detection.
               </p>
-              <Badge variant="secondary" className="bg-green-950/50 text-green-300 border-green-400/30 text-xs">
-                <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+              <Badge variant="secondary" className="badge-luxury text-xs">
+                <span className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></span>
                 10,000+ Active Users
               </Badge>
             </div>
@@ -511,17 +509,17 @@ const Index = () => {
               action: () => handleSocialLink("GDPR")
             }]
           }].map((section, index) => <div key={index}>
-                <h3 className="font-semibold text-white mb-4 md:mb-6 text-base md:text-lg">{section.title}</h3>
+                <h3 className="font-semibold text-foreground mb-4 md:mb-6 text-base md:text-lg">{section.title}</h3>
                 <ul className="space-y-2 md:space-y-3">
                   {section.links.map((link, linkIndex) => <li key={linkIndex}>
-                      <button onClick={link.action} className="text-slate-400 hover:text-cyan-300 transition-colors text-sm md:text-base text-left">
+                      <button onClick={link.action} className="text-yellow-200/60 hover:text-gold transition-colors text-sm md:text-base text-left">
                         {link.name}
                       </button>
                     </li>)}
                 </ul>
               </div>)}
           </div>
-          <div className="border-t border-cyan-800/50 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-slate-400 space-y-4 md:space-y-0">
+          <div className="border-t border-yellow-500/20 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-yellow-200/60 space-y-4 md:space-y-0">
             <div className="text-sm md:text-base">© 2024 Silently AI. All rights reserved.</div>
             <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm">
               <span>Made in India 🇮🇳</span>
