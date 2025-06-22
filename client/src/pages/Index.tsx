@@ -623,69 +623,101 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {[{
-            name: "Free",
-            price: "₹0",
-            period: "/forever",
-            description: "Basic access via keyboard shortcuts",
-            features: ["Shortcut-only access", "Limited daily use", "Basic text-to-code", "Community support"],
-            buttonText: "Download Free",
-            popular: false,
-            badge: "Perfect for trying out"
-          }, {
-            name: "Pro",
-            price: "₹800",
-            period: "/month",
-            description: "100 API calls included",
-            features: ["100 API calls/month", "All core features", "Priority typing simulation", "Email support", "Offline mode"],
-            buttonText: "Start Pro",
-            popular: true,
-            badge: "Most Popular"
-          }, {
-            name: "Advanced",
-            price: "₹2000",
-            period: "/month",
-            description: "300 API calls + premium features",
-            features: ["300 API calls/month", "Advanced aptitude solver", "Batch screenshot processing", "Custom shortcuts", "Premium support"],
-            buttonText: "Go Advanced",
-            popular: false,
-            badge: "Best Value"
-          }, {
-            name: "Top-Up",
-            price: "₹10",
-            period: "/call",
-            description: "Add credits anytime",
-            features: ["Pay per API call", "No monthly commitment", "Add to any plan", "Perfect for heavy usage"],
-            buttonText: "Buy Credits",
-            popular: false,
-            badge: "Flexible"
-          }].map((plan, index) => <Card key={index} className={`relative rounded-2xl overflow-hidden luxury-card transition-all duration-500 hover:golden-glow ${plan.popular ? 'bg-gradient-to-b from-yellow-950/30 to-amber-950/30 border-yellow-400/50' : 'hover:border-yellow-400/50'}`}>
-                {plan.popular}
-                <CardHeader className="text-center pb-4 md:pb-6">
-                  <div className="mb-3 md:mb-4">
-                    <CardTitle className="text-lg md:text-xl text-foreground mb-2">{plan.name}</CardTitle>
-                    <Badge variant="secondary" className="badge-luxury text-xs">
+            {[
+              {
+                id: "free",
+                name: "Free",
+                monthlyPrice: "₹0",
+                yearlyPrice: "₹0",
+                period: "/forever",
+                description: "Basic access via keyboard shortcuts",
+                features: ["Shortcut-only access", "Limited daily use", "Basic text-to-code", "Community support"],
+                buttonText: "Download Free",
+                popular: false,
+                badge: "Perfect for trying out"
+              },
+              {
+                id: "pro",
+                name: "Pro",
+                monthlyPrice: "₹800",
+                yearlyPrice: "₹9500",
+                period: billingPeriod === 'monthly' ? "/month" : "/year",
+                description: billingPeriod === 'monthly' ? "100 API calls included" : "1200 API calls included",
+                features: billingPeriod === 'monthly' ? ["100 API calls/month", "All core features", "Priority typing simulation", "Email support", "Offline mode"] : ["1200 API calls/year", "All core features", "Priority typing simulation", "Email support", "Offline mode"],
+                buttonText: "Start Pro",
+                popular: true,
+                badge: "Most Popular"
+              },
+              {
+                id: "advanced",
+                name: "Advanced",
+                monthlyPrice: "₹2000",
+                yearlyPrice: "₹20000",
+                period: billingPeriod === 'monthly' ? "/month" : "/year",
+                description: billingPeriod === 'monthly' ? "300 API calls + premium features" : "3600 API calls + premium features",
+                features: billingPeriod === 'monthly' ? ["300 API calls/month", "Advanced aptitude solver", "Batch screenshot processing", "Custom shortcuts", "Premium support"] : ["3600 API calls/year", "Advanced aptitude solver", "Batch screenshot processing", "Custom shortcuts", "Premium support"],
+                buttonText: "Go Advanced",
+                popular: false,
+                badge: "Best Value"
+              },
+              {
+                id: "topup",
+                name: "Top-Up",
+                monthlyPrice: "₹9",
+                yearlyPrice: "₹9",
+                period: "/call",
+                description: "Add credits anytime",
+                features: ["Pay per API call", "No monthly commitment", "Add to any plan", "Perfect for heavy usage"],
+                buttonText: "Buy Credits",
+                popular: false,
+                badge: "Flexible"
+              }
+            ].map((plan, index) => (
+              <Card key={index} className={`relative rounded-2xl overflow-hidden luxury-card transition-all duration-500 hover:golden-glow ${plan.popular ? 'bg-gradient-to-b from-yellow-950/30 to-amber-950/30 border-yellow-400/50' : 'hover:border-yellow-400/50'}`}>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold px-4 py-1">
                       {plan.badge}
                     </Badge>
                   </div>
+                )}
+                <CardHeader className="text-center pb-4 md:pb-6">
                   <div className="mb-3 md:mb-4">
-                    <span className="text-3xl md:text-4xl font-bold text-gold">{plan.price}</span>
+                    <CardTitle className="text-lg md:text-xl text-foreground mb-2">{plan.name}</CardTitle>
+                    {!plan.popular && (
+                      <Badge variant="secondary" className="badge-luxury text-xs">
+                        {plan.badge}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="mb-3 md:mb-4">
+                    <span className="text-3xl md:text-4xl font-bold text-gold">
+                      {billingPeriod === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
+                    </span>
                     <span className="text-yellow-200/60 text-sm md:text-base">{plan.period}</span>
+                    {billingPeriod === 'yearly' && (plan.id === 'pro' || plan.id === 'advanced') && (
+                      <div className="text-xs text-yellow-200/70 mt-1">
+                        {plan.id === 'pro' ? '₹9500 billed annually' : '₹20000 billed annually'}
+                      </div>
+                    )}
                   </div>
                   <p className="text-yellow-200/70 text-xs md:text-sm">{plan.description}</p>
                 </CardHeader>
                 <CardContent className="space-y-4 md:space-y-6">
                   <ul className="space-y-2 md:space-y-3">
-                    {plan.features.map((feature, featureIndex) => <li key={featureIndex} className="flex items-center gap-2 md:gap-3 text-yellow-200/70 text-xs md:text-sm">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center gap-2 md:gap-3 text-yellow-200/70 text-xs md:text-sm">
                         <Check className="h-3 md:h-4 w-3 md:w-4 text-gold flex-shrink-0" />
                         {feature}
-                      </li>)}
+                      </li>
+                    ))}
                   </ul>
                   <Button onClick={() => handleSubscribe(plan.id)} className={`w-full rounded-xl py-2 md:py-3 text-sm md:text-base font-semibold transition-all duration-300 ${plan.popular ? 'btn-luxury' : 'btn-luxury-outline'}`}>
                     {plan.buttonText}
                   </Button>
                 </CardContent>
-              </Card>)}
+              </Card>
+            ))}
           </div>
 
           <div className="text-center mt-8 md:mt-12">
