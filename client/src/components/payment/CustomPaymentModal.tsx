@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { X, Smartphone, CreditCard, Building2 } from 'lucide-react';
+import { X, Smartphone, CreditCard, Building2, Clock } from 'lucide-react';
 
 interface CustomPaymentModalProps {
   isOpen: boolean;
@@ -34,6 +34,8 @@ export default function CustomPaymentModal({
   const [activeTab, setActiveTab] = useState('UPI');
   const [upiId, setUpiId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [paymentTimer, setPaymentTimer] = useState(0);
+  const [showTimer, setShowTimer] = useState(false);
   
   // Card details state
   const [cardDetails, setCardDetails] = useState({
@@ -49,6 +51,19 @@ export default function CustomPaymentModal({
     accountNumber: '',
     ifsc: ''
   });
+
+  // Timer effect for UPI payment countdown
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (showTimer && paymentTimer > 0) {
+      interval = setInterval(() => {
+        setPaymentTimer(prev => prev - 1);
+      }, 1000);
+    } else if (paymentTimer === 0 && showTimer) {
+      setShowTimer(false);
+    }
+    return () => clearInterval(interval);
+  }, [paymentTimer, showTimer]);
   
   const formattedAmount = (amount / 100).toFixed(0);
 
@@ -65,15 +80,38 @@ export default function CustomPaymentModal({
     setLoading(true);
 
     try {
-      // Simulate successful payment without Razorpay interface
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
+      // Step 1: Initiate UPI request
+      toast({
+        title: "UPI Request Initiated",
+        description: `Payment request sent to ${upiId}. Please check your UPI app.`,
+      });
+
+      // Step 2: Simulate UPI request creation (2 seconds)
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Create mock payment response
+      // Step 3: Start 5-minute countdown timer
+      setPaymentTimer(300); // 5 minutes = 300 seconds
+      setShowTimer(true);
+      
+      toast({
+        title: "Payment Request Active",
+        description: "You have 5 minutes to complete payment in your UPI app.",
+      });
+
+      // Step 4: Simulate user completing payment in UPI app (8 seconds for demo)
+      await new Promise(resolve => setTimeout(resolve, 8000));
+      
+      // Step 5: Payment confirmation
       const mockResponse = {
         razorpay_payment_id: `pay_${Math.random().toString(36).substr(2, 14)}`,
         razorpay_order_id: orderId,
         razorpay_signature: `signature_${Math.random().toString(36).substr(2, 20)}`
       };
+      
+      toast({
+        title: "Payment Received",
+        description: "UPI payment completed successfully!",
+      });
       
       await handlePaymentSuccess(mockResponse);
     } catch (error: any) {
@@ -301,6 +339,24 @@ export default function CustomPaymentModal({
                 <Badge variant="outline" className="text-purple-400 border-purple-400/50">PhonePe</Badge>
                 <Badge variant="outline" className="text-green-400 border-green-400/50">Paytm</Badge>
               </div>
+
+              {/* Payment Timer Display */}
+              {showTimer && paymentTimer > 0 && (
+                <div className="bg-yellow-900/20 border border-yellow-400/30 rounded-lg p-3 mt-4">
+                  <div className="flex items-center gap-2 text-yellow-200">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-sm font-medium">Payment Request Active</span>
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-lg font-bold text-gold">
+                      {Math.floor(paymentTimer / 60)}:{(paymentTimer % 60).toString().padStart(2, '0')}
+                    </div>
+                    <p className="text-xs text-yellow-200/70">
+                      Complete payment in your UPI app within this time
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
