@@ -6,7 +6,23 @@ import { Check, Download, Zap, Crown, Star } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
-const PRICING_PLANS = [
+interface PricingPlan {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+  period: string;
+  apiCalls: number;
+  description: string;
+  features: string[];
+  limitations?: string[];
+  buttonText: string;
+  popular: boolean;
+  icon: any;
+  billedAnnually?: boolean;
+}
+
+const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'free',
     name: 'Free',
@@ -362,7 +378,7 @@ export default function Pricing() {
             if (billingPeriod === 'monthly') {
               return plan.id.includes('monthly');
             } else {
-              return plan.id.includes('annual');
+              return plan.id === 'pro-annual' || plan.id === 'advanced-annual';
             }
           }).map((plan) => {
             const Icon = plan.icon;
