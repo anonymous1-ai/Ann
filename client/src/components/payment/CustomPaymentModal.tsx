@@ -224,12 +224,12 @@ export default function CustomPaymentModal({
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-yellow-200 mb-1">Complete Payment</h2>
-              <p className="text-yellow-300/70 text-sm">{description}</p>
+              <h2 className="text-xl font-semibold text-yellow-400 mb-1">Complete Payment</h2>
+              <p className="text-yellow-300 text-sm">{description}</p>
             </div>
             <button
               onClick={onClose}
-              className="text-yellow-300/70 hover:text-yellow-200 transition-colors"
+              className="text-yellow-400 hover:text-yellow-300 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -242,7 +242,7 @@ export default function CustomPaymentModal({
               className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                 activeTab === 'UPI'
                   ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold shadow-lg'
-                  : 'text-yellow-300/70 hover:text-yellow-200'
+                  : 'text-yellow-400 hover:text-yellow-300'
               }`}
             >
               <Smartphone className="w-4 h-4" />
@@ -253,7 +253,7 @@ export default function CustomPaymentModal({
               className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                 activeTab === 'Card'
                   ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold shadow-lg'
-                  : 'text-yellow-300/70 hover:text-yellow-200'
+                  : 'text-yellow-400 hover:text-yellow-300'
               }`}
             >
               <CreditCard className="w-4 h-4" />
