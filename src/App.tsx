@@ -12,15 +12,21 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const LoadingScreen = () => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 circuit-pattern flex items-center justify-center">
+    <div className="text-center">
+      <div className="w-16 h-16 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4 shadow-[0_0_20px_rgba(34,211,238,0.5)]"></div>
+      <div className="text-white text-xl font-semibold neon-text">Loading...</div>
+      <div className="text-slate-300 text-sm mt-2">Initializing your tech workspace</div>
+    </div>
+  </div>
+);
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
   
   return user ? <>{children}</> : <Navigate to="/auth" replace />;
@@ -30,11 +36,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
   
   return user ? <Navigate to="/dashboard" replace /> : <>{children}</>;
