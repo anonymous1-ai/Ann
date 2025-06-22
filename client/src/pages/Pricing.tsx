@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Zap, Crown, Star, Shield, CheckCircle, Lock, Smartphone, RefreshCw } from 'lucide-react';
-import UniversalPaymentModal from '@/components/payment/UniversalPaymentModal';
+
 
 interface PricingPlan {
   id: string;
@@ -154,9 +154,6 @@ export default function Pricing() {
   });
 
   const handleSubscribe = async (planId: string) => {
-    console.log('handleSubscribe called with planId:', planId);
-    console.log('User:', user);
-    
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -203,28 +200,72 @@ export default function Pricing() {
       });
 
       const orderData = await response.json();
-      console.log('Order response:', orderData);
       
       if (!orderData.success) {
         throw new Error(orderData.error || 'Failed to create payment order');
       }
 
-      console.log('Opening payment modal with data:', {
-        isOpen: true,
+      // Open Razorpay checkout modal (same as dashboard)
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderData.data.amount,
+        currency: orderData.data.currency,
+        name: "Subscription Plan",
         description: `${planId.toUpperCase()} Plan Subscription`,
-        orderId: orderData.data.orderId,
-        planId: planId
-      });
+        order_id: orderData.data.orderId,
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: "#D4AF37"
+        },
+        handler: async function (response: any) {
+          try {
+            // Verify payment with backend
+            const verifyResponse = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                orderId: orderData.data.orderId,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                plan: planId
+              })
+            });
 
-      // Open UPI payment modal instead of Razorpay checkout
-      setUpiModal({
-        isOpen: true,
-        amount: orderData.data.amount,
-        description: `${planId.toUpperCase()} Plan Subscription`,
-        orderId: orderData.data.orderId,
-        planId: planId
-      });
+            const verifyData = await verifyResponse.json();
+            
+            if (verifyData.success) {
+              toast({
+                title: "Payment Successful!",
+                description: "Your subscription has been activated",
+              });
+              // Redirect to dashboard
+              window.location.href = '/dashboard';
+            } else {
+              throw new Error(verifyData.error || 'Payment verification failed');
+            }
+          } catch (error: any) {
+            toast({
+              title: "Verification Error",
+              description: error.message || "Payment successful but verification failed. Contact support.",
+              variant: "destructive"
+            });
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(null);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
       
     } catch (error: any) {
       toast({
@@ -285,22 +326,7 @@ export default function Pricing() {
           </p>
         </div>
 
-        {/* Test Modal Button */}
-        <div className="text-center mb-8">
-          <Button
-            onClick={() => setUpiModal({
-              isOpen: true,
-              amount: 80000,
-              description: 'Test Payment',
-              orderId: 'test_order_123',
-              planId: 'pro-monthly'
-            })}
-            className="luxury-button"
-          >
-            Test Payment Modal
-          </Button>
-          <p className="text-xs text-yellow-200/60 mt-2">Debug: Click to test if modal opens</p>
-        </div>
+
 
         {/* Billing Period Toggle */}
         <div className="flex items-center justify-center space-x-4 mb-12">
@@ -546,128 +572,7 @@ export default function Pricing() {
         </div>
       </div>
 
-      {/* Universal Payment Modal */}
-      {upiModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="luxury-card max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gradient flex items-center gap-2">
-                  <Shield className="w-6 h-6 text-gold" />
-                  Secure Payment
-                </h2>
-                <button
-                  onClick={() => setUpiModal({ ...upiModal, isOpen: false })}
-                  className="text-yellow-200/70 hover:text-gold"
-                >
-                  ✕
-                </button>
-              </div>
 
-              <div className="space-y-6">
-                <div className="text-center">
-                  <div className="bg-slate-800/50 rounded-lg p-4 border border-yellow-400/20 mb-4">
-                    <p className="text-gold font-semibold text-lg">₹{(upiModal.amount / 100).toFixed(2)}</p>
-                    <p className="text-yellow-200/80 text-sm">{upiModal.description}</p>
-                    <p className="text-yellow-200/60 text-xs mt-1">Order ID: {upiModal.orderId}</p>
-                  </div>
-                </div>
-
-                {/* UPI Payment Section */}
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-gold font-semibold mb-3">Choose UPI App</h3>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <Button
-                      onClick={() => {
-                        const upiString = `upi://pay?pa=payments@yourapp.upi&pn=YourApp&am=${(upiModal.amount / 100).toFixed(2)}&tr=${upiModal.orderId}&tn=${encodeURIComponent(upiModal.description)}`;
-                        window.location.href = `tez://upi/pay?pa=payments@yourapp.upi&pn=YourApp&am=${(upiModal.amount / 100).toFixed(2)}&tr=${upiModal.orderId}&tn=${encodeURIComponent(upiModal.description)}`;
-                      }}
-                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
-                    >
-                      <div className="w-8 h-8 bg-blue-600 rounded-lg mb-2 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">G</span>
-                      </div>
-                      <span className="text-xs">Google Pay</span>
-                    </Button>
-
-                    <Button
-                      onClick={() => {
-                        window.location.href = `phonepe://pay?pa=payments@yourapp.upi&pn=YourApp&am=${(upiModal.amount / 100).toFixed(2)}&tr=${upiModal.orderId}&tn=${encodeURIComponent(upiModal.description)}`;
-                      }}
-                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
-                    >
-                      <div className="w-8 h-8 bg-purple-600 rounded-lg mb-2 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">P</span>
-                      </div>
-                      <span className="text-xs">PhonePe</span>
-                    </Button>
-
-                    <Button
-                      onClick={() => {
-                        window.location.href = `paytmmp://pay?pa=payments@yourapp.upi&pn=YourApp&am=${(upiModal.amount / 100).toFixed(2)}&tr=${upiModal.orderId}&tn=${encodeURIComponent(upiModal.description)}`;
-                      }}
-                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
-                    >
-                      <div className="w-8 h-8 bg-blue-500 rounded-lg mb-2 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">P</span>
-                      </div>
-                      <span className="text-xs">Paytm</span>
-                    </Button>
-                  </div>
-
-                  <div className="border-t border-yellow-400/20 pt-4">
-                    <p className="text-yellow-200/80 text-sm mb-2">Or pay manually using UPI ID:</p>
-                    <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-3 border border-yellow-400/20">
-                      <span className="text-gold font-mono text-sm flex-1">payments@yourapp.upi</span>
-                      <Button
-                        onClick={() => {
-                          navigator.clipboard.writeText('payments@yourapp.upi');
-                          toast({
-                            title: "UPI ID Copied",
-                            description: "UPI ID has been copied to clipboard"
-                          });
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="luxury-button-outline"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex space-x-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setUpiModal({ ...upiModal, isOpen: false })}
-                    className="flex-1 luxury-button-outline"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <UniversalPaymentModal
-        isOpen={false}
-        onClose={() => setUpiModal({ ...upiModal, isOpen: false })}
-        amount={upiModal.amount}
-        description={upiModal.description}
-        orderId={upiModal.orderId}
-        onSuccess={handleUPIPaymentSuccess}
-        onError={handleUPIPaymentError}
-        userDetails={{
-          email: user?.email || '',
-          name: user?.name || ''
-        }}
-      />
     </div>
   );
 }
