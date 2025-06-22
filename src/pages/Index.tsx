@@ -143,7 +143,7 @@ const Index = () => {
       <section id="features" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text py-[10px] lg:text-5xl">
               Stealth Features That Actually Work
             </h2>
             <p className="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed px-4 md:px-0">
