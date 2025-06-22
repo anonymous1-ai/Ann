@@ -315,6 +315,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create Razorpay order for API call top-up (₹9 per call)
+  app.post("/api/create-topup-order", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { apiCalls } = req.body;
+      const userId = req.user.userId;
+
+      if (!apiCalls || apiCalls < 1 || apiCalls > 1000) {
+        return res.status(400).json({ success: false, error: "Invalid API call count (1-1000)" });
+      }
+
+      const pricePerCall = 9; // ₹9 per API call
+      const totalAmount = apiCalls * pricePerCall;
+
+      const options = {
+        amount: totalAmount * 100, // Convert to paise
+        currency: "INR",
+        receipt: `topup_${Date.now()}`,
+        notes: {
+          userId: userId.toString(),
+          type: 'topup',
+          apiCalls: apiCalls.toString()
+        }
+      };
+
+      const order = await razorpay.orders.create(options);
+      
+      res.json({
+        success: true,
+        data: {
+          orderId: order.id,
+          amount: order.amount,
+          currency: order.currency,
+          apiCalls,
+          pricePerCall,
+          totalAmount
+        }
+      });
+    } catch (error: any) {
+      console.error('Create topup order error:', error);
+      res.status(500).json({ success: false, error: "Failed to create topup payment order" });
+    }
+  });
+
   // Webhook handler for seamless payment verification
   app.post("/api/verify-payment", authenticateToken, async (req: AuthRequest, res) => {
     try {
@@ -367,6 +410,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         error: error.message || "Payment verification failed" 
       });
+    }
+  });
+
+  // Verify top-up payment
+  app.post("/api/verify-topup-payment", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { orderId, paymentId, signature, apiCalls } = req.body;
+      
+      if (!orderId || !paymentId || !signature || !apiCalls) {
+        return res.status(400).json({ success: false, error: "Missing payment details" });
+      }
+
+      // Verify payment signature
+      const body = orderId + "|" + paymentId;
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+        .update(body.toString())
+        .digest("hex");
+
+      if (expectedSignature !== signature) {
+        return res.status(400).json({ success: false, error: "Invalid payment signature" });
+      }
+
+      // Get current user
+      const user = await storage.getUser(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ success: false, error: "User not found" });
+      }
+
+      // Add API calls to user's account
+      const newBalance = user.apiCallsLeft + parseInt(apiCalls);
+      await storage.updateUser(req.user.userId, { apiCallsLeft: newBalance });
+
+      // Track the top-up transaction
+      await storage.trackApiUsage(req.user.userId, `topup-${apiCalls}`, -parseInt(apiCalls));
+
+      res.json({ 
+        success: true, 
+        message: "Top-up successful",
+        data: {
+          addedCalls: parseInt(apiCalls),
+          newBalance,
+          totalPaid: parseInt(apiCalls) * 9
+        }
+      });
+    } catch (error: any) {
+      console.error('Top-up verification error:', error);
+      res.status(500).json({ success: false, error: "Top-up verification failed" });
     }
   });
 

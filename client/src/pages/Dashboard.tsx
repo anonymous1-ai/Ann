@@ -6,10 +6,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Download, CreditCard, TrendingUp, Calendar, Clock, ExternalLink } from 'lucide-react';
+import { LogOut, Download, CreditCard, TrendingUp, Calendar, Clock, ExternalLink, Plus } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { getLogoPath } from '@/assets/logo-config';
 import { PaymentModal } from '@/components/payment/PaymentModal';
+import TopUpModal from '@/components/dashboard/TopUpModal';
 
 // Add Razorpay type declaration
 declare global {
@@ -29,6 +30,7 @@ const Dashboard = () => {
     description: '',
     type: ''
   });
+  const [topUpModal, setTopUpModal] = useState(false);
   const [recentActivity] = useState([
     { id: 1, feature: 'Screenshot to Code', timestamp: '2 minutes ago', status: 'success' },
     { id: 2, feature: 'Text to Code', timestamp: '15 minutes ago', status: 'success' },
@@ -211,15 +213,23 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="luxury-card golden-glow">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-yellow-200/70 text-sm">Credits Remaining</p>
-                  <p className="text-2xl font-bold text-gold">{user.api_credits}</p>
+                  <p className="text-yellow-200/70 text-sm">API Credits</p>
+                  <p className="text-2xl font-bold text-gold">{user.apiCallsLeft}</p>
                 </div>
                 <div className="w-12 h-12 gold-gradient rounded-lg flex items-center justify-center">
                   <CreditCard className="w-6 h-6 text-black" />
                 </div>
               </div>
+              <Button
+                onClick={() => setTopUpModal(true)}
+                size="sm"
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Top-up ₹9/call
+              </Button>
             </CardContent>
           </Card>
 
@@ -415,6 +425,16 @@ const Dashboard = () => {
         userDetails={{
           email: user?.email || '',
           name: user?.name || ''
+        }}
+      />
+
+      {/* Top-Up Modal */}
+      <TopUpModal
+        isOpen={topUpModal}
+        onClose={() => setTopUpModal(false)}
+        onSuccess={async () => {
+          await refreshUser();
+          setTopUpModal(false);
         }}
       />
     </div>
