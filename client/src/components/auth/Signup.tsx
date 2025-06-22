@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Code, Check, Eye, EyeOff } from 'lucide-react';
+import { Code, Check, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getLogoPath } from '@/assets/logo-config';
 
@@ -20,32 +21,74 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const { signup, isLoading } = useAuth();
   const { toast } = useToast();
 
+  const validateForm = () => {
+    const errors: {
+      name?: string;
+      email?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
+    
+    if (!name.trim()) {
+      errors.name = 'Full name is required';
+    } else if (name.trim().length < 2) {
+      errors.name = 'Name must be at least 2 characters';
+    }
+    
+    if (!email) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    if (!password) {
+      errors.password = 'Password is required';
+    } else if (password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+    
+    if (!confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password';
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setValidationErrors({});
     
-    if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       await signup(email, password, name);
       toast({
-        title: "Account created successfully",
-        description: "Welcome to Silently AI! You have 5 free credits.",
+        title: "Welcome to Silently AI!",
+        description: "Account created successfully. You have 5 free API credits to get started.",
+        className: "bg-gradient-to-r from-yellow-950/90 to-amber-950/90 border-yellow-500/50 text-yellow-200",
       });
-    } catch (error) {
+    } catch (error: any) {
+      const errorMessage = error?.message || "Failed to create account. Please try again.";
+      setError(errorMessage);
       toast({
         title: "Signup failed",
-        description: "Please try again.",
+        description: errorMessage,
         variant: "destructive",
+        className: "bg-gradient-to-r from-red-950/90 to-red-900/90 border-red-500/50 text-red-200",
       });
     }
   };
@@ -79,30 +122,61 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <Alert className="bg-gradient-to-r from-red-950/50 to-red-900/50 border-red-500/50">
+              <AlertCircle className="h-4 w-4 text-red-400" />
+              <AlertDescription className="text-red-200">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <div className="space-y-2">
             <Label htmlFor="name" className="text-yellow-200/90 font-medium">Full Name</Label>
             <Input
               id="name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              onChange={(e) => {
+                setName(e.target.value);
+                if (validationErrors.name) {
+                  setValidationErrors(prev => ({...prev, name: undefined}));
+                }
+              }}
               placeholder="John Doe"
-              className="input-luxury"
+              className={`input-luxury ${validationErrors.name ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : ''}`}
             />
+            {validationErrors.name && (
+              <p className="text-red-400 text-sm flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {validationErrors.name}
+              </p>
+            )}
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="email" className="text-yellow-200/90 font-medium">Email</Label>
             <Input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (validationErrors.email) {
+                  setValidationErrors(prev => ({...prev, email: undefined}));
+                }
+              }}
               placeholder="your@email.com"
-              className="input-luxury"
+              className={`input-luxury ${validationErrors.email ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : ''}`}
             />
+            {validationErrors.email && (
+              <p className="text-red-400 text-sm flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {validationErrors.email}
+              </p>
+            )}
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="password" className="text-yellow-200/90 font-medium">Password</Label>
             <div className="relative">
@@ -110,10 +184,14 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (validationErrors.password) {
+                    setValidationErrors(prev => ({...prev, password: undefined}));
+                  }
+                }}
                 placeholder="••••••••"
-                className="input-luxury pr-10"
+                className={`input-luxury pr-10 ${validationErrors.password ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : ''}`}
               />
               <button
                 type="button"
@@ -123,7 +201,14 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            {validationErrors.password && (
+              <p className="text-red-400 text-sm flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {validationErrors.password}
+              </p>
+            )}
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="confirmPassword" className="text-yellow-200/90 font-medium">Confirm Password</Label>
             <div className="relative">
@@ -131,10 +216,14 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (validationErrors.confirmPassword) {
+                    setValidationErrors(prev => ({...prev, confirmPassword: undefined}));
+                  }
+                }}
                 placeholder="••••••••"
-                className="input-luxury pr-10"
+                className={`input-luxury pr-10 ${validationErrors.confirmPassword ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : ''}`}
               />
               <button
                 type="button"
@@ -144,8 +233,11 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {confirmPassword && password !== confirmPassword && (
-              <p className="text-red-400 text-xs mt-1">Passwords don't match</p>
+            {validationErrors.confirmPassword && (
+              <p className="text-red-400 text-sm flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {validationErrors.confirmPassword}
+              </p>
             )}
           </div>
           <Button 

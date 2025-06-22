@@ -58,7 +58,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(validatedData.email);
       if (existingUser) {
-        return res.status(400).json({ success: false, error: "User already exists" });
+        return res.status(400).json({ 
+          success: false, 
+          error: "An account with this email already exists. Please try signing in instead." 
+        });
       }
 
       const user = await storage.createUser(validatedData);
@@ -71,9 +74,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ success: false, error: "Invalid input data" });
+        const fieldErrors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+        return res.status(400).json({ 
+          success: false, 
+          error: `Please check your input: ${fieldErrors}` 
+        });
       }
-      res.status(500).json({ success: false, error: "Internal server error" });
+      console.error('Signup error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Unable to create account. Please try again later." 
+      });
     }
   });
 
@@ -83,7 +94,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const user = await storage.verifyPassword(validatedData.email, validatedData.password);
       if (!user) {
-        return res.status(401).json({ success: false, error: "Invalid credentials" });
+        return res.status(401).json({ 
+          success: false, 
+          error: "Invalid email or password. Please check your credentials and try again." 
+        });
       }
 
       const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
