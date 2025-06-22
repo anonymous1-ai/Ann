@@ -70,19 +70,17 @@ const Index = () => {
     setLocation('/auth');
   };
   return <div className="min-h-screen relative">
-      {/* Luxurious Animated Background */}
+      {/* Luxurious Static Background */}
       <div className="animated-bg">
-        <div className="particles">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="particle"></div>
-          ))}
-        </div>
+        <div className="static-graphics"></div>
         <div className="circuit-pattern"></div>
         <div className="geometric-shapes">
           <div className="shape shape-1"></div>
           <div className="shape shape-2"></div>
           <div className="shape shape-3"></div>
           <div className="shape shape-4"></div>
+          <div className="shape shape-5"></div>
+          <div className="shape shape-6"></div>
         </div>
       </div>
 
@@ -226,7 +224,7 @@ const Index = () => {
       {/* How It Works */}
       <section className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-5xl mx-auto relative z-10">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 text-gradient">
             Get Started in 3 Minutes
           </h2>
           <div className="space-y-8 md:space-y-12">
@@ -246,19 +244,19 @@ const Index = () => {
             description: "Select text, capture screens, or input problems. Get instant AI solutions with undetectable typing simulation.",
             action: "Ready to use immediately"
           }].map((item, index) => <div key={index} className="flex flex-col md:flex-row items-start gap-6 md:gap-8 group">
-                <div className="flex-shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-xl md:rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 tech-border flex items-center justify-center text-cyan-300 font-bold text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0 pulse-glow">
+                <div className="flex-shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-xl md:rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-500/20 luxury-card flex items-center justify-center text-gold font-bold text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0">
                   {item.step}
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 mb-3 md:mb-4">
-                    <h3 className="text-xl md:text-2xl font-semibold text-white group-hover:text-cyan-200 transition-colors">
+                    <h3 className="text-xl md:text-2xl font-semibold text-foreground group-hover:text-gold transition-colors">
                       {item.title}
                     </h3>
-                    <Badge variant="secondary" className="bg-green-950/50 text-green-300 border-green-400/30 text-xs">
+                    <Badge variant="secondary" className="badge-luxury text-xs">
                       {item.action}
                     </Badge>
                   </div>
-                  <p className="text-slate-300 text-base md:text-lg leading-relaxed">
+                  <p className="text-yellow-200/70 text-base md:text-lg leading-relaxed">
                     {item.description}
                   </p>
                 </div>
@@ -271,10 +269,10 @@ const Index = () => {
       <section id="pricing" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text py-[10px] lg:text-5xl">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-gradient py-[10px] lg:text-5xl">
               Fair & Transparent Pricing
             </h2>
-            <p className="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto px-4 md:px-0">
+            <p className="text-yellow-200/70 text-lg md:text-xl max-w-3xl mx-auto px-4 md:px-0">
               No yearly lock-ins. No hidden fees. Pay for what you use.
             </p>
           </div>
@@ -316,29 +314,29 @@ const Index = () => {
             buttonText: "Buy Credits",
             popular: false,
             badge: "Flexible"
-          }].map((plan, index) => <Card key={index} className={`relative rounded-2xl overflow-hidden tech-border transition-all duration-500 hover:neon-glow ${plan.popular ? 'bg-gradient-to-b from-cyan-950/80 to-blue-950/80 border-cyan-400/50' : 'hover:border-cyan-400/50'}`}>
+          }].map((plan, index) => <Card key={index} className={`relative rounded-2xl overflow-hidden luxury-card transition-all duration-500 hover:golden-glow ${plan.popular ? 'bg-gradient-to-b from-yellow-950/30 to-amber-950/30 border-yellow-400/50' : 'hover:border-yellow-400/50'}`}>
                 {plan.popular}
                 <CardHeader className="text-center pb-4 md:pb-6">
                   <div className="mb-3 md:mb-4">
-                    <CardTitle className="text-lg md:text-xl text-white mb-2">{plan.name}</CardTitle>
-                    <Badge variant="secondary" className="bg-slate-800/50 text-slate-300 border-slate-600/50 text-xs">
+                    <CardTitle className="text-lg md:text-xl text-foreground mb-2">{plan.name}</CardTitle>
+                    <Badge variant="secondary" className="badge-luxury text-xs">
                       {plan.badge}
                     </Badge>
                   </div>
                   <div className="mb-3 md:mb-4">
-                    <span className="text-3xl md:text-4xl font-bold text-white">{plan.price}</span>
-                    <span className="text-slate-400 text-sm md:text-base">{plan.period}</span>
+                    <span className="text-3xl md:text-4xl font-bold text-gold">{plan.price}</span>
+                    <span className="text-yellow-200/60 text-sm md:text-base">{plan.period}</span>
                   </div>
-                  <p className="text-slate-300 text-xs md:text-sm">{plan.description}</p>
+                  <p className="text-yellow-200/70 text-xs md:text-sm">{plan.description}</p>
                 </CardHeader>
                 <CardContent className="space-y-4 md:space-y-6">
                   <ul className="space-y-2 md:space-y-3">
-                    {plan.features.map((feature, featureIndex) => <li key={featureIndex} className="flex items-center gap-2 md:gap-3 text-slate-300 text-xs md:text-sm">
-                        <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400 flex-shrink-0" />
+                    {plan.features.map((feature, featureIndex) => <li key={featureIndex} className="flex items-center gap-2 md:gap-3 text-yellow-200/70 text-xs md:text-sm">
+                        <Check className="h-3 md:h-4 w-3 md:w-4 text-gold flex-shrink-0" />
                         {feature}
                       </li>)}
                   </ul>
-                  <Button onClick={() => handlePlanSelect(plan.name, plan.price + plan.period)} className={`w-full rounded-xl py-2 md:py-3 text-sm md:text-base font-semibold transition-all duration-300 ${plan.popular ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:via-cyan-600 hover:to-blue-700 text-white neon-glow' : 'tech-border text-cyan-400 hover:bg-cyan-500/10'}`}>
+                  <Button onClick={() => handlePlanSelect(plan.name, plan.price + plan.period)} className={`w-full rounded-xl py-2 md:py-3 text-sm md:text-base font-semibold transition-all duration-300 ${plan.popular ? 'btn-luxury' : 'btn-luxury-outline'}`}>
                     {plan.buttonText}
                   </Button>
                 </CardContent>
@@ -346,8 +344,8 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-8 md:mt-12">
-            <p className="text-slate-400 text-base md:text-lg px-4 md:px-0">
-              All plans include <span className="text-cyan-300 font-semibold">undetectable typing simulation</span> and <span className="text-cyan-300 font-semibold">master kill switch</span>
+            <p className="text-yellow-200/70 text-base md:text-lg px-4 md:px-0">
+              All plans include <span className="text-gold font-semibold">undetectable typing simulation</span> and <span className="text-gold font-semibold">master kill switch</span>
             </p>
           </div>
         </div>

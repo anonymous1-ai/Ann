@@ -13,19 +13,17 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const LoadingScreen = () => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-amber-950/20 to-slate-950 flex items-center justify-center">
+  <div className="min-h-screen flex items-center justify-center">
     <div className="animated-bg">
-      <div className="particles">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="particle"></div>
-        ))}
-      </div>
+      <div className="static-graphics"></div>
       <div className="circuit-pattern"></div>
       <div className="geometric-shapes">
         <div className="shape shape-1"></div>
         <div className="shape shape-2"></div>
         <div className="shape shape-3"></div>
         <div className="shape shape-4"></div>
+        <div className="shape shape-5"></div>
+        <div className="shape shape-6"></div>
       </div>
     </div>
     <div className="text-center relative z-10">
