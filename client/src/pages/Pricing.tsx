@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Zap, Crown, Star, Shield, CheckCircle, Lock, Smartphone, HelpCircle, RefreshCw } from 'lucide-react';
+import { Download, Zap, Crown, Star, Shield, CheckCircle, Lock, Smartphone, RefreshCw } from 'lucide-react';
 
 interface PricingPlan {
   id: string;
@@ -19,6 +19,7 @@ interface PricingPlan {
   buttonText: string;
   popular: boolean;
   icon: any;
+  billingType: 'monthly' | 'yearly' | 'free';
 }
 
 const PRICING_PLANS: PricingPlan[] = [
@@ -43,10 +44,11 @@ const PRICING_PLANS: PricingPlan[] = [
     ],
     buttonText: 'Download Free',
     popular: false,
-    icon: Download
+    icon: Download,
+    billingType: 'free'
   },
   {
-    id: 'pro',
+    id: 'pro-monthly',
     name: 'Pro',
     price: 800,
     currency: '₹',
@@ -62,15 +64,38 @@ const PRICING_PLANS: PricingPlan[] = [
       'Usage analytics'
     ],
     buttonText: 'Subscribe Pro',
-    popular: true,
-    icon: Zap
+    popular: false,
+    icon: Zap,
+    billingType: 'monthly'
   },
   {
-    id: 'advanced',
+    id: 'pro-yearly',
+    name: 'Pro',
+    price: 9500,
+    currency: '₹',
+    period: 'year',
+    apiCalls: 1200,
+    description: 'Perfect for individuals and small projects',
+    features: [
+      'Full AI tool activation',
+      '1200 API calls annually',
+      'License validation',
+      'Email support',
+      'Regular updates',
+      'Usage analytics',
+      'Save ₹1100 per year'
+    ],
+    buttonText: 'Subscribe Pro',
+    popular: true,
+    icon: Zap,
+    billingType: 'yearly'
+  },
+  {
+    id: 'advanced-monthly',
     name: 'Advanced',
     price: 2000,
     currency: '₹',
-    period: 'year',
+    period: 'month',
     apiCalls: 300,
     description: 'Best for businesses and power users',
     features: [
@@ -85,7 +110,32 @@ const PRICING_PLANS: PricingPlan[] = [
     ],
     buttonText: 'Subscribe Advanced',
     popular: false,
-    icon: Crown
+    icon: Crown,
+    billingType: 'monthly'
+  },
+  {
+    id: 'advanced-yearly',
+    name: 'Advanced',
+    price: 20000,
+    currency: '₹',
+    period: 'year',
+    apiCalls: 3600,
+    description: 'Best for businesses and power users',
+    features: [
+      'Full AI tool activation',
+      '3600 API calls annually',
+      'Priority support',
+      'Advanced analytics',
+      'Hardware hash binding',
+      'Commercial usage rights',
+      'API access logs',
+      'Dedicated support',
+      'Save ₹4000 per year'
+    ],
+    buttonText: 'Subscribe Advanced',
+    popular: false,
+    icon: Crown,
+    billingType: 'yearly'
   }
 ];
 
@@ -93,6 +143,7 @@ export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
 
   const handleSubscribe = async (planId: string) => {
     if (!user) {
@@ -149,8 +200,65 @@ export default function Pricing() {
       // Store plan info for success page
       localStorage.setItem('pendingPlan', planId);
       
-      // Redirect to Razorpay payment page (no UI branding visible)
-      window.location.href = orderData.data.paymentUrl;
+      // Create Razorpay options for seamless checkout
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.data.amount,
+        currency: orderData.data.currency,
+        name: "AI Tool Subscription",
+        description: `${planId} subscription`,
+        order_id: orderData.data.orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify payment with backend
+            const verifyResponse = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                orderId: orderData.data.orderId,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                plan: planId
+              })
+            });
+
+            const verifyData = await verifyResponse.json();
+            
+            if (verifyData.success) {
+              // Payment verified successfully, redirect to success page
+              window.location.href = '/payment-success';
+            } else {
+              throw new Error(verifyData.error || 'Payment verification failed');
+            }
+          } catch (error: any) {
+            toast({
+              title: "Payment Verification Failed",
+              description: error.message || "Please contact support",
+              variant: "destructive"
+            });
+            setLoading(null);
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email
+        },
+        theme: {
+          color: "#D4AF37"
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(null);
+          }
+        }
+      };
+
+      // Open Razorpay checkout
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
       
     } catch (error: any) {
       toast({
@@ -160,6 +268,14 @@ export default function Pricing() {
       });
       setLoading(null);
     }
+  };
+
+  // Filter plans based on billing period
+  const getFilteredPlans = () => {
+    return PRICING_PLANS.filter(plan => {
+      if (plan.id === 'free') return true;
+      return plan.billingType === billingPeriod;
+    });
   };
 
   return (
@@ -175,9 +291,32 @@ export default function Pricing() {
           </p>
         </div>
 
+        {/* Billing Period Toggle */}
+        <div className="flex items-center justify-center space-x-4 mb-12">
+          <span className={`text-lg font-medium ${billingPeriod === 'monthly' ? 'text-gold' : 'text-yellow-200/70'}`}>
+            Monthly
+          </span>
+          <button
+            onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
+            className="relative inline-flex items-center h-8 rounded-full w-16 bg-yellow-900/30 border border-yellow-400/30 transition-colors focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-slate-950"
+          >
+            <span
+              className={`inline-block w-6 h-6 transform bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full transition-transform ${
+                billingPeriod === 'yearly' ? 'translate-x-8' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <div className="flex items-center space-x-2">
+            <span className={`text-lg font-medium ${billingPeriod === 'yearly' ? 'text-gold' : 'text-yellow-200/70'}`}>
+              Yearly
+            </span>
+            <Badge className="bg-green-500 text-white text-xs">Save up to 17%</Badge>
+          </div>
+        </div>
+
         {/* Pricing Cards */}
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {PRICING_PLANS.map((plan) => {
+          {getFilteredPlans().map((plan) => {
             const Icon = plan.icon;
             const isCurrentPlan = user?.plan === plan.id;
             
@@ -224,7 +363,7 @@ export default function Pricing() {
                   <div className="text-center">
                     <div className="flex items-baseline justify-center">
                       <span className="text-4xl font-bold text-gradient">
-                        {plan.currency}{plan.price}
+                        {plan.currency}{plan.price.toLocaleString()}
                       </span>
                       {plan.period !== 'Forever' && (
                         <span className="text-yellow-200/70 ml-2">
@@ -234,7 +373,7 @@ export default function Pricing() {
                     </div>
                     {plan.apiCalls > 0 && (
                       <p className="text-gold text-sm mt-2">
-                        {plan.apiCalls} API calls {plan.period === 'year' ? 'per month' : plan.period === 'month' ? 'per month' : 'included'}
+                        {plan.apiCalls} API calls {plan.period === 'year' ? 'annually' : 'per month'}
                       </p>
                     )}
                   </div>

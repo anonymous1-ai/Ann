@@ -20,8 +20,10 @@ const razorpay = new Razorpay({
 // Pricing plans
 const PRICING_PLANS = {
   free: { price: 0, apiCalls: 0, duration: 0 },
-  pro: { price: 800, apiCalls: 100, duration: 30 }, // ₹800/month, 100 API calls
-  advanced: { price: 2000, apiCalls: 300, duration: 365 } // ₹2000/year, 300 API calls
+  'pro-monthly': { price: 800, apiCalls: 100, duration: 30 },
+  'pro-yearly': { price: 9500, apiCalls: 1200, duration: 365 },
+  'advanced-monthly': { price: 2000, apiCalls: 300, duration: 30 },
+  'advanced-yearly': { price: 20000, apiCalls: 3600, duration: 365 }
 };
 
 // Rate limiting for license validation
