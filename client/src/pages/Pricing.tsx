@@ -154,6 +154,9 @@ export default function Pricing() {
   });
 
   const handleSubscribe = async (planId: string) => {
+    console.log('handleSubscribe called with planId:', planId);
+    console.log('User:', user);
+    
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -200,10 +203,19 @@ export default function Pricing() {
       });
 
       const orderData = await response.json();
+      console.log('Order response:', orderData);
       
       if (!orderData.success) {
         throw new Error(orderData.error || 'Failed to create payment order');
       }
+
+      console.log('Opening payment modal with data:', {
+        isOpen: true,
+        amount: orderData.data.amount,
+        description: `${planId.toUpperCase()} Plan Subscription`,
+        orderId: orderData.data.orderId,
+        planId: planId
+      });
 
       // Open UPI payment modal instead of Razorpay checkout
       setUpiModal({
@@ -271,6 +283,23 @@ export default function Pricing() {
             Get access to our powerful AI tool with flexible pricing options. 
             Download for free or unlock full functionality with our paid plans.
           </p>
+        </div>
+
+        {/* Test Modal Button */}
+        <div className="text-center mb-8">
+          <Button
+            onClick={() => setUpiModal({
+              isOpen: true,
+              amount: 80000,
+              description: 'Test Payment',
+              orderId: 'test_order_123',
+              planId: 'pro-monthly'
+            })}
+            className="luxury-button"
+          >
+            Test Payment Modal
+          </Button>
+          <p className="text-xs text-yellow-200/60 mt-2">Debug: Click to test if modal opens</p>
         </div>
 
         {/* Billing Period Toggle */}
