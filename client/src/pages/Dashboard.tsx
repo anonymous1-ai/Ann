@@ -6,7 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Download, CreditCard, TrendingUp, Calendar, Clock } from 'lucide-react';
+import { LogOut, Download, CreditCard, TrendingUp, Calendar, Clock, ExternalLink } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { getLogoPath } from '@/assets/logo-config';
 
 // Add Razorpay type declaration
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const { user, logout, refreshUser } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
   const [recentActivity] = useState([
     { id: 1, feature: 'Screenshot to Code', timestamp: '2 minutes ago', status: 'success' },
     { id: 2, feature: 'Text to Code', timestamp: '15 minutes ago', status: 'success' },
@@ -389,15 +391,16 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="luxury-card golden-glow">
+          <Card className="luxury-card golden-glow cursor-pointer hover:ring-2 hover:ring-gold/50 transition-all duration-300" 
+                onClick={() => setLocation('/pricing')}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-yellow-200/70 text-sm">Success Rate</p>
-                  <p className="text-2xl font-bold text-gold">{apiStats.successRate}%</p>
+                  <p className="text-yellow-200/70 text-sm">View All Plans</p>
+                  <p className="text-lg font-bold text-gold">Pricing</p>
                 </div>
                 <div className="w-12 h-12 gold-gradient rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-black" />
+                  <ExternalLink className="w-6 h-6 text-black" />
                 </div>
               </div>
             </CardContent>
