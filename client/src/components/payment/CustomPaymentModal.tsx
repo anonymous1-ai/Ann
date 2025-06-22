@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { X } from 'lucide-react';
+import { X, Smartphone, CreditCard, Building2 } from 'lucide-react';
 
 interface CustomPaymentModalProps {
   isOpen: boolean;
@@ -219,17 +219,17 @@ export default function CustomPaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div className="bg-slate-900 rounded-xl max-w-md w-full mx-4 border border-yellow-400/20">
+      <div className="bg-slate-900/95 backdrop-blur-sm rounded-2xl max-w-md w-full mx-4 border border-slate-700/50 shadow-2xl">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-gold">Complete Payment</h2>
-              <p className="text-yellow-200/70 text-sm">{description}</p>
+              <h2 className="text-xl font-semibold text-yellow-400 mb-1">Complete Payment</h2>
+              <p className="text-slate-400 text-sm">Pay ₹{formattedAmount} for API Credits - ₹9 per call</p>
             </div>
             <button
               onClick={onClose}
-              className="text-yellow-200/70 hover:text-gold"
+              className="text-slate-400 hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -237,33 +237,68 @@ export default function CustomPaymentModal({
 
           {/* Tab Navigation */}
           <div className="flex bg-slate-800/50 rounded-lg p-1 mb-6">
-            {['UPI', 'Card', 'Bank'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                  activeTab === tab
-                    ? 'bg-yellow-600 text-black'
-                    : 'text-yellow-200/70 hover:text-gold'
-                }`}
-              >
-                {tab === 'UPI' && '📱'} {tab === 'Card' && '💳'} {tab === 'Bank' && '🏦'} {tab}
-              </button>
-            ))}
+            <button
+              onClick={() => setActiveTab('UPI')}
+              className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+                activeTab === 'UPI'
+                  ? 'bg-yellow-600 text-black font-semibold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Smartphone className="w-4 h-4" />
+              UPI
+            </button>
+            <button
+              onClick={() => setActiveTab('Card')}
+              className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+                activeTab === 'Card'
+                  ? 'bg-yellow-600 text-black font-semibold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <CreditCard className="w-4 h-4" />
+              Card
+            </button>
+            <button
+              onClick={() => setActiveTab('Bank')}
+              className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+                activeTab === 'Bank'
+                  ? 'bg-yellow-600 text-black font-semibold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Building2 className="w-4 h-4" />
+              Bank
+            </button>
           </div>
 
-          {/* UPI Tab */}
+          {/* UPI Tab Content */}
           {activeTab === 'UPI' && (
             <div className="space-y-4">
               <div>
-                <label className="text-gold text-sm font-medium">UPI ID</label>
+                <h3 className="text-yellow-400 text-sm font-medium mb-2">Number of API Credits</h3>
+                <div className="bg-slate-800/50 rounded-lg px-4 py-3 border border-slate-600/50">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      value="1"
+                      readOnly
+                      className="bg-transparent text-white font-medium text-lg w-12 outline-none"
+                    />
+                    <span className="text-slate-400">credits × ₹9 = ₹{formattedAmount}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-yellow-400 text-sm font-medium block mb-2">UPI ID</label>
                 <Input
                   placeholder="yourname@paytm"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                  className="mt-1 bg-slate-800/50 border-yellow-400/20 text-yellow-100 placeholder:text-slate-400"
+                  className="bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 h-12 rounded-lg"
                 />
-                <p className="text-yellow-200/60 text-xs mt-1">
+                <p className="text-slate-500 text-xs mt-2">
                   Enter your UPI ID (e.g., 9876543210@paytm, user@googlepay)
                 </p>
               </div>
@@ -273,7 +308,7 @@ export default function CustomPaymentModal({
                   onClick={() => handleQuickUPI('Google Pay')}
                   variant="outline"
                   size="sm"
-                  className="bg-blue-600/20 border-blue-400/30 text-blue-300 hover:bg-blue-600/30"
+                  className="bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30 rounded-lg px-4 py-2"
                 >
                   Google Pay
                 </Button>
@@ -281,7 +316,7 @@ export default function CustomPaymentModal({
                   onClick={() => handleQuickUPI('PhonePe')}
                   variant="outline"
                   size="sm"
-                  className="bg-purple-600/20 border-purple-400/30 text-purple-300 hover:bg-purple-600/30"
+                  className="bg-purple-600/20 border-purple-500/30 text-purple-300 hover:bg-purple-600/30 rounded-lg px-4 py-2"
                 >
                   PhonePe
                 </Button>
@@ -289,7 +324,7 @@ export default function CustomPaymentModal({
                   onClick={() => handleQuickUPI('Paytm')}
                   variant="outline"
                   size="sm"
-                  className="bg-blue-500/20 border-blue-400/30 text-blue-300 hover:bg-blue-500/30"
+                  className="bg-green-600/20 border-green-500/30 text-green-300 hover:bg-green-600/30 rounded-lg px-4 py-2"
                 >
                   Paytm
                 </Button>
@@ -297,29 +332,31 @@ export default function CustomPaymentModal({
             </div>
           )}
 
-          {/* Card Tab */}
+          {/* Card Tab Content */}
           {activeTab === 'Card' && (
             <div className="text-center py-8">
-              <p className="text-yellow-200/70 mb-4">Click below to pay with Credit/Debit Card</p>
-              <p className="text-lg text-gold font-semibold">Secure card payment</p>
+              <CreditCard className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+              <p className="text-slate-400 mb-4">Click below to pay with Credit/Debit Card</p>
+              <p className="text-lg text-white font-semibold">Secure card payment</p>
             </div>
           )}
 
-          {/* Bank Tab */}
+          {/* Bank Tab Content */}
           {activeTab === 'Bank' && (
             <div className="text-center py-8">
-              <p className="text-yellow-200/70 mb-4">Click below to pay with Net Banking</p>
-              <p className="text-lg text-gold font-semibold">Choose your bank</p>
+              <Building2 className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+              <p className="text-slate-400 mb-4">Click below to pay with Net Banking</p>
+              <p className="text-lg text-white font-semibold">Choose your bank</p>
             </div>
           )}
 
           {/* Amount Section */}
-          <div className="bg-slate-800/30 rounded-lg p-4 mt-6 border border-yellow-400/20">
+          <div className="bg-slate-800/30 rounded-lg p-4 mt-6 border border-slate-600/30">
             <div className="flex justify-between items-center">
-              <span className="text-yellow-200/80">Amount to Pay</span>
-              <span className="text-gold text-xl font-bold">₹{formattedAmount}</span>
+              <span className="text-yellow-400 font-medium">Amount to Pay</span>
+              <span className="text-yellow-400 text-xl font-bold">₹{formattedAmount}</span>
             </div>
-            <p className="text-yellow-200/60 text-xs mt-1">
+            <p className="text-slate-500 text-xs mt-1">
               Secure payment powered by advanced encryption
             </p>
           </div>
@@ -328,8 +365,7 @@ export default function CustomPaymentModal({
           <div className="flex gap-3 mt-6">
             <Button
               onClick={onClose}
-              variant="outline"
-              className="flex-1 bg-slate-800/50 border-yellow-400/30 text-yellow-200 hover:bg-slate-700/50"
+              className="flex-1 bg-slate-800/50 border border-slate-600/50 text-white hover:bg-slate-700/50 rounded-lg h-12 font-medium"
             >
               Cancel
             </Button>
@@ -340,7 +376,7 @@ export default function CustomPaymentModal({
                 else if (activeTab === 'Bank') handleBankPayment();
               }}
               disabled={loading || (activeTab === 'UPI' && !upiId.trim())}
-              className="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-black font-semibold"
+              className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-black font-semibold rounded-lg h-12"
             >
               {loading ? 'Processing...' : `Pay ₹${formattedAmount}`}
             </Button>
