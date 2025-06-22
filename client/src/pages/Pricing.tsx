@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Zap, Crown, Star, Shield, CheckCircle, Lock, Smartphone, RefreshCw } from 'lucide-react';
+import UniversalPaymentModal from '@/components/payment/UniversalPaymentModal';
 
 interface PricingPlan {
   id: string;
@@ -144,6 +145,13 @@ export default function Pricing() {
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
+  const [upiModal, setUpiModal] = useState({
+    isOpen: false,
+    amount: 0,
+    description: '',
+    orderId: '',
+    planId: ''
+  });
 
   const handleSubscribe = async (planId: string) => {
     if (!user) {
@@ -197,68 +205,14 @@ export default function Pricing() {
         throw new Error(orderData.error || 'Failed to create payment order');
       }
 
-      // Store plan info for success page
-      localStorage.setItem('pendingPlan', planId);
-      
-      // Create Razorpay options for seamless checkout
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      // Open UPI payment modal instead of Razorpay checkout
+      setUpiModal({
+        isOpen: true,
         amount: orderData.data.amount,
-        currency: orderData.data.currency,
-        name: "AI Tool Subscription",
-        description: `${planId} subscription`,
-        order_id: orderData.data.orderId,
-        handler: async function (response: any) {
-          try {
-            // Verify payment with backend
-            const verifyResponse = await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              body: JSON.stringify({
-                orderId: orderData.data.orderId,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-                plan: planId
-              })
-            });
-
-            const verifyData = await verifyResponse.json();
-            
-            if (verifyData.success) {
-              // Payment verified successfully, redirect to success page
-              window.location.href = '/payment-success';
-            } else {
-              throw new Error(verifyData.error || 'Payment verification failed');
-            }
-          } catch (error: any) {
-            toast({
-              title: "Payment Verification Failed",
-              description: error.message || "Please contact support",
-              variant: "destructive"
-            });
-            setLoading(null);
-          }
-        },
-        prefill: {
-          name: user.name,
-          email: user.email
-        },
-        theme: {
-          color: "#D4AF37"
-        },
-        modal: {
-          ondismiss: function() {
-            setLoading(null);
-          }
-        }
-      };
-
-      // Open Razorpay checkout
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+        description: `${planId.toUpperCase()} Plan Subscription`,
+        orderId: orderData.data.orderId,
+        planId: planId
+      });
       
     } catch (error: any) {
       toast({
@@ -268,6 +222,34 @@ export default function Pricing() {
       });
       setLoading(null);
     }
+  };
+
+  const handleUPIPaymentSuccess = async (response: any) => {
+    try {
+      toast({
+        title: "Payment Successful!",
+        description: "Your subscription has been activated",
+      });
+      
+      // Close modal and redirect to dashboard
+      setUpiModal({ ...upiModal, isOpen: false });
+      window.location.href = '/dashboard';
+    } catch (error: any) {
+      toast({
+        title: "Activation Error",
+        description: "Payment successful but activation failed. Contact support.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUPIPaymentError = (error: any) => {
+    toast({
+      title: "Payment Failed",
+      description: error.message || "Please try again",
+      variant: "destructive"
+    });
+    setUpiModal({ ...upiModal, isOpen: false });
   };
 
   // Filter plans based on billing period
@@ -534,6 +516,21 @@ export default function Pricing() {
           </div>
         </div>
       </div>
+
+      {/* Universal Payment Modal */}
+      <UniversalPaymentModal
+        isOpen={upiModal.isOpen}
+        onClose={() => setUpiModal({ ...upiModal, isOpen: false })}
+        amount={upiModal.amount}
+        description={upiModal.description}
+        orderId={upiModal.orderId}
+        onSuccess={handleUPIPaymentSuccess}
+        onError={handleUPIPaymentError}
+        userDetails={{
+          email: user?.email || '',
+          name: user?.name || ''
+        }}
+      />
     </div>
   );
 }

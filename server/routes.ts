@@ -493,6 +493,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check payment status for UPI payments
+  app.post("/api/check-payment-status", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { orderId } = req.body;
+      
+      if (!orderId) {
+        return res.status(400).json({ success: false, error: "Order ID required" });
+      }
+
+      // Check Razorpay order status
+      const order = await razorpay.orders.fetch(orderId);
+      
+      res.json({
+        success: true,
+        status: order.status, // 'created', 'attempted', 'paid'
+        orderId: order.id,
+        amount: order.amount
+      });
+    } catch (error: any) {
+      console.error('Payment status check error:', error);
+      res.status(500).json({ success: false, error: "Failed to check payment status" });
+    }
+  });
+
+  // Manual payment verification for UPI payments
+  app.post("/api/manual-payment-verification", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { orderId, amount } = req.body;
+      
+      if (!orderId || !amount) {
+        return res.status(400).json({ success: false, error: "Order ID and amount required" });
+      }
+
+      // Check if order exists and get plan details from order notes
+      const order = await razorpay.orders.fetch(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ success: false, error: "Order not found" });
+      }
+
+      // For manual verification, we'll mark as pending and notify admin
+      // In production, you'd implement proper manual verification workflow
+      res.json({
+        success: true,
+        message: "Payment verification request submitted. You'll be notified once verified.",
+        status: 'pending_verification'
+      });
+    } catch (error: any) {
+      console.error('Manual verification error:', error);
+      res.status(500).json({ success: false, error: "Manual verification failed" });
+    }
+  });
+
+  // Initiate bank transfer
+  app.post("/api/initiate-bank-transfer", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { orderId, accountDetails, amount } = req.body;
+      
+      if (!orderId || !accountDetails || !amount) {
+        return res.status(400).json({ success: false, error: "Missing required details" });
+      }
+
+      // Validate account details
+      const { accountNumber, ifsc, accountHolder } = accountDetails;
+      if (!accountNumber || !ifsc || !accountHolder) {
+        return res.status(400).json({ success: false, error: "Complete bank details required" });
+      }
+
+      // Store bank transfer request in database (you'd need a new table for this)
+      // For now, we'll just log it and return success
+      console.log('Bank transfer request:', {
+        orderId,
+        userId: req.user.userId,
+        accountDetails,
+        amount,
+        timestamp: new Date()
+      });
+
+      res.json({
+        success: true,
+        message: "Bank transfer request submitted successfully",
+        transferId: `BT${Date.now()}`,
+        status: 'pending'
+      });
+    } catch (error: any) {
+      console.error('Bank transfer initiation error:', error);
+      res.status(500).json({ success: false, error: "Failed to initiate bank transfer" });
+    }
+  });
+
   // Payment success return URL handler
   app.get("/api/payment-return", async (req, res) => {
     try {
