@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Check, Download, Zap, Crown, Star } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { PaymentModal } from '@/components/payment/PaymentModal';
+import { Download, Zap, Crown, Star, Shield, CheckCircle, Lock, Smartphone, HelpCircle, RefreshCw } from 'lucide-react';
 
 interface PricingPlan {
   id: string;
@@ -20,7 +19,6 @@ interface PricingPlan {
   buttonText: string;
   popular: boolean;
   icon: any;
-  billedAnnually?: boolean;
 }
 
 const PRICING_PLANS: PricingPlan[] = [
@@ -48,8 +46,8 @@ const PRICING_PLANS: PricingPlan[] = [
     icon: Download
   },
   {
-    id: 'pro-monthly',
-    name: 'Pro Monthly',
+    id: 'pro',
+    name: 'Pro',
     price: 800,
     currency: '₹',
     period: 'month',
@@ -63,39 +61,18 @@ const PRICING_PLANS: PricingPlan[] = [
       'Regular updates',
       'Usage analytics'
     ],
-    buttonText: 'Subscribe Monthly',
-    popular: false,
-    icon: Zap
-  },
-  {
-    id: 'pro-annual',
-    name: 'Pro',
-    price: 9500,
-    currency: '₹',
-    period: 'year',
-    apiCalls: 1200,
-    description: 'Most popular',
-    billedAnnually: true,
-    features: [
-      'Full AI tool activation',
-      '1200 API calls annually',
-      'License validation',
-      'Email support',
-      'Regular updates',
-      'Usage analytics'
-    ],
-    buttonText: 'Subscribe',
+    buttonText: 'Subscribe Pro',
     popular: true,
     icon: Zap
   },
   {
-    id: 'advanced-monthly',
-    name: 'Advanced Monthly',
+    id: 'advanced',
+    name: 'Advanced',
     price: 2000,
     currency: '₹',
-    period: 'month',
+    period: 'year',
     apiCalls: 300,
-    description: 'For power users and small teams',
+    description: 'Best for businesses and power users',
     features: [
       'Full AI tool activation',
       '300 API calls per month',
@@ -103,32 +80,10 @@ const PRICING_PLANS: PricingPlan[] = [
       'Advanced analytics',
       'Hardware hash binding',
       'Commercial usage rights',
-      'API access logs'
-    ],
-    buttonText: 'Subscribe Monthly',
-    popular: false,
-    icon: Crown
-  },
-  {
-    id: 'advanced-annual',
-    name: 'Advanced',
-    price: 20000,
-    currency: '₹',
-    period: 'year',
-    apiCalls: 3600,
-    description: 'Best for businesses',
-    billedAnnually: true,
-    features: [
-      'Full AI tool activation',
-      '3600 API calls annually',
-      'Priority support',
-      'Advanced analytics',
-      'Hardware hash binding',
-      'Commercial usage rights',
       'API access logs',
       'Dedicated support'
     ],
-    buttonText: 'Subscribe',
+    buttonText: 'Subscribe Advanced',
     popular: false,
     icon: Crown
   }
@@ -138,13 +93,6 @@ export default function Pricing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
-  const [paymentModal, setPaymentModal] = useState({
-    isOpen: false,
-    amount: 0,
-    description: '',
-    planId: ''
-  });
 
   const handleSubscribe = async (planId: string) => {
     if (!user) {
@@ -167,7 +115,6 @@ export default function Pricing() {
             title: "Download Ready",
             description: "Your download will begin shortly. Note: The tool requires a paid license to activate.",
           });
-          // In a real implementation, trigger actual download
           window.open(data.downloadUrl, '_blank');
         }
       } catch (error) {
@@ -180,158 +127,57 @@ export default function Pricing() {
       return;
     }
 
-    const plan = PRICING_PLANS.find(p => p.id === planId);
-    if (!plan || plan.price === 0) {
-      toast({
-        title: "Invalid Plan",
-        description: "Please select a valid subscription plan",
-        variant: "destructive"
-      });
-      return;
-    }
+    setLoading(planId);
 
-    setPaymentModal({
-      isOpen: true,
-      amount: plan.price * 100, // Convert to paise
-      description: `${plan.name} - ${plan.description}`,
-      planId: planId
-    });
-  };
-
-  const handlePaymentSuccess = async (response: any) => {
     try {
-      const verifyResponse = await fetch('/api/verify-payment', {
+      // Create payment order
+      const response = await fetch('/api/create-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-          paymentId: response.razorpay_payment_id,
-          signature: response.razorpay_signature,
-          plan: paymentModal.planId
-        })
+        body: JSON.stringify({ plan: planId })
       });
 
-      const verifyData = await verifyResponse.json();
+      const orderData = await response.json();
       
-      if (verifyData.success) {
-        toast({
-          title: "Subscription Successful!",
-          description: "Your account has been upgraded successfully. License key generated!"
-        });
-        window.location.reload();
-      } else {
-        throw new Error(verifyData.error || 'Payment verification failed');
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to create payment order');
       }
+
+      // Store plan info for success page
+      localStorage.setItem('pendingPlan', planId);
+      
+      // Redirect to Razorpay payment page (no UI branding visible)
+      window.location.href = orderData.data.paymentUrl;
+      
     } catch (error: any) {
       toast({
-        title: "Payment Verification Failed",
-        description: error.message || "Please contact support if payment was deducted.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handlePaymentError = (error: any) => {
-    toast({
-      title: "Payment Failed",
-      description: error.description || "Payment was unsuccessful. Please try again.",
-      variant: "destructive"
-    });
-  };
-
-  const handleTopUp = async (topupType: string) => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to purchase API call top-ups",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(topupType);
-
-    if (topupType !== 'topup-9') {
-      toast({
-        title: "Invalid Top-up",
-        description: "Invalid top-up option selected",
+        title: "Payment Setup Failed",
+        description: error.message || "Please try again later",
         variant: "destructive"
       });
       setLoading(null);
-      return;
     }
-
-    // For ₹9 per call, we'll use payment modal to let user choose amount
-    setPaymentModal({
-      isOpen: true,
-      amount: 900, // ₹9 in paise
-      description: "API Credits - ₹9 per call",
-      planId: 'topup-9'
-    });
-    setLoading(null);
-  };
-
-  const simulatePayment = (orderData: any): Promise<boolean> => {
-    // Mock payment simulation - replace with actual Razorpay integration
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(true); // Simulate successful payment
-      }, 2000);
-    });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen luxury-background">
       <div className="container mx-auto px-4 py-16">
-        {/* Header */}
         <div className="text-center mb-16">
-          <Badge className="mb-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold">
-            SaaS Pricing
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold text-gradient mb-6">
+          <h1 className="text-5xl font-bold text-gradient mb-6">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-yellow-200/70 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-yellow-200/80 max-w-3xl mx-auto">
             Get access to our powerful AI tool with flexible pricing options. 
             Download for free or unlock full functionality with our paid plans.
           </p>
-
-          {/* Billing Period Toggle */}
-          <div className="flex items-center justify-center space-x-4 mb-8">
-            <span className={`text-lg font-medium ${billingPeriod === 'monthly' ? 'text-gold' : 'text-yellow-200/70'}`}>
-              Monthly
-            </span>
-            <button
-              onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
-              className="relative inline-flex items-center h-8 rounded-full w-16 bg-yellow-900/30 border border-yellow-400/30 transition-colors focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-slate-950"
-            >
-              <span
-                className={`inline-block w-6 h-6 transform bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full transition-transform ${
-                  billingPeriod === 'yearly' ? 'translate-x-8' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <div className="flex items-center space-x-2">
-              <span className={`text-lg font-medium ${billingPeriod === 'yearly' ? 'text-gold' : 'text-yellow-200/70'}`}>
-                Yearly
-              </span>
-              <Badge className="bg-green-500 text-white text-xs">Save up to 17%</Badge>
-            </div>
-          </div>
         </div>
 
         {/* Pricing Cards */}
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {PRICING_PLANS.filter(plan => {
-            if (plan.id === 'free') return true;
-            if (billingPeriod === 'monthly') {
-              return plan.id.includes('monthly');
-            } else {
-              return plan.id === 'pro-annual' || plan.id === 'advanced-annual';
-            }
-          }).map((plan) => {
+          {PRICING_PLANS.map((plan) => {
             const Icon = plan.icon;
             const isCurrentPlan = user?.plan === plan.id;
             
@@ -352,75 +198,64 @@ export default function Pricing() {
                     </Badge>
                   </div>
                 )}
-
-
-
+                
                 {isCurrentPlan && (
                   <div className="absolute -top-4 right-4">
                     <Badge className="bg-green-500 text-white">
+                      <CheckCircle className="w-3 h-3 mr-1" />
                       Current Plan
                     </Badge>
                   </div>
                 )}
 
-                <CardHeader className="text-center pb-8">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
-                    <Icon className="w-6 h-6 text-black" />
+                <CardHeader className="text-center pb-4">
+                  <div className="mb-4">
+                    <Icon className="w-12 h-12 text-gold mx-auto" />
                   </div>
-                  
-                  <CardTitle className="text-gold text-2xl font-bold">
+                  <CardTitle className="text-2xl font-bold text-gold">
                     {plan.name}
                   </CardTitle>
-                  
-                  <CardDescription className="text-yellow-200/70">
+                  <p className="text-yellow-200/70 mt-2">
                     {plan.description}
-                  </CardDescription>
+                  </p>
+                </CardHeader>
 
-                  <div className="mt-4">
+                <CardContent className="space-y-6">
+                  <div className="text-center">
                     <div className="flex items-baseline justify-center">
                       <span className="text-4xl font-bold text-gradient">
                         {plan.currency}{plan.price}
                       </span>
-                      {plan.period !== 'Forever' && !plan.billedAnnually && (
+                      {plan.period !== 'Forever' && (
                         <span className="text-yellow-200/70 ml-2">
                           /{plan.period}
                         </span>
                       )}
                     </div>
-                    {plan.billedAnnually && (
-                      <p className="text-yellow-200/70 text-sm mt-1">
-                        {plan.currency}{plan.price} billed annually
-                      </p>
-                    )}
                     {plan.apiCalls > 0 && (
                       <p className="text-gold text-sm mt-2">
-                        {plan.apiCalls} API calls {plan.billedAnnually ? 'annually' : plan.id.includes('monthly') ? 'per month' : 'included'}
+                        {plan.apiCalls} API calls {plan.period === 'year' ? 'per month' : plan.period === 'month' ? 'per month' : 'included'}
                       </p>
                     )}
                   </div>
-                </CardHeader>
 
-                <CardContent className="space-y-6">
-                  {/* Features */}
                   <div className="space-y-3">
+                    <h4 className="font-semibold text-gold">Features:</h4>
                     {plan.features.map((feature, index) => (
-                      <div key={index} className="flex items-center">
-                        <Check className="w-4 h-4 text-gold mr-3 flex-shrink-0" />
-                        <span className="text-yellow-200/90 text-sm">{feature}</span>
+                      <div key={index} className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                        <span className="text-yellow-200/80 text-sm">{feature}</span>
                       </div>
                     ))}
                   </div>
 
-                  {/* Limitations (for free plan) */}
                   {plan.limitations && (
-                    <div className="space-y-3 pt-3 border-t border-yellow-400/20">
-                      <p className="text-yellow-200/70 text-xs font-medium">Limitations:</p>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-red-400">Limitations:</h4>
                       {plan.limitations.map((limitation, index) => (
-                        <div key={index} className="flex items-center">
-                          <div className="w-4 h-4 rounded-full bg-red-500/20 mr-3 flex-shrink-0 flex items-center justify-center">
-                            <div className="w-2 h-2 rounded-full bg-red-400"></div>
-                          </div>
-                          <span className="text-red-200/70 text-sm">{limitation}</span>
+                        <div key={index} className="flex items-center space-x-2">
+                          <Lock className="w-4 h-4 text-red-400 flex-shrink-0" />
+                          <span className="text-red-300/80 text-sm">{limitation}</span>
                         </div>
                       ))}
                     </div>
@@ -429,16 +264,18 @@ export default function Pricing() {
                   <Button
                     onClick={() => handleSubscribe(plan.id)}
                     disabled={loading === plan.id || isCurrentPlan}
-                    className={`w-full ${
-                      plan.popular 
-                        ? 'btn-luxury' 
-                        : 'bg-yellow-900/30 hover:bg-yellow-900/50 text-gold border border-yellow-400/30'
+                    className={`w-full h-12 text-lg font-semibold transition-all duration-300 ${
+                      plan.popular
+                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black'
+                        : isCurrentPlan
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/50 cursor-not-allowed'
+                          : 'luxury-button'
                     }`}
                   >
                     {loading === plan.id ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                        Processing...
+                      <div className="flex items-center space-x-2">
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Processing...</span>
                       </div>
                     ) : isCurrentPlan ? (
                       'Current Plan'
@@ -452,57 +289,62 @@ export default function Pricing() {
           })}
         </div>
 
-        {/* API Call Top-up Section */}
-        {user && user.plan !== 'free' && (
-          <div className="mt-20">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gradient mb-4">
-                Top-up API Credits
-              </h2>
-              <p className="text-xl text-yellow-200/70 max-w-2xl mx-auto">
-                Purchase additional API calls at ₹9 per call. Perfect for scaling your usage on demand.
-              </p>
-            </div>
+        {/* Features Comparison */}
+        <div className="mt-20">
+          <h2 className="text-3xl font-bold text-gradient text-center mb-12">
+            Why Choose Our AI Tool?
+          </h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <Card className="luxury-card text-center">
+              <CardContent className="pt-6">
+                <Shield className="w-12 h-12 text-gold mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gold mb-2">Secure License System</h3>
+                <p className="text-yellow-200/70">
+                  Hardware-bound licensing ensures your subscription is protected and cannot be shared illegally.
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="max-w-md mx-auto">
-              <Card className="luxury-card">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
-                    <Zap className="w-8 h-8 text-black" />
-                  </div>
-                  <CardTitle className="text-gold text-2xl">API Credits</CardTitle>
-                  <CardDescription className="text-yellow-200/70">Pay per call - No minimum purchase</CardDescription>
-                  <div className="mt-6">
-                    <span className="text-4xl font-bold text-gradient">₹9</span>
-                    <p className="text-yellow-200/70 text-lg">per API call</p>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center">
-                    <p className="text-yellow-200/70 text-sm mb-4">
-                      Buy exactly what you need. Credits never expire.
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={() => handleTopUp('topup-9')}
-                    disabled={loading === 'topup-9'}
-                    className="w-full btn-luxury"
-                  >
-                    {loading === 'topup-9' ? 'Processing...' : 'Buy API Credits'}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="luxury-card text-center">
+              <CardContent className="pt-6">
+                <Smartphone className="w-12 h-12 text-gold mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gold mb-2">Real-time Validation</h3>
+                <p className="text-yellow-200/70">
+                  Every API call is validated in real-time with our secure backend system for accurate usage tracking.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="luxury-card text-center">
+              <CardContent className="pt-6">
+                <CheckCircle className="w-12 h-12 text-gold mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gold mb-2">Instant Activation</h3>
+                <p className="text-yellow-200/70">
+                  License keys are generated instantly upon payment completion. No waiting period required.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="luxury-card text-center">
+              <CardContent className="pt-6">
+                <RefreshCw className="w-12 h-12 text-gold mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gold mb-2">Monthly Reset</h3>
+                <p className="text-yellow-200/70">
+                  API call quotas reset automatically every month, ensuring consistent access to our services.
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        )}
+        </div>
 
         {/* FAQ Section */}
-        <div className="mt-20 text-center">
-          <h2 className="text-3xl font-bold text-gradient mb-8">
+        <div className="mt-20">
+          <h2 className="text-3xl font-bold text-gradient text-center mb-12">
             Frequently Asked Questions
           </h2>
           
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto text-left">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Card className="luxury-card">
               <CardHeader>
                 <CardTitle className="text-gold">How does license validation work?</CardTitle>
@@ -553,21 +395,6 @@ export default function Pricing() {
           </div>
         </div>
       </div>
-
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={paymentModal.isOpen}
-        onClose={() => setPaymentModal({ ...paymentModal, isOpen: false })}
-        amount={paymentModal.amount}
-        currency="INR"
-        description={paymentModal.description}
-        onSuccess={handlePaymentSuccess}
-        onError={handlePaymentError}
-        userDetails={{
-          email: user?.email || '',
-          name: user?.name || ''
-        }}
-      />
     </div>
   );
 }

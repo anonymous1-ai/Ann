@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { v4 as uuidv4 } from "uuid";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key";
 
@@ -19,10 +20,8 @@ const razorpay = new Razorpay({
 // Pricing plans
 const PRICING_PLANS = {
   free: { price: 0, apiCalls: 0, duration: 0 },
-  'pro-monthly': { price: 800, apiCalls: 100, duration: 30 }, // ₹800/month, 100 API calls
-  'pro-annual': { price: 9500, apiCalls: 1200, duration: 365 }, // ₹9500/year, 1200 API calls
-  'advanced-monthly': { price: 2000, apiCalls: 300, duration: 30 }, // ₹2000/month, 300 API calls
-  'advanced-annual': { price: 20000, apiCalls: 3600, duration: 365 } // ₹20000/year, 3600 API calls
+  pro: { price: 800, apiCalls: 100, duration: 30 }, // ₹800/month, 100 API calls
+  advanced: { price: 2000, apiCalls: 300, duration: 365 } // ₹2000/year, 300 API calls
 };
 
 // Rate limiting for license validation
@@ -269,52 +268,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Razorpay payment routes
+  // Create payment order (backend-only, no Razorpay UI)
   app.post("/api/create-order", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { plan, amount, paymentMethod } = req.body;
+      const { plan } = req.body;
       
-      let orderAmount: number;
-      let orderDescription: string;
-
-      if (plan === 'custom-payment' || plan === 'topup-9') {
-        // Handle ₹9 per call top-up
-        orderAmount = amount || 900; // Default ₹9 in paise
-        orderDescription = "API Credits - ₹9 per call";
-      } else if (PRICING_PLANS[plan as keyof typeof PRICING_PLANS]) {
-        // Handle subscription plans
-        const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
-        orderAmount = planDetails.price * 100; // Convert to paise
-        orderDescription = `${plan} subscription plan`;
-      } else {
+      if (!PRICING_PLANS[plan as keyof typeof PRICING_PLANS]) {
         return res.status(400).json({ success: false, error: "Invalid plan" });
       }
 
-      // Create Razorpay order
+      const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+      
+      // Create Razorpay order (backend only)
       const options = {
-        amount: orderAmount,
+        amount: planDetails.price * 100, // Convert to paise
         currency: 'INR',
         receipt: `receipt_${Date.now()}`,
         notes: {
           plan: plan,
-          userId: req.user.userId,
-          paymentMethod: paymentMethod || 'card'
+          userId: req.user.userId
         }
       };
 
       const order = await razorpay.orders.create(options);
       
+      // Return payment link for seamless redirect with return URL
+      const returnUrl = `${process.env.CLIENT_URL || 'http://localhost:5000'}/api/payment-return`;
       res.json({
         success: true,
         data: {
           orderId: order.id,
           amount: order.amount,
           currency: order.currency,
-          plan
+          plan,
+          paymentUrl: `https://checkout.razorpay.com/v1/checkout.js?order_id=${order.id}&key_id=${process.env.VITE_RAZORPAY_KEY_ID}&callback_url=${encodeURIComponent(returnUrl)}`
         }
       });
     } catch (error: any) {
-      console.error('Razorpay order creation error:', error);
+      console.error('Order creation error:', error);
       res.status(500).json({ 
         success: false, 
         error: error.message || "Failed to create payment order" 
@@ -322,6 +313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Webhook handler for seamless payment verification
   app.post("/api/verify-payment", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { orderId, paymentId, signature, plan } = req.body;
@@ -339,38 +331,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, error: "Payment verification failed" });
       }
 
-      // Handle top-up payments
-      if (plan === 'custom-payment' || plan === 'topup-9') {
-        // Get payment details from Razorpay to determine amount
-        const payment = await razorpay.payments.fetch(paymentId);
-        const paymentAmount = payment.amount as number;
-        const amountInRupees = paymentAmount / 100;
-        const creditsToAdd = Math.floor(amountInRupees / 9); // ₹9 per credit
-
-        // Get current user
-        const user = await storage.getUser(req.user.userId);
-        if (!user) {
-          return res.status(404).json({ success: false, error: "User not found" });
-        }
-
-        // Add API calls to user's account
-        const newBalance = user.apiCallsLeft + creditsToAdd;
-        await storage.updateUser(req.user.userId, { apiCallsLeft: newBalance });
-
-        // Track the top-up transaction
-        await storage.trackApiUsage(req.user.userId, `topup-${creditsToAdd}`, -creditsToAdd);
-
-        return res.json({
-          success: true,
-          data: {
-            newBalance,
-            addedCalls: creditsToAdd,
-            amountPaid: amountInRupees,
-            message: `Successfully added ${creditsToAdd} API calls to your account`
-          }
-        });
-      }
-
       // Handle subscription payments
       const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
       if (!planDetails) {
@@ -379,23 +339,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const expiryDate = new Date(Date.now() + planDetails.duration * 24 * 60 * 60 * 1000);
 
+      // Generate UUID license key
+      const licenseKey = uuidv4();
+
       // Update user plan and create subscription
       await storage.updateUserPlan(req.user.userId, plan, planDetails.apiCalls, expiryDate);
       await storage.createSubscription(req.user.userId, plan, paymentId, planDetails.price);
+      
+      // Store license key in user record (never expose to frontend)
+      await storage.updateUser(req.user.userId, { licenseKey });
 
-      // Generate license key for paid plans
-      let licenseKey = null;
-      if (plan !== 'free') {
-        licenseKey = await storage.generateLicenseKey(req.user.userId);
-      }
-
+      // Return success without exposing license key
       res.json({
         success: true,
         data: {
           plan,
           apiCallsLeft: planDetails.apiCalls,
           expiryDate,
-          licenseKey
+          message: "Subscription activated successfully"
         }
       });
     } catch (error: any) {
@@ -436,6 +397,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, data: usage });
     } catch (error) {
       res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  });
+
+  // Payment success return URL handler
+  app.get("/api/payment-return", async (req, res) => {
+    try {
+      const { order_id, payment_id, signature } = req.query;
+      
+      if (!order_id || !payment_id || !signature) {
+        return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5000'}/pricing?error=invalid_params`);
+      }
+
+      // Verify payment signature
+      const body = order_id + "|" + payment_id;
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+        .update(body.toString())
+        .digest("hex");
+
+      if (expectedSignature !== signature) {
+        return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5000'}/pricing?error=verification_failed`);
+      }
+
+      // Get order details to find user and plan
+      const order = await razorpay.orders.fetch(order_id as string);
+      const userId = order.notes?.userId;
+      const plan = order.notes?.plan;
+
+      if (!userId || !plan) {
+        return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5000'}/pricing?error=missing_data`);
+      }
+
+      // Process subscription
+      const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+      if (!planDetails) {
+        return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5000'}/pricing?error=invalid_plan`);
+      }
+
+      const expiryDate = new Date(Date.now() + planDetails.duration * 24 * 60 * 60 * 1000);
+      const licenseKey = uuidv4();
+
+      // Update user plan and create subscription
+      const userIdNum = parseInt(userId as string);
+      await storage.updateUserPlan(userIdNum, plan as string, planDetails.apiCalls, expiryDate);
+      await storage.createSubscription(userIdNum, plan as string, payment_id as string, planDetails.price);
+      await storage.updateUser(userIdNum, { licenseKey });
+
+      // Redirect to success page
+      res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5000'}/payment-success`);
+    } catch (error: any) {
+      console.error('Payment return handler error:', error);
+      res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5000'}/pricing?error=processing_failed`);
     }
   });
 
