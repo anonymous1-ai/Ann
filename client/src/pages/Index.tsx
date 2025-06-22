@@ -73,7 +73,6 @@ const Index = () => {
       {/* Luxurious Static Background */}
       <div className="animated-bg">
         <div className="static-graphics"></div>
-        <div className="circuit-pattern"></div>
         <div className="geometric-shapes">
           <div className="shape shape-1"></div>
           <div className="shape shape-2"></div>
@@ -92,9 +91,9 @@ const Index = () => {
               <img 
                 src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
                 alt="Silently AI Logo" 
-                className="w-8 h-8 object-contain"
+                className="w-8 h-8 object-contain logo-reveal"
               />
-              <span className="text-gold font-bold text-xl">Silently AI</span>
+              <span className="text-gold font-bold text-xl logo-text-reveal">Silently AI</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
               <button onClick={() => scrollToSection('features')} className="text-yellow-200/70 hover:text-gold transition-colors">Features</button>

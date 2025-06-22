@@ -16,7 +16,6 @@ const LoadingScreen = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="animated-bg">
       <div className="static-graphics"></div>
-      <div className="circuit-pattern"></div>
       <div className="geometric-shapes">
         <div className="shape shape-1"></div>
         <div className="shape shape-2"></div>

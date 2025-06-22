@@ -52,35 +52,52 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
-              API Dashboard
-            </h1>
-            <p className="text-slate-300 text-lg">Welcome back, {user.name}</p>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handleDownloadLogs}
-              className="tech-border bg-slate-900/50 border-cyan-400/30 text-cyan-300 hover:bg-cyan-950/30 hover:border-cyan-400/50 transition-all duration-300"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download Logs
-            </Button>
-            <Button
-              variant="outline"
-              onClick={logout}
-              className="tech-border bg-slate-900/50 border-red-400/30 text-red-300 hover:bg-red-950/30 hover:border-red-400/50 transition-all duration-300"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+    <div className="min-h-screen">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 luxury-card border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+                alt="Silently AI Logo" 
+                className="w-8 h-8 object-contain logo-reveal"
+              />
+              <span className="text-gold font-bold text-xl logo-text-reveal">Silently AI</span>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={handleDownloadLogs}
+                className="btn-luxury-outline"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download Logs
+              </Button>
+              <Button
+                variant="outline"
+                onClick={logout}
+                className="btn-luxury-outline border-red-400/30 text-red-300 hover:bg-red-950/30 hover:border-red-400/50"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
+      </nav>
+
+      <div className="pt-16 p-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-4xl font-bold text-gradient">
+                API Dashboard
+              </h1>
+              <p className="text-yellow-200/70 text-lg">Welcome back, {user.name}</p>
+            </div>
+          </div>
 
         {/* Top Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -237,6 +254,7 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
     </div>
