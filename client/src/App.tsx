@@ -13,11 +13,25 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const LoadingScreen = () => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 circuit-pattern flex items-center justify-center">
-    <div className="text-center">
-      <div className="w-16 h-16 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4 shadow-[0_0_20px_rgba(34,211,238,0.5)]"></div>
-      <div className="text-white text-xl font-semibold neon-text">Loading...</div>
-      <div className="text-slate-300 text-sm mt-2">Initializing your tech workspace</div>
+  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-amber-950/20 to-slate-950 flex items-center justify-center">
+    <div className="animated-bg">
+      <div className="particles">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="particle"></div>
+        ))}
+      </div>
+      <div className="circuit-pattern"></div>
+      <div className="geometric-shapes">
+        <div className="shape shape-1"></div>
+        <div className="shape shape-2"></div>
+        <div className="shape shape-3"></div>
+        <div className="shape shape-4"></div>
+      </div>
+    </div>
+    <div className="text-center relative z-10">
+      <div className="w-16 h-16 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin mx-auto mb-4 golden-glow"></div>
+      <div className="text-gold text-xl font-semibold">Loading...</div>
+      <div className="text-yellow-200/70 text-sm mt-2">Initializing your luxury workspace</div>
     </div>
   </div>
 );

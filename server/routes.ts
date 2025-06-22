@@ -5,6 +5,9 @@ import { insertUserSchema, loginUserSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize database
+  await storage.initDatabase();
+
   // Authentication routes
   app.post("/api/auth/signup", async (req, res) => {
     try {
@@ -52,15 +55,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/auth/me", async (req, res) => {
-    // For demo purposes, return first user if exists
-    const users = Array.from((storage as any).users.values());
-    if (users.length > 0) {
-      const user = users[0] as any;
-      const { password, ...userWithoutPassword } = user;
-      res.json({ success: true, data: userWithoutPassword });
-    } else {
-      res.json({ success: true, data: null });
-    }
+    // For now, return null (user not authenticated)
+    res.json({ success: true, data: null });
   });
 
   // User management routes

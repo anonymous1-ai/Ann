@@ -69,27 +69,43 @@ const Index = () => {
   const handleLogin = () => {
     setLocation('/auth');
   };
-  return <div className="min-h-screen floating-shapes">
+  return <div className="min-h-screen relative">
+      {/* Luxurious Animated Background */}
+      <div className="animated-bg">
+        <div className="particles">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="particle"></div>
+          ))}
+        </div>
+        <div className="circuit-pattern"></div>
+        <div className="geometric-shapes">
+          <div className="shape shape-1"></div>
+          <div className="shape shape-2"></div>
+          <div className="shape shape-3"></div>
+          <div className="shape shape-4"></div>
+        </div>
+      </div>
+
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 tech-border border-b">
+      <nav className="fixed top-0 w-full z-50 luxury-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg neon-glow"></div>
-              <span className="text-white font-bold text-xl neon-text">Silently AI</span>
+              <div className="w-8 h-8 gold-gradient rounded-lg golden-glow"></div>
+              <span className="text-gold font-bold text-xl">Silently AI</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <button onClick={() => scrollToSection('features')} className="text-slate-300 hover:text-cyan-400 transition-colors">Features</button>
-              <button onClick={() => scrollToSection('pricing')} className="text-slate-300 hover:text-cyan-400 transition-colors">Pricing</button>
-              <button onClick={() => scrollToSection('faq')} className="text-slate-300 hover:text-cyan-400 transition-colors">FAQ</button>
-              {user ? <Button onClick={() => setLocation('/dashboard')} className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 neon-glow">
+              <button onClick={() => scrollToSection('features')} className="text-yellow-200/70 hover:text-gold transition-colors">Features</button>
+              <button onClick={() => scrollToSection('pricing')} className="text-yellow-200/70 hover:text-gold transition-colors">Pricing</button>
+              <button onClick={() => scrollToSection('faq')} className="text-yellow-200/70 hover:text-gold transition-colors">FAQ</button>
+              {user ? <Button onClick={() => setLocation('/dashboard')} className="btn-luxury">
                   Dashboard
-                </Button> : <Button onClick={handleLogin} variant="outline" className="tech-border text-cyan-400 hover:bg-cyan-500/10">
+                </Button> : <Button onClick={handleLogin} variant="outline" className="btn-luxury-outline">
                   Login
                 </Button>}
             </div>
             <div className="md:hidden">
-              <Button variant="ghost" size="sm" className="text-white">
+              <Button variant="ghost" size="sm" className="text-gold">
                 <Menu className="h-6 w-6" />
               </Button>
             </div>
@@ -101,38 +117,33 @@ const Index = () => {
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <div className="mb-8">
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-              {/* Convert Anything to */}
-              <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent neon-text mx-0 px-0 font-bold py-[10px]">Silently AI
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+              <span className="block text-gradient mx-0 px-0 font-bold py-[10px]">Silently AI
             </span>
             </h1>
-            <p className="text-xl sm:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl sm:text-2xl text-yellow-200/80 mb-8 max-w-3xl mx-auto">
               Screenshots, text, aptitude problems - transform them into working code instantly. 
               Undetectable typing simulation for seamless coding tests.
             </p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Button onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold neon-glow transform hover:scale-105 transition-all duration-200">
+            <Button onClick={handleGetStarted} size="lg" className="btn-luxury px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-200">
               {user ? 'Go to Dashboard' : 'Get Started Free'}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button onClick={() => scrollToSection('pricing')} variant="outline" size="lg" className="tech-border text-cyan-400 hover:bg-cyan-500/10 px-8 py-4 text-lg font-semibold">
+            <Button onClick={() => scrollToSection('pricing')} variant="outline" size="lg" className="btn-luxury-outline px-8 py-4 text-lg font-semibold">
               View Pricing
             </Button>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 px-4">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-yellow-200/60 px-4">
             <div className="flex items-center gap-2">
-              {/* <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" /> */}
-              {/* <span>Works 100% offline</span> */}
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" />
+              <Check className="h-3 md:h-4 w-3 md:w-4 text-gold" />
               <span>Undetectable typing simulation</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" />
+              <Check className="h-3 md:h-4 w-3 md:w-4 text-gold" />
               <span>Instant kill switch</span>
             </div>
           </div>
@@ -143,10 +154,10 @@ const Index = () => {
       <section id="features" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text py-[10px] lg:text-5xl">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-gradient py-[10px] lg:text-5xl">
               Stealth Features That Actually Work
             </h2>
-            <p className="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed px-4 md:px-0">
+            <p className="text-yellow-200/70 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed px-4 md:px-0">
               Built for students, freelancers, and professionals who need results without detection
             </p>
           </div>
@@ -157,53 +168,53 @@ const Index = () => {
             emoji: "⚡",
             title: "Text → Code Magic",
             description: "Select any text problem statement and instantly get clean, working code solutions",
-            gradient: "from-cyan-500/20 to-blue-500/20"
+            gradient: "from-yellow-500/20 to-amber-500/20"
           }, {
             icon: Camera,
             emoji: "📸",
             title: "Screenshot → Implementation",
             description: "Upload any UI screenshot or long image and get pixel-perfect code implementation",
-            gradient: "from-blue-500/20 to-indigo-500/20"
+            gradient: "from-amber-500/20 to-orange-500/20"
           }, {
             icon: Brain,
             emoji: "🧠",
             title: "Aptitude Problem Solver",
             description: "Crack quantitative aptitude, logical reasoning, and coding problems in seconds",
-            gradient: "from-indigo-500/20 to-purple-500/20"
+            gradient: "from-orange-500/20 to-yellow-600/20"
           }, {
             icon: Timer,
             emoji: "⌨️",
             title: "Human-Like Typing",
             description: "AI types your solutions with natural delays and corrections to avoid detection",
-            gradient: "from-purple-500/20 to-pink-500/20"
+            gradient: "from-yellow-600/20 to-amber-600/20"
           }, {
             icon: Shield,
             emoji: "🔒",
             title: "Master Kill Switch",
             description: "Press Ctrl+Shift+K to instantly hide all AI activity and return to normal work",
-            gradient: "from-pink-500/20 to-red-500/20"
+            gradient: "from-amber-600/20 to-yellow-500/20"
           }, {
             icon: Zap,
             emoji: "💾",
             title: "100% Offline Mode",
             description: "Download as .exe and work completely offline when internet monitoring is strict",
-            gradient: "from-red-500/20 to-cyan-500/20"
-          }].map((feature, index) => <Card key={index} className="tech-border hover:neon-glow transition-all duration-500 group rounded-2xl overflow-hidden">
+            gradient: "from-yellow-500/20 to-amber-500/20"
+          }].map((feature, index) => <Card key={index} className="luxury-card hover:golden-glow transition-all duration-500 group rounded-2xl overflow-hidden">
                 <CardHeader className="relative">
                   <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                     <div className={`w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 pulse-glow`}>
                       <span className="text-xl md:text-2xl">{feature.emoji}</span>
                     </div>
-                    <Badge variant="secondary" className="bg-cyan-950/50 text-cyan-300 border-cyan-400/30 text-xs">
+                    <Badge variant="secondary" className="badge-luxury text-xs">
                       Core Feature
                     </Badge>
                   </div>
-                  <CardTitle className="text-white text-lg md:text-xl group-hover:text-cyan-200 transition-colors">
+                  <CardTitle className="text-foreground text-lg md:text-xl group-hover:text-gold transition-colors">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-slate-300 leading-relaxed text-sm md:text-base">
+                  <CardDescription className="text-yellow-200/70 leading-relaxed text-sm md:text-base">
                     {feature.description}
                   </CardDescription>
                 </CardContent>
