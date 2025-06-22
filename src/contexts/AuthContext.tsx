@@ -1,22 +1,15 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  plan: 'free' | 'pro' | 'advanced';
-  apiCredits: number;
-  totalCalls: number;
-}
+import { apiService } from '../lib/api';
+import { User } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isLoading: boolean;
   updateCredits: (newCredits: number) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,34 +30,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshUser = async () => {
+    try {
+      const currentUser = await apiService.getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
     // Check if user is logged in on mount
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      try {
+        await refreshUser();
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: email.split('@')[0],
-        plan: 'free',
-        apiCredits: 10,
-        totalCalls: 0
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const userData = await apiService.login({ email, password });
+      setUser(userData);
     } catch (error) {
-      throw new Error('Login failed');
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -73,37 +70,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signup = async (email: string, password: string, name: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: '1',
-        email,
-        name,
-        plan: 'free',
-        apiCredits: 10,
-        totalCalls: 0
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const userData = await apiService.signup({ email, password, name });
+      setUser(userData);
     } catch (error) {
-      throw new Error('Signup failed');
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      await apiService.logout();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const updateCredits = (newCredits: number) => {
     if (user) {
-      const updatedUser = { ...user, apiCredits: newCredits, totalCalls: user.totalCalls + 1 };
+      const updatedUser = { ...user, api_credits: newCredits, total_calls: user.total_calls + 1 };
       setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
     }
   };
 
@@ -114,6 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isLoading,
     updateCredits,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

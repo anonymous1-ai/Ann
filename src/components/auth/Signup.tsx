@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Code, Check } from 'lucide-react';
+import { Code, Check, Eye, EyeOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface SignupProps {
@@ -16,17 +15,30 @@ interface SignupProps {
 export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signup, isLoading } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await signup(email, password, name);
       toast({
         title: "Account created successfully",
-        description: "Welcome to Silently AI! You have 10 free credits.",
+        description: "Welcome to Silently AI! You have 5 free credits.",
       });
     } catch (error) {
       toast({
@@ -54,7 +66,7 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
         <div className="flex flex-wrap justify-center gap-2 text-xs">
           <Badge variant="secondary" className="bg-cyan-950/50 text-cyan-300 border-cyan-400/30">
             <Check className="h-3 w-3 mr-1" />
-            10 Free Credits
+            5 Free Credits
           </Badge>
           <Badge variant="secondary" className="bg-green-950/50 text-green-300 border-green-400/30">
             <Check className="h-3 w-3 mr-1" />
@@ -90,20 +102,53 @@ export const Signup: React.FC<SignupProps> = ({ onToggleMode }) => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password" className="text-slate-200 font-medium">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="tech-border bg-slate-800/50 text-white placeholder:text-slate-400 focus:border-cyan-400/50 focus:ring-cyan-400/20"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="tech-border bg-slate-800/50 text-white placeholder:text-slate-400 focus:border-cyan-400/50 focus:ring-cyan-400/20 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="text-slate-200 font-medium">Confirm Password</Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="tech-border bg-slate-800/50 text-white placeholder:text-slate-400 focus:border-cyan-400/50 focus:ring-cyan-400/20 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {confirmPassword && password !== confirmPassword && (
+              <p className="text-red-400 text-xs mt-1">Passwords don't match</p>
+            )}
           </div>
           <Button 
             type="submit" 
             className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 rounded-xl neon-glow transition-all duration-300 hover:scale-105" 
-            disabled={isLoading}
+            disabled={isLoading || (confirmPassword && password !== confirmPassword)}
           >
             {isLoading ? "Creating account..." : "Create Account"}
           </Button>

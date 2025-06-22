@@ -102,7 +102,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto text-center">
           <div className="mb-8">
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-              Convert Anything to
+              {/* Convert Anything to */}
               <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent neon-text mx-0 px-0 font-bold py-[10px]">Silently AI
             </span>
             </h1>
@@ -124,8 +124,8 @@ const Index = () => {
 
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 px-4">
             <div className="flex items-center gap-2">
-              <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" />
-              <span>Works 100% offline</span>
+              {/* <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" /> */}
+              {/* <span>Works 100% offline</span> */}
             </div>
             <div className="flex items-center gap-2">
               <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" />
