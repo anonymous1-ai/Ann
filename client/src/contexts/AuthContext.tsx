@@ -44,9 +44,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check if user is logged in on mount
     const initializeAuth = async () => {
       try {
-        await refreshUser();
+        // Only try to refresh user if token exists
+        const token = localStorage.getItem('token');
+        if (token) {
+          await refreshUser();
+        }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        // Clear invalid token
+        localStorage.removeItem('token');
       } finally {
         setIsLoading(false);
       }

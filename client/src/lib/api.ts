@@ -54,11 +54,17 @@ export interface ApiResponse<T> {
 }
 
 class ApiService {
+  private getAuthHeaders(): Record<string, string> {
+    const token = localStorage.getItem('token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`/api${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
+          ...this.getAuthHeaders(),
           ...options.headers,
         },
         credentials: 'include',
@@ -76,7 +82,7 @@ class ApiService {
   }
 
   async signup(credentials: SignupCredentials): Promise<User> {
-    const response = await this.request<User>('/auth/signup', {
+    const response = await this.request<{ user: User; token: string }>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -85,11 +91,14 @@ class ApiService {
       throw new Error(response.error || 'Signup failed');
     }
 
-    return response.data;
+    // Store the token for authenticated requests
+    localStorage.setItem('token', response.data.token);
+    
+    return response.data.user;
   }
 
   async login(credentials: LoginCredentials): Promise<User> {
-    const response = await this.request<User>('/auth/login', {
+    const response = await this.request<{ user: User; token: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -98,13 +107,19 @@ class ApiService {
       throw new Error(response.error || 'Login failed');
     }
 
-    return response.data;
+    // Store the token for authenticated requests
+    localStorage.setItem('token', response.data.token);
+    
+    return response.data.user;
   }
 
   async logout(): Promise<void> {
     const response = await this.request('/auth/logout', {
       method: 'POST',
     });
+
+    // Clear the token regardless of response
+    localStorage.removeItem('token');
 
     if (!response.success) {
       throw new Error(response.error || 'Logout failed');
