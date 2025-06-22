@@ -648,34 +648,11 @@ const Index = () => {
                 Need More API Calls?
               </h3>
               <p className="text-yellow-200/70 max-w-2xl mx-auto">
-                Top up your account with additional API calls at ₹9 per call. Credits never expire.
+                Top up your account with additional API calls. Credits never expire and work with any plan.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <Card className="luxury-card hover:golden-glow transition-all duration-300">
-                <CardHeader className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-white" />
-                  </div>
-                  <CardTitle className="text-gold text-xl">50 Calls</CardTitle>
-                  <CardDescription className="text-yellow-200/70">Quick boost</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-3xl font-bold text-gradient">₹450</span>
-                    <p className="text-yellow-200/70 text-sm">₹9 per call</p>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    onClick={() => handleTopUp('topup-50')}
-                    disabled={loading === 'topup-50'}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    {loading === 'topup-50' ? 'Processing...' : 'Buy 50 Calls'}
-                  </Button>
-                </CardContent>
-              </Card>
-
+            <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
               <Card className="luxury-card golden-glow ring-2 ring-gold/50">
                 <CardHeader className="text-center">
                   <Badge className="mb-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold">
