@@ -285,17 +285,33 @@ Health check endpoint.
 - **Duration:** Forever
 - **Features:** Download access, tool remains inactive
 
-### Pro Plan
+### Pro Plans
+#### Pro Monthly
 - **Price:** ₹800/month
 - **API Calls:** 100 per month
 - **Duration:** 30 days
 - **Features:** Full tool activation, license validation, email support
 
-### Advanced Plan
-- **Price:** ₹2000/year
-- **API Calls:** 300 per month (3600 total)
+#### Pro Annual
+- **Price:** ₹9,500/year
+- **API Calls:** 1,200 per year (100/month equivalent)
 - **Duration:** 365 days
-- **Features:** All Pro features + priority support, advanced analytics
+- **Savings:** Save ₹1,100 (11% discount) vs monthly billing
+- **Features:** All Pro features + annual billing discount
+
+### Advanced Plans
+#### Advanced Monthly
+- **Price:** ₹2,000/month
+- **API Calls:** 300 per month
+- **Duration:** 30 days
+- **Features:** Priority support, advanced analytics, commercial usage
+
+#### Advanced Annual
+- **Price:** ₹20,000/year
+- **API Calls:** 3,600 per year (300/month equivalent)
+- **Duration:** 365 days
+- **Savings:** Save ₹4,000 (17% discount) vs monthly billing
+- **Features:** All Advanced features + maximum savings, dedicated support
 
 ## Security Features
 

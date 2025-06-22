@@ -11,8 +11,10 @@ const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key";
 // Pricing plans
 const PRICING_PLANS = {
   free: { price: 0, apiCalls: 0, duration: 0 },
-  pro: { price: 800, apiCalls: 100, duration: 30 }, // 30 days
-  advanced: { price: 2000, apiCalls: 3600, duration: 365 } // 365 days (300 calls per month * 12)
+  'pro-monthly': { price: 800, apiCalls: 100, duration: 30 }, // ₹800/month, 100 API calls
+  'pro-annual': { price: 9500, apiCalls: 1200, duration: 365 }, // ₹9500/year, 1200 API calls
+  'advanced-monthly': { price: 2000, apiCalls: 300, duration: 30 }, // ₹2000/month, 300 API calls
+  'advanced-annual': { price: 20000, apiCalls: 3600, duration: 365 } // ₹20000/year, 3600 API calls
 };
 
 // Rate limiting for license validation

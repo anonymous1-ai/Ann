@@ -31,8 +31,8 @@ const PRICING_PLANS = [
     icon: Download
   },
   {
-    id: 'pro',
-    name: 'Pro',
+    id: 'pro-monthly',
+    name: 'Pro Monthly',
     price: 800,
     currency: '₹',
     period: 'month',
@@ -46,30 +46,76 @@ const PRICING_PLANS = [
       'Regular updates',
       'Usage analytics'
     ],
-    buttonText: 'Subscribe to Pro',
-    popular: true,
+    buttonText: 'Subscribe Monthly',
+    popular: false,
     icon: Zap
   },
   {
-    id: 'advanced',
-    name: 'Advanced',
-    price: 2000,
+    id: 'pro-annual',
+    name: 'Pro Annual',
+    price: 9500,
     currency: '₹',
     period: 'year',
+    apiCalls: 1200,
+    description: 'Save money with annual billing',
+    features: [
+      'Full AI tool activation',
+      '1200 API calls per year',
+      'Save ₹1100 vs monthly',
+      'License validation',
+      'Email support',
+      'Regular updates',
+      'Usage analytics'
+    ],
+    buttonText: 'Subscribe Annually',
+    popular: true,
+    icon: Zap,
+    savings: 'Save 11%'
+  },
+  {
+    id: 'advanced-monthly',
+    name: 'Advanced Monthly',
+    price: 2000,
+    currency: '₹',
+    period: 'month',
     apiCalls: 300,
-    description: 'Best value for power users and businesses',
+    description: 'For power users and small teams',
     features: [
       'Full AI tool activation',
       '300 API calls per month',
-      'Annual billing (save 37%)',
       'Priority support',
       'Advanced analytics',
       'Hardware hash binding',
-      'Commercial usage rights'
+      'Commercial usage rights',
+      'API access logs'
     ],
-    buttonText: 'Subscribe to Advanced',
+    buttonText: 'Subscribe Monthly',
     popular: false,
     icon: Crown
+  },
+  {
+    id: 'advanced-annual',
+    name: 'Advanced Annual',
+    price: 20000,
+    currency: '₹',
+    period: 'year',
+    apiCalls: 3600,
+    description: 'Best value for businesses',
+    features: [
+      'Full AI tool activation',
+      '3600 API calls per year',
+      'Save ₹4000 vs monthly',
+      'Priority support',
+      'Advanced analytics',
+      'Hardware hash binding',
+      'Commercial usage rights',
+      'API access logs',
+      'Dedicated support'
+    ],
+    buttonText: 'Subscribe Annually',
+    popular: false,
+    icon: Crown,
+    savings: 'Save 17%'
   }
 ];
 
@@ -202,7 +248,7 @@ export default function Pricing() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
           {PRICING_PLANS.map((plan) => {
             const Icon = plan.icon;
             const isCurrentPlan = user?.plan === plan.id;
@@ -221,6 +267,14 @@ export default function Pricing() {
                     <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold">
                       <Star className="w-3 h-3 mr-1" />
                       Most Popular
+                    </Badge>
+                  </div>
+                )}
+
+                {plan.savings && (
+                  <div className="absolute -top-4 right-4">
+                    <Badge className="bg-green-500 text-white font-semibold">
+                      {plan.savings}
                     </Badge>
                   </div>
                 )}
