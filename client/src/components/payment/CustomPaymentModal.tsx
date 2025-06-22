@@ -264,7 +264,7 @@ export default function CustomPaymentModal({
               className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                 activeTab === 'Bank'
                   ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold shadow-lg'
-                  : 'text-yellow-300/70 hover:text-yellow-200'
+                  : 'text-yellow-400 hover:text-yellow-300'
               }`}
             >
               <Building2 className="w-4 h-4" />
