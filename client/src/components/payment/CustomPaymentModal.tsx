@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { X, Smartphone, CreditCard, Building2 } from 'lucide-react';
 
@@ -32,6 +34,21 @@ export default function CustomPaymentModal({
   const [activeTab, setActiveTab] = useState('UPI');
   const [upiId, setUpiId] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Card details state
+  const [cardDetails, setCardDetails] = useState({
+    name: '',
+    number: '',
+    expiry: '',
+    cvv: ''
+  });
+  
+  // Bank details state
+  const [bankDetails, setBankDetails] = useState({
+    accountName: '',
+    accountNumber: '',
+    ifsc: ''
+  });
   
   const formattedAmount = (amount / 100).toFixed(0);
 
@@ -91,6 +108,43 @@ export default function CustomPaymentModal({
   };
 
   const handleCardPayment = async () => {
+    // Validate card details
+    if (!cardDetails.name.trim()) {
+      toast({
+        title: "Cardholder Name Required",
+        description: "Please enter the cardholder name",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!cardDetails.number.trim()) {
+      toast({
+        title: "Card Number Required",
+        description: "Please enter your card number",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!cardDetails.expiry.trim()) {
+      toast({
+        title: "Expiry Date Required",
+        description: "Please enter the card expiry date",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!cardDetails.cvv.trim()) {
+      toast({
+        title: "CVV Required",
+        description: "Please enter the CVV code",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -105,8 +159,14 @@ export default function CustomPaymentModal({
           card: true
         },
         prefill: {
-          name: userDetails.name,
+          name: cardDetails.name,
           email: userDetails.email,
+          contact: '',
+          'card[name]': cardDetails.name,
+          'card[number]': cardDetails.number,
+          'card[expiry_month]': cardDetails.expiry.split('/')[0],
+          'card[expiry_year]': cardDetails.expiry.split('/')[1],
+          'card[cvv]': cardDetails.cvv
         },
         theme: {
           color: "#D4AF37",
@@ -134,6 +194,34 @@ export default function CustomPaymentModal({
   };
 
   const handleBankPayment = async () => {
+    // Validate bank details
+    if (!bankDetails.accountName.trim()) {
+      toast({
+        title: "Account Holder Name Required",
+        description: "Please enter the account holder name",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!bankDetails.accountNumber.trim()) {
+      toast({
+        title: "Account Number Required",
+        description: "Please enter your account number",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!bankDetails.ifsc.trim()) {
+      toast({
+        title: "IFSC Code Required",
+        description: "Please enter the IFSC code",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -148,8 +236,11 @@ export default function CustomPaymentModal({
           netbanking: true
         },
         prefill: {
-          name: userDetails.name,
+          name: bankDetails.accountName,
           email: userDetails.email,
+          contact: '',
+          'account_number': bankDetails.accountNumber,
+          'ifsc': bankDetails.ifsc
         },
         theme: {
           color: "#D4AF37",
@@ -275,48 +366,121 @@ export default function CustomPaymentModal({
           {/* UPI Tab Content */}
           {activeTab === 'UPI' && (
             <div className="space-y-4">
-              <div>
-                <label className="text-yellow-200 text-sm font-medium block mb-2">UPI ID</label>
+              <div className="space-y-2">
+                <Label htmlFor="upi" className="text-[#ffecb3]">UPI ID</Label>
                 <Input
+                  id="upi"
+                  type="text"
                   placeholder="yourname@paytm"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                  className="bg-background/80 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60 h-12 rounded-lg focus:border-yellow-500 focus:ring-yellow-500/20"
+                  className="border-yellow-400/30 text-white bg-[#000000cc]"
                 />
-                <p className="text-yellow-300/60 text-xs mt-2">
+                <p className="text-xs text-yellow-200/60">
                   Enter your UPI ID (e.g., 9876543210@paytm, user@googlepay)
                 </p>
               </div>
-
-              <div className="flex gap-2">
-                <div className="bg-blue-600/20 border border-blue-500/30 text-blue-300 rounded-lg px-4 py-2 text-sm cursor-not-allowed opacity-70">
-                  Google Pay
-                </div>
-                <div className="bg-purple-600/20 border border-purple-500/30 text-purple-300 rounded-lg px-4 py-2 text-sm cursor-not-allowed opacity-70">
-                  PhonePe
-                </div>
-                <div className="bg-green-600/20 border border-green-500/30 text-green-300 rounded-lg px-4 py-2 text-sm cursor-not-allowed opacity-70">
-                  Paytm
-                </div>
+              
+              <div className="flex items-center space-x-2">
+                <Badge variant="outline" className="text-blue-400 border-blue-400/50">Google Pay</Badge>
+                <Badge variant="outline" className="text-purple-400 border-purple-400/50">PhonePe</Badge>
+                <Badge variant="outline" className="text-green-400 border-green-400/50">Paytm</Badge>
               </div>
             </div>
           )}
 
           {/* Card Tab Content */}
           {activeTab === 'Card' && (
-            <div className="text-center py-8">
-              <CreditCard className="w-12 h-12 text-yellow-400/60 mx-auto mb-4" />
-              <p className="text-yellow-300/70 mb-4">Click below to pay with Credit/Debit Card</p>
-              <p className="text-lg text-yellow-200 font-semibold">Secure card payment</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="cardname" className="text-[#ffecb3]">Cardholder Name</Label>
+                <Input
+                  id="cardname"
+                  type="text"
+                  placeholder="John Doe"
+                  value={cardDetails.name}
+                  onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
+                  className="border-yellow-400/30 text-white bg-[#000000cc]"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="cardnumber" className="text-[#ffecb3]">Card Number</Label>
+                <Input
+                  id="cardnumber"
+                  type="text"
+                  placeholder="1234 5678 9012 3456"
+                  value={cardDetails.number}
+                  onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
+                  className="border-yellow-400/30 text-white bg-[#000000cc]"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="expiry" className="text-[#ffecb3]">Expiry</Label>
+                  <Input
+                    id="expiry"
+                    type="text"
+                    placeholder="MM/YY"
+                    value={cardDetails.expiry}
+                    onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
+                    className="border-yellow-400/30 text-white bg-[#000000cc]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cvv" className="text-[#ffecb3]">CVV</Label>
+                  <Input
+                    id="cvv"
+                    type="text"
+                    placeholder="123"
+                    value={cardDetails.cvv}
+                    onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
+                    className="border-yellow-400/30 text-white bg-[#000000cc]"
+                  />
+                </div>
+              </div>
             </div>
           )}
 
           {/* Bank Tab Content */}
           {activeTab === 'Bank' && (
-            <div className="text-center py-8">
-              <Building2 className="w-12 h-12 text-yellow-400/60 mx-auto mb-4" />
-              <p className="text-yellow-300/70 mb-4">Click below to pay with Net Banking</p>
-              <p className="text-lg text-yellow-200 font-semibold">Choose your bank</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="accountname" className="text-[#ffecb3]">Account Holder Name</Label>
+                <Input
+                  id="accountname"
+                  type="text"
+                  placeholder="John Doe"
+                  value={bankDetails.accountName}
+                  onChange={(e) => setBankDetails({...bankDetails, accountName: e.target.value})}
+                  className="border-yellow-400/30 text-white bg-[#000000cc]"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="account" className="text-[#ffecb3]">Account Number</Label>
+                <Input
+                  id="account"
+                  type="text"
+                  placeholder="1234567890123456"
+                  value={bankDetails.accountNumber}
+                  onChange={(e) => setBankDetails({...bankDetails, accountNumber: e.target.value})}
+                  className="border-yellow-400/30 text-white bg-[#000000cc]"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="ifsc" className="text-[#ffecb3]">IFSC Code</Label>
+                <Input
+                  id="ifsc"
+                  type="text"
+                  placeholder="SBIN0001234"
+                  value={bankDetails.ifsc}
+                  onChange={(e) => setBankDetails({...bankDetails, ifsc: e.target.value.toUpperCase()})}
+                  className="border-yellow-400/30 text-white bg-[#000000cc]"
+                />
+              </div>
             </div>
           )}
 
@@ -345,7 +509,11 @@ export default function CustomPaymentModal({
                 else if (activeTab === 'Card') handleCardPayment();
                 else if (activeTab === 'Bank') handleBankPayment();
               }}
-              disabled={loading || (activeTab === 'UPI' && !upiId.trim())}
+              disabled={loading || 
+                (activeTab === 'UPI' && !upiId.trim()) ||
+                (activeTab === 'Card' && (!cardDetails.name.trim() || !cardDetails.number.trim() || !cardDetails.expiry.trim() || !cardDetails.cvv.trim())) ||
+                (activeTab === 'Bank' && (!bankDetails.accountName.trim() || !bankDetails.accountNumber.trim() || !bankDetails.ifsc.trim()))
+              }
               className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold rounded-lg h-12 shadow-lg hover:shadow-yellow-500/20 transition-all"
             >
               {loading ? 'Processing...' : `Pay ₹${formattedAmount}`}
