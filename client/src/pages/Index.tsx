@@ -1,4 +1,5 @@
-import { Download, Code, Camera, Brain, Shield, Zap, ArrowRight, Check, CreditCard, Activity, Settings, Timer, Menu } from "lucide-react";
+import { useState } from 'react';
+import { Download, Code, Camera, Brain, Shield, Zap, ArrowRight, Check, CreditCard, Activity, Settings, Timer, Menu, Crown, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,133 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { getLogoPath } from "@/assets/logo-config";
+interface PricingPlan {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+  period: string;
+  apiCalls: number;
+  description: string;
+  features: string[];
+  limitations?: string[];
+  buttonText: string;
+  popular: boolean;
+  icon: any;
+  billedAnnually?: boolean;
+}
+
+const PRICING_PLANS: PricingPlan[] = [
+  {
+    id: 'free',
+    name: 'Free',
+    price: 0,
+    currency: '₹',
+    period: 'Forever',
+    apiCalls: 0,
+    description: 'Try out the tool with download access',
+    features: [
+      'Download AI tool',
+      'Tool remains inactive',
+      'Community support',
+      'Basic documentation'
+    ],
+    limitations: [
+      'No API calls included',
+      'License validation fails',
+      'Tool functionality disabled'
+    ],
+    buttonText: 'Download Free',
+    popular: false,
+    icon: Download
+  },
+  {
+    id: 'pro-monthly',
+    name: 'Pro Monthly',
+    price: 800,
+    currency: '₹',
+    period: 'month',
+    apiCalls: 100,
+    description: 'Perfect for regular users',
+    features: [
+      'Full AI tool activation',
+      '100 API calls per month',
+      'License validation',
+      'Email support',
+      'Regular updates',
+      'Usage analytics'
+    ],
+    buttonText: 'Subscribe Monthly',
+    popular: false,
+    icon: Zap
+  },
+  {
+    id: 'pro-annual',
+    name: 'Pro',
+    price: 9500,
+    currency: '₹',
+    period: 'year',
+    apiCalls: 1200,
+    description: 'Most popular',
+    billedAnnually: true,
+    features: [
+      'Full AI tool activation',
+      '1200 API calls annually',
+      'License validation',
+      'Email support',
+      'Regular updates',
+      'Usage analytics'
+    ],
+    buttonText: 'Subscribe',
+    popular: true,
+    icon: Zap
+  },
+  {
+    id: 'advanced-monthly',
+    name: 'Advanced Monthly',
+    price: 2000,
+    currency: '₹',
+    period: 'month',
+    apiCalls: 300,
+    description: 'For power users and small teams',
+    features: [
+      'Full AI tool activation',
+      '300 API calls per month',
+      'Priority support',
+      'Advanced analytics',
+      'Hardware hash binding',
+      'Commercial usage rights',
+      'API access logs'
+    ],
+    buttonText: 'Subscribe Monthly',
+    popular: false,
+    icon: Crown
+  },
+  {
+    id: 'advanced-annual',
+    name: 'Advanced',
+    price: 20000,
+    currency: '₹',
+    period: 'year',
+    apiCalls: 3600,
+    description: 'Best for businesses',
+    billedAnnually: true,
+    features: [
+      'Full AI tool activation',
+      '3600 API calls annually',
+      'Priority support',
+      'Advanced analytics',
+      'Hardware hash binding',
+      'Commercial usage rights',
+      'API access logs',
+      'Dedicated support'
+    ],
+    buttonText: 'Subscribe',
+    popular: false,
+    icon: Crown
+  }
+];
+
 const Index = () => {
   const [, setLocation] = useLocation();
   const {
@@ -15,6 +143,8 @@ const Index = () => {
   const {
     toast
   } = useToast();
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
+  const [loading, setLoading] = useState<string | null>(null);
   const handleDownload = () => {
     toast({
       title: "Download Started",
@@ -31,12 +161,198 @@ const Index = () => {
       description: "Check out our transparent pricing plans below"
     });
   };
-  const handlePlanSelect = (planName: string, price: string) => {
-    toast({
-      title: `${planName} Plan Selected`,
-      description: `You selected the ${planName} plan at ${price}. Redirecting to payment...`
+  const handleSubscribe = async (planId: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to subscribe to a plan",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (planId === 'free') {
+      // Handle free plan download
+      try {
+        const response = await fetch('/api/download');
+        const data = await response.json();
+        
+        if (data.success) {
+          toast({
+            title: "Download Ready",
+            description: "Your free AI tool download is ready!"
+          });
+          // Trigger download
+          window.open(data.downloadUrl, '_blank');
+        }
+      } catch (error) {
+        toast({
+          title: "Download Failed",
+          description: "Unable to start download. Please try again.",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+
+    setLoading(planId);
+
+    try {
+      // Create Razorpay order
+      const orderResponse = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ plan: planId })
+      });
+
+      const orderData = await orderResponse.json();
+
+      if (!orderData.success) {
+        throw new Error(orderData.error);
+      }
+
+      // Simulate payment process
+      const mockPaymentSuccess = await simulatePayment(orderData.data);
+
+      if (mockPaymentSuccess) {
+        // Verify payment
+        const verifyResponse = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            orderId: orderData.data.orderId,
+            paymentId: `pay_${Date.now()}`,
+            signature: 'mock_signature',
+            plan: planId
+          })
+        });
+
+        const verifyData = await verifyResponse.json();
+
+        if (verifyData.success) {
+          toast({
+            title: "Subscription Activated!",
+            description: `Welcome to ${planId}! Your subscription is now active.`
+          });
+
+          // Redirect to dashboard
+          setTimeout(() => {
+            setLocation('/dashboard');
+          }, 2000);
+        } else {
+          throw new Error(verifyData.error);
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Subscription Failed",
+        description: error instanceof Error ? error.message : "Subscription failed. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleTopUp = async (topupType: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to purchase API call top-ups",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(topupType);
+
+    const topupPlans = {
+      'topup-50': { calls: 50, price: 200 },
+      'topup-100': { calls: 100, price: 350 },
+      'topup-250': { calls: 250, price: 750 }
+    };
+
+    const topup = topupPlans[topupType as keyof typeof topupPlans];
+
+    try {
+      // Create top-up order
+      const orderResponse = await fetch('/api/create-topup-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          topupType,
+          calls: topup.calls,
+          price: topup.price
+        })
+      });
+
+      const orderData = await orderResponse.json();
+
+      if (!orderData.success) {
+        throw new Error(orderData.error);
+      }
+
+      // Simulate payment process
+      const mockPaymentSuccess = await simulatePayment(orderData.data);
+
+      if (mockPaymentSuccess) {
+        // Verify top-up payment
+        const verifyResponse = await fetch('/api/verify-topup-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            orderId: orderData.data.orderId,
+            paymentId: `pay_${Date.now()}`,
+            signature: 'mock_signature',
+            topupType,
+            calls: topup.calls
+          })
+        });
+
+        const verifyData = await verifyResponse.json();
+
+        if (verifyData.success) {
+          toast({
+            title: "Top-up Successful!",
+            description: `Added ${topup.calls} API calls to your account. Your new balance: ${verifyData.data.newBalance} calls.`
+          });
+
+          // Refresh user data
+          window.location.reload();
+        } else {
+          throw new Error(verifyData.error);
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Top-up Failed",
+        description: error instanceof Error ? error.message : "Top-up processing failed. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const simulatePayment = (orderData: any): Promise<boolean> => {
+    // Mock payment simulation - replace with actual Razorpay integration
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true); // Simulate successful payment
+      }, 2000);
     });
-    console.log(`Selected plan: ${planName} at ${price}`);
   };
   const handleContactUs = () => {
     toast({
@@ -277,8 +593,33 @@ const Index = () => {
               Fair & Transparent Pricing
             </h2>
             <p className="text-yellow-200/70 text-lg md:text-xl max-w-3xl mx-auto px-4 md:px-0">
-              No yearly lock-ins. No hidden fees. Pay for what you use.
+              Choose the plan that fits your needs. Upgrade or downgrade anytime.
             </p>
+          </div>
+
+          {/* Billing Period Toggle */}
+          <div className="flex justify-center mb-12">
+            <div className="luxury-card p-1 rounded-lg">
+              <div className="flex items-center gap-2 relative">
+                <div className="flex items-center gap-4">
+                  <span className={`text-lg font-medium ${billingPeriod === 'monthly' ? 'text-gold' : 'text-yellow-200/70'}`}>
+                    Monthly
+                  </span>
+                  <button
+                    onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
+                    className="relative w-14 h-7 bg-yellow-400/20 rounded-full transition-colors focus:outline-none"
+                  >
+                    <div className={`absolute top-1 w-5 h-5 bg-gold rounded-full transition-transform ${billingPeriod === 'yearly' ? 'translate-x-7' : 'translate-x-1'}`} />
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-lg font-medium ${billingPeriod === 'yearly' ? 'text-gold' : 'text-yellow-200/70'}`}>
+                      Yearly
+                    </span>
+                    <Badge className="bg-green-500 text-white text-xs">Save up to 17%</Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -340,7 +681,7 @@ const Index = () => {
                         {feature}
                       </li>)}
                   </ul>
-                  <Button onClick={() => handlePlanSelect(plan.name, plan.price + plan.period)} className={`w-full rounded-xl py-2 md:py-3 text-sm md:text-base font-semibold transition-all duration-300 ${plan.popular ? 'btn-luxury' : 'btn-luxury-outline'}`}>
+                  <Button onClick={() => handleSubscribe(plan.id)} className={`w-full rounded-xl py-2 md:py-3 text-sm md:text-base font-semibold transition-all duration-300 ${plan.popular ? 'btn-luxury' : 'btn-luxury-outline'}`}>
                     {plan.buttonText}
                   </Button>
                 </CardContent>
