@@ -225,7 +225,7 @@ export default function CustomPaymentModal({
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl font-semibold text-yellow-400 mb-1">Complete Payment</h2>
-              <p className="text-slate-400 text-sm">Pay ₹{formattedAmount} for API Credits - ₹9 per call</p>
+              <p className="text-slate-400 text-sm">{description}</p>
             </div>
             <button
               onClick={onClose}
@@ -275,21 +275,6 @@ export default function CustomPaymentModal({
           {/* UPI Tab Content */}
           {activeTab === 'UPI' && (
             <div className="space-y-4">
-              <div>
-                <h3 className="text-yellow-400 text-sm font-medium mb-2">Number of API Credits</h3>
-                <div className="bg-slate-800/50 rounded-lg px-4 py-3 border border-slate-600/50">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="number"
-                      value="1"
-                      readOnly
-                      className="bg-transparent text-white font-medium text-lg w-12 outline-none"
-                    />
-                    <span className="text-slate-400">credits × ₹9 = ₹{formattedAmount}</span>
-                  </div>
-                </div>
-              </div>
-
               <div>
                 <label className="text-yellow-400 text-sm font-medium block mb-2">UPI ID</label>
                 <Input
