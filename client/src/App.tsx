@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Pricing from "./pages/Pricing";
+import BuyCredits from "./pages/BuyCredits";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 
@@ -73,6 +74,11 @@ const AppRoutes = () => {
         </PublicRoute>
       </Route>
       <Route path="/pricing" component={Pricing} />
+      <Route path="/buy-credits">
+        <ProtectedRoute>
+          <BuyCredits />
+        </ProtectedRoute>
+      </Route>
       <Route path="/payment-success">
         <ProtectedRoute>
           <PaymentSuccess />

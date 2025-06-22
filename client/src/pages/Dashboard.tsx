@@ -178,6 +178,14 @@ const Dashboard = () => {
             <div className="flex gap-3">
               <Button
                 variant="outline"
+                onClick={() => setLocation('/buy-credits')}
+                className="btn-luxury-outline"
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                Buy Credits
+              </Button>
+              <Button
+                variant="outline"
                 onClick={handleDownloadLogs}
                 className="btn-luxury-outline"
               >
