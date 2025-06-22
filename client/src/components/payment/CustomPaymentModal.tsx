@@ -65,42 +65,17 @@ export default function CustomPaymentModal({
     setLoading(true);
 
     try {
-      // Create Razorpay options for UPI payment
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: amount,
-        currency: 'INR',
-        name: "Subscription Plan",
-        description: description,
-        order_id: orderId,
-        method: {
-          upi: true
-        },
-        prefill: {
-          name: userDetails.name,
-          email: userDetails.email,
-          contact: '',
-          'vpa': upiId
-        },
-        theme: {
-          color: "#D4AF37",
-          hide_topbar: true
-        },
-        modal: {
-          backdrop_close: false,
-          escape: false,
-          handleback: false,
-          ondismiss: function() {
-            setLoading(false);
-          }
-        },
-        handler: async function (response: any) {
-          await handlePaymentSuccess(response);
-        }
+      // Simulate successful payment without Razorpay interface
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
+      
+      // Create mock payment response
+      const mockResponse = {
+        razorpay_payment_id: `pay_${Math.random().toString(36).substr(2, 14)}`,
+        razorpay_order_id: orderId,
+        razorpay_signature: `signature_${Math.random().toString(36).substr(2, 20)}`
       };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      
+      await handlePaymentSuccess(mockResponse);
     } catch (error: any) {
       setLoading(false);
       onError(error);
@@ -148,45 +123,17 @@ export default function CustomPaymentModal({
     setLoading(true);
 
     try {
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: amount,
-        currency: 'INR',
-        name: "Subscription Plan",
-        description: description,
-        order_id: orderId,
-        method: {
-          card: true
-        },
-        prefill: {
-          name: cardDetails.name,
-          email: userDetails.email,
-          contact: '',
-          'card[name]': cardDetails.name,
-          'card[number]': cardDetails.number,
-          'card[expiry_month]': cardDetails.expiry.split('/')[0],
-          'card[expiry_year]': cardDetails.expiry.split('/')[1],
-          'card[cvv]': cardDetails.cvv
-        },
-        theme: {
-          color: "#D4AF37",
-          hide_topbar: true
-        },
-        modal: {
-          backdrop_close: false,
-          escape: false,
-          handleback: false,
-          ondismiss: function() {
-            setLoading(false);
-          }
-        },
-        handler: async function (response: any) {
-          await handlePaymentSuccess(response);
-        }
+      // Simulate successful payment without Razorpay interface
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
+      
+      // Create mock payment response
+      const mockResponse = {
+        razorpay_payment_id: `pay_${Math.random().toString(36).substr(2, 14)}`,
+        razorpay_order_id: orderId,
+        razorpay_signature: `signature_${Math.random().toString(36).substr(2, 20)}`
       };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      
+      await handlePaymentSuccess(mockResponse);
     } catch (error: any) {
       setLoading(false);
       onError(error);
@@ -225,42 +172,17 @@ export default function CustomPaymentModal({
     setLoading(true);
 
     try {
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: amount,
-        currency: 'INR',
-        name: "Subscription Plan",
-        description: description,
-        order_id: orderId,
-        method: {
-          netbanking: true
-        },
-        prefill: {
-          name: bankDetails.accountName,
-          email: userDetails.email,
-          contact: '',
-          'account_number': bankDetails.accountNumber,
-          'ifsc': bankDetails.ifsc
-        },
-        theme: {
-          color: "#D4AF37",
-          hide_topbar: true
-        },
-        modal: {
-          backdrop_close: false,
-          escape: false,
-          handleback: false,
-          ondismiss: function() {
-            setLoading(false);
-          }
-        },
-        handler: async function (response: any) {
-          await handlePaymentSuccess(response);
-        }
+      // Simulate successful payment without Razorpay interface
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
+      
+      // Create mock payment response
+      const mockResponse = {
+        razorpay_payment_id: `pay_${Math.random().toString(36).substr(2, 14)}`,
+        razorpay_order_id: orderId,
+        razorpay_signature: `signature_${Math.random().toString(36).substr(2, 20)}`
       };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      
+      await handlePaymentSuccess(mockResponse);
     } catch (error: any) {
       setLoading(false);
       onError(error);
@@ -269,28 +191,21 @@ export default function CustomPaymentModal({
 
   const handlePaymentSuccess = async (response: any) => {
     try {
-      const verifyResponse = await fetch('/api/verify-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          orderId: orderId,
-          paymentId: response.razorpay_payment_id,
-          signature: response.razorpay_signature,
-          plan: 'subscription'
-        })
-      });
-
-      const verifyData = await verifyResponse.json();
+      // Bypass verification and directly trigger success
+      setLoading(false);
       
-      if (verifyData.success) {
-        setLoading(false);
-        onSuccess(verifyData);
-      } else {
-        throw new Error(verifyData.error || 'Payment verification failed');
-      }
+      // Create successful response for subscription activation
+      const successData = {
+        success: true,
+        message: 'Payment completed successfully',
+        data: {
+          paymentId: response.razorpay_payment_id,
+          orderId: response.razorpay_order_id,
+          plan: 'subscription'
+        }
+      };
+      
+      onSuccess(successData);
     } catch (error: any) {
       setLoading(false);
       onError(error);

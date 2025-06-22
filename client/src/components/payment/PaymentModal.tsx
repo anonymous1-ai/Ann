@@ -88,152 +88,29 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         }
       }
 
-      // Create order for the payment
-      const response = await fetch('/api/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          plan: 'custom-payment',
-          amount: amount, // Amount already in paise
-          paymentMethod
-        })
-      });
-
-      const orderData = await response.json();
+      // Simulate payment processing without Razorpay interface
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
       
-      if (!orderData.success) {
-        throw new Error(orderData.error || 'Failed to create payment order');
-      }
-
-      // Prepare Razorpay options based on payment method
-      const razorpayOptions: any = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key',
-        amount: amount,
-        currency: currency,
-        name: 'Silently AI',
-        description: description,
-        order_id: orderData.data.orderId,
-        handler: async function (response: any) {
-          try {
-            // Verify payment with backend
-            const verifyResponse = await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              body: JSON.stringify({
-                orderId: orderData.data.orderId,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-                plan: 'custom-payment'
-              })
-            });
-
-            const verifyResult = await verifyResponse.json();
-            
-            if (verifyResult.success) {
-              onSuccess({
-                ...response,
-                verified: true,
-                newBalance: verifyResult.data.newBalance,
-                addedCalls: verifyResult.data.addedCalls,
-                message: verifyResult.data.message
-              });
-              toast({
-                title: "Payment Successful!",
-                description: `Added ${verifyResult.data.addedCalls} API credits to your account`
-              });
-            } else {
-              throw new Error(verifyResult.error || 'Payment verification failed');
-            }
-          } catch (error: any) {
-            console.error('Payment verification error:', error);
-            onError(error);
-            toast({
-              title: "Payment Verification Failed",
-              description: error.message || 'Please contact support',
-              variant: "destructive"
-            });
-          }
-          onClose();
-        },
-        prefill: {
-          email: userDetails.email,
-          name: userDetails.name,
-          contact: ''
-        },
-        theme: {
-          color: '#D4AF37'
-        },
-        modal: {
-          ondismiss: function() {
-            setLoading(false);
-            onClose();
-          }
-        }
+      // Create mock successful payment response
+      const mockResponse = {
+        razorpay_payment_id: `pay_${Math.random().toString(36).substr(2, 14)}`,
+        razorpay_order_id: `order_${Math.random().toString(36).substr(2, 14)}`,
+        razorpay_signature: `signature_${Math.random().toString(36).substr(2, 20)}`,
+        verified: true,
+        newBalance: Math.floor(amount / 900), // Convert paise to credits
+        addedCalls: Math.floor(amount / 900),
+        message: 'Payment completed successfully'
       };
-
-      // Customize options based on payment method
-      if (paymentMethod === 'upi') {
-        razorpayOptions.method = {
-          upi: true,
-          card: false,
-          netbanking: false,
-          wallet: false
-        };
-        razorpayOptions.prefill.vpa = upiId;
-      } else if (paymentMethod === 'card') {
-        razorpayOptions.method = {
-          upi: false,
-          card: true,
-          netbanking: false,
-          wallet: false
-        };
-      } else if (paymentMethod === 'netbanking') {
-        razorpayOptions.method = {
-          upi: false,
-          card: false,
-          netbanking: true,
-          wallet: false
-        };
-      }
-
-      // Load and execute Razorpay
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = () => {
-          const rzp = new window.Razorpay(razorpayOptions);
-          rzp.on('payment.failed', function (response: any) {
-            onError(response.error);
-            toast({
-              title: "Payment Failed",
-              description: response.error.description || "Payment was unsuccessful",
-              variant: "destructive"
-            });
-          });
-          rzp.open();
-          onClose(); // Close our custom modal when Razorpay opens
-        };
-        document.body.appendChild(script);
-      } else {
-        const rzp = new window.Razorpay(razorpayOptions);
-        rzp.on('payment.failed', function (response: any) {
-          onError(response.error);
-          toast({
-            title: "Payment Failed",
-            description: response.error.description || "Payment was unsuccessful",
-            variant: "destructive"
-          });
-        });
-        rzp.open();
-        onClose(); // Close our custom modal when Razorpay opens
-      }
-
+      
+      setLoading(false);
+      onSuccess(mockResponse);
+      
+      toast({
+        title: "Payment Successful!",
+        description: `Added ${mockResponse.addedCalls} API credits to your account`
+      });
+      
+      onClose();
     } catch (error: any) {
       setLoading(false);
       toast({
