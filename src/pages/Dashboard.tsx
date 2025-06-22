@@ -60,19 +60,21 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 circuit-pattern p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-            <p className="text-slate-300">Welcome back, {user.name}</p>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
+              Dashboard
+            </h1>
+            <p className="text-slate-300 text-lg">Welcome back, {user.name}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={handleDownloadLogs}
-              className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+              className="tech-border bg-slate-900/50 border-cyan-400/30 text-cyan-300 hover:bg-cyan-950/30 hover:border-cyan-400/50 transition-all duration-300"
             >
               <Download className="w-4 h-4 mr-2" />
               Download Logs
@@ -80,7 +82,7 @@ const Dashboard = () => {
             <Button
               variant="outline"
               onClick={logout}
-              className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+              className="tech-border bg-slate-900/50 border-red-400/30 text-red-300 hover:bg-red-950/30 hover:border-red-400/50 transition-all duration-300"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Logout
@@ -90,15 +92,15 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* API Credits Tracker */}
-          <Card className="lg:col-span-1 bg-slate-800/50 border-slate-700">
+          <Card className="lg:col-span-1 tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
             <CardHeader>
-              <CardTitle className="text-white">API Credits</CardTitle>
-              <CardDescription>Track your usage and plan</CardDescription>
+              <CardTitle className="text-white neon-text">API Credits</CardTitle>
+              <CardDescription className="text-slate-300">Track your usage and plan</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-slate-300">Current Plan</span>
-                <Badge variant="secondary" className="capitalize">
+                <Badge variant="secondary" className="capitalize bg-cyan-950/50 text-cyan-300 border-cyan-400/30">
                   {user.plan}
                 </Badge>
               </div>
@@ -106,9 +108,9 @@ const Dashboard = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-300">Credits Remaining</span>
-                  <span className="text-white font-bold">{user.apiCredits}</span>
+                  <span className="text-white font-bold text-cyan-300 neon-text">{user.apiCredits}</span>
                 </div>
-                <Progress value={creditPercentage} className="h-2" />
+                <Progress value={creditPercentage} className="h-3 bg-slate-800/50 [&>div]:bg-gradient-to-r [&>div]:from-cyan-500 [&>div]:to-blue-600 [&>div]:shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
                 <p className="text-xs text-slate-400">
                   {user.apiCredits} of {planLimits[user.plan]} credits remaining
                 </p>
@@ -116,12 +118,12 @@ const Dashboard = () => {
 
               <div className="flex justify-between items-center">
                 <span className="text-slate-300">Total Calls</span>
-                <span className="text-white font-bold">{user.totalCalls}</span>
+                <span className="text-white font-bold text-cyan-300 neon-text">{user.totalCalls}</span>
               </div>
 
               <Button
                 onClick={handleTopUp}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 rounded-xl neon-glow transition-all duration-300 hover:scale-105"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
                 Buy More Credits
@@ -130,70 +132,70 @@ const Dashboard = () => {
           </Card>
 
           {/* Feature Shortcuts */}
-          <Card className="lg:col-span-2 bg-slate-800/50 border-slate-700">
+          <Card className="lg:col-span-2 tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
             <CardHeader>
-              <CardTitle className="text-white">Quick Actions</CardTitle>
-              <CardDescription>Access your favorite features instantly</CardDescription>
+              <CardTitle className="text-white neon-text">Quick Actions</CardTitle>
+              <CardDescription className="text-slate-300">Access your favorite features instantly</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   onClick={() => handleFeatureUse('Screenshot to Code')}
-                  className="h-20 flex flex-col items-center justify-center bg-blue-600 hover:bg-blue-700"
+                  className="h-24 flex flex-col items-center justify-center bg-gradient-to-br from-blue-600/80 to-blue-800/80 hover:from-blue-500/90 hover:to-blue-700/90 text-white border border-blue-400/30 neon-glow transition-all duration-300 hover:scale-105"
                   disabled={user.apiCredits <= 0}
                 >
-                  <Camera className="w-6 h-6 mb-2" />
-                  Screenshot → Code
+                  <Camera className="w-8 h-8 mb-2" />
+                  <span className="text-sm font-medium">Screenshot → Code</span>
                 </Button>
                 
                 <Button
                   onClick={() => handleFeatureUse('Text to Code')}
-                  className="h-20 flex flex-col items-center justify-center bg-green-600 hover:bg-green-700"
+                  className="h-24 flex flex-col items-center justify-center bg-gradient-to-br from-green-600/80 to-green-800/80 hover:from-green-500/90 hover:to-green-700/90 text-white border border-green-400/30 neon-glow transition-all duration-300 hover:scale-105"
                   disabled={user.apiCredits <= 0}
                 >
-                  <Type className="w-6 h-6 mb-2" />
-                  Text → Code
+                  <Type className="w-8 h-8 mb-2" />
+                  <span className="text-sm font-medium">Text → Code</span>
                 </Button>
                 
                 <Button
                   onClick={() => handleFeatureUse('Aptitude Solver')}
-                  className="h-20 flex flex-col items-center justify-center bg-orange-600 hover:bg-orange-700"
+                  className="h-24 flex flex-col items-center justify-center bg-gradient-to-br from-orange-600/80 to-orange-800/80 hover:from-orange-500/90 hover:to-orange-700/90 text-white border border-orange-400/30 neon-glow transition-all duration-300 hover:scale-105"
                   disabled={user.apiCredits <= 0}
                 >
-                  <Brain className="w-6 h-6 mb-2" />
-                  Aptitude Solver
+                  <Brain className="w-8 h-8 mb-2" />
+                  <span className="text-sm font-medium">Aptitude Solver</span>
                 </Button>
                 
                 <Button
                   variant="outline"
-                  className="h-20 flex flex-col items-center justify-center bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  className="h-24 flex flex-col items-center justify-center tech-border bg-slate-800/50 border-slate-600/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500/50 hover:text-white transition-all duration-300 hover:scale-105"
                 >
-                  <Settings className="w-6 h-6 mb-2" />
-                  Settings
+                  <Settings className="w-8 h-8 mb-2" />
+                  <span className="text-sm font-medium">Settings</span>
                 </Button>
               </div>
             </CardContent>
           </Card>
 
           {/* Recent Activity */}
-          <Card className="lg:col-span-3 bg-slate-800/50 border-slate-700">
+          <Card className="lg:col-span-3 tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
             <CardHeader>
-              <CardTitle className="text-white">Recent Activity</CardTitle>
-              <CardDescription>Your last 5 feature uses</CardDescription>
+              <CardTitle className="text-white neon-text">Recent Activity</CardTitle>
+              <CardDescription className="text-slate-300">Your last 5 feature uses</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {recentActivity.map((activity) => (
                   <div
                     key={activity.id}
-                    className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg"
+                    className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700/50 hover:bg-slate-700/30 transition-all duration-300"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-white">{activity.feature}</span>
+                      <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_6px_rgba(34,211,238,0.8)] pulse-glow"></div>
+                      <span className="text-white font-medium">{activity.feature}</span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="outline" className="text-green-400 border-green-400">
+                    <div className="flex items-center space-x-3">
+                      <Badge variant="outline" className="text-cyan-400 border-cyan-400/50 bg-cyan-950/30">
                         {activity.status}
                       </Badge>
                       <span className="text-slate-400 text-sm">{activity.timestamp}</span>

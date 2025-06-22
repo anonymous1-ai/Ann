@@ -95,6 +95,12 @@
     @apply bg-background text-foreground;
     background: linear-gradient(135deg, hsl(8 20% 4%) 0%, hsl(195 30% 8%) 50%, hsl(8 20% 4%) 100%);
     min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  }
+
+  /* Global tech theme styles for all pages */
+  .min-h-screen {
+    background: linear-gradient(135deg, hsl(8 20% 4%) 0%, hsl(195 30% 8%) 50%, hsl(8 20% 4%) 100%);
   }
 }
 
@@ -132,5 +138,86 @@
     100% {
       box-shadow: 0 0 20px hsl(195 100% 60% / 0.8), 0 0 30px hsl(195 100% 60% / 0.4);
     }
+  }
+
+  /* Enhanced button styles for tech theme */
+  .btn-tech {
+    @apply bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-xl neon-glow transition-all duration-300 hover:scale-105;
+  }
+
+  .btn-tech-outline {
+    @apply tech-border bg-slate-900/50 border-cyan-400/30 text-cyan-300 hover:bg-cyan-950/30 hover:border-cyan-400/50 transition-all duration-300 hover:scale-105;
+  }
+
+  /* Enhanced card styles */
+  .card-tech {
+    @apply tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg;
+  }
+
+  /* Enhanced progress bar */
+  .progress-tech {
+    @apply bg-slate-800/50;
+  }
+  
+  .progress-tech > div {
+    @apply bg-gradient-to-r from-cyan-500 to-blue-600;
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+  }
+
+  /* Enhanced badge styles */
+  .badge-tech {
+    @apply bg-cyan-950/50 text-cyan-300 border-cyan-400/30;
+  }
+
+  /* Loading animation */
+  .loading-glow {
+    animation: loading-glow 1.5s ease-in-out infinite;
+  }
+
+  @keyframes loading-glow {
+    0%, 100% {
+      opacity: 0.5;
+      box-shadow: 0 0 10px hsl(195 100% 60% / 0.3);
+    }
+    50% {
+      opacity: 1;
+      box-shadow: 0 0 20px hsl(195 100% 60% / 0.6);
+    }
+  }
+
+  /* Hover effects for interactive elements */
+  .hover-glow:hover {
+    box-shadow: 0 0 30px hsl(195 100% 60% / 0.5), 0 0 60px hsl(195 100% 60% / 0.3);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+  }
+
+  /* Text gradient utility */
+  .text-gradient {
+    @apply bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent;
+  }
+
+  /* Enhanced input styles */
+  .input-tech {
+    @apply tech-border bg-slate-800/50 text-white placeholder:text-slate-400 focus:border-cyan-400/50 focus:ring-cyan-400/20;
+  }
+}
+
+/* Override shadcn components to match tech theme */
+@layer components {
+  .dark .bg-card {
+    background: linear-gradient(135deg, hsl(8 20% 6% / 0.8) 0%, hsl(195 30% 10% / 0.6) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(195 100% 60% / 0.3);
+  }
+
+  .dark .bg-popover {
+    background: linear-gradient(135deg, hsl(8 20% 6% / 0.9) 0%, hsl(195 30% 10% / 0.7) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(195 100% 60% / 0.3);
+  }
+
+  .dark .bg-background {
+    background: linear-gradient(135deg, hsl(8 20% 4%) 0%, hsl(195 30% 8%) 50%, hsl(8 20% 4%) 100%);
   }
 }
