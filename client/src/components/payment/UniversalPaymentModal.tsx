@@ -291,13 +291,19 @@ export default function UniversalPaymentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="luxury-card max-w-lg">
+      <DialogContent 
+        className="luxury-card max-w-lg"
+        aria-describedby="payment-modal-description"
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gradient flex items-center gap-2">
             <Shield className="w-6 h-6 text-gold" />
             Secure Payment
           </DialogTitle>
         </DialogHeader>
+        <div id="payment-modal-description" className="sr-only">
+          Complete your payment using UPI, credit card, or bank transfer
+        </div>
 
         <div className="space-y-6 pt-4">
           <div className="text-center">

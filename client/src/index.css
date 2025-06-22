@@ -419,3 +419,39 @@
       linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%);
   }
 }
+
+/* Modal stability fixes to prevent movement on hover */
+[data-radix-dialog-overlay] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 40 !important;
+  pointer-events: auto !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-radix-dialog-content] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+  will-change: auto !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+}
+
+/* Prevent luxury-card from moving */
+.luxury-card {
+  position: relative !important;
+  pointer-events: auto !important;
+  will-change: auto !important;
+  transform: none !important;
+  transform-origin: center !important;
+}
+
+/* Override any transform animations on hover */
+.luxury-card:hover {
+  transform: none !important;
+  position: relative !important;
+}
