@@ -52,25 +52,24 @@ const PRICING_PLANS = [
   },
   {
     id: 'pro-annual',
-    name: 'Pro Annual',
+    name: 'Pro',
     price: 9500,
     currency: '₹',
     period: 'year',
     apiCalls: 1200,
-    description: 'Save money with annual billing',
+    description: 'Most popular',
+    billedAnnually: true,
     features: [
       'Full AI tool activation',
-      '1200 API calls per year',
-      'Save ₹1100 vs monthly',
+      '1200 API calls annually',
       'License validation',
       'Email support',
       'Regular updates',
       'Usage analytics'
     ],
-    buttonText: 'Subscribe Annually',
+    buttonText: 'Subscribe',
     popular: true,
-    icon: Zap,
-    savings: 'Save 11%'
+    icon: Zap
   },
   {
     id: 'advanced-monthly',
@@ -95,16 +94,16 @@ const PRICING_PLANS = [
   },
   {
     id: 'advanced-annual',
-    name: 'Advanced Annual',
+    name: 'Advanced',
     price: 20000,
     currency: '₹',
     period: 'year',
     apiCalls: 3600,
-    description: 'Best value for businesses',
+    description: 'Best for businesses',
+    billedAnnually: true,
     features: [
       'Full AI tool activation',
-      '3600 API calls per year',
-      'Save ₹4000 vs monthly',
+      '3600 API calls annually',
       'Priority support',
       'Advanced analytics',
       'Hardware hash binding',
@@ -112,10 +111,9 @@ const PRICING_PLANS = [
       'API access logs',
       'Dedicated support'
     ],
-    buttonText: 'Subscribe Annually',
+    buttonText: 'Subscribe',
     popular: false,
-    icon: Crown,
-    savings: 'Save 17%'
+    icon: Crown
   }
 ];
 
@@ -388,13 +386,7 @@ export default function Pricing() {
                   </div>
                 )}
 
-                {plan.savings && (
-                  <div className="absolute -top-4 right-4">
-                    <Badge className="bg-green-500 text-white font-semibold">
-                      {plan.savings}
-                    </Badge>
-                  </div>
-                )}
+
 
                 {isCurrentPlan && (
                   <div className="absolute -top-4 right-4">
@@ -422,15 +414,20 @@ export default function Pricing() {
                       <span className="text-4xl font-bold text-gradient">
                         {plan.currency}{plan.price}
                       </span>
-                      {plan.period !== 'Forever' && (
+                      {plan.period !== 'Forever' && !plan.billedAnnually && (
                         <span className="text-yellow-200/70 ml-2">
                           /{plan.period}
                         </span>
                       )}
                     </div>
+                    {plan.billedAnnually && (
+                      <p className="text-yellow-200/70 text-sm mt-1">
+                        {plan.currency}{plan.price} billed annually
+                      </p>
+                    )}
                     {plan.apiCalls > 0 && (
                       <p className="text-gold text-sm mt-2">
-                        {plan.apiCalls} API calls {plan.id === 'advanced' ? 'per month' : 'included'}
+                        {plan.apiCalls} API calls {plan.billedAnnually ? 'annually' : plan.id.includes('monthly') ? 'per month' : 'included'}
                       </p>
                     )}
                   </div>
