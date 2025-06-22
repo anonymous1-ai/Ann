@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Zap, Crown, Star, Shield, CheckCircle, Lock, Smartphone, RefreshCw } from 'lucide-react';
+import CustomPaymentModal from '@/components/payment/CustomPaymentModal';
 
 
 interface PricingPlan {
@@ -205,67 +206,14 @@ export default function Pricing() {
         throw new Error(orderData.error || 'Failed to create payment order');
       }
 
-      // Open Razorpay checkout modal (same as dashboard)
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      // Open custom payment modal
+      setUpiModal({
+        isOpen: true,
         amount: orderData.data.amount,
-        currency: orderData.data.currency,
-        name: "Subscription Plan",
         description: `${planId.toUpperCase()} Plan Subscription`,
-        order_id: orderData.data.orderId,
-        prefill: {
-          name: user.name,
-          email: user.email,
-        },
-        theme: {
-          color: "#D4AF37"
-        },
-        handler: async function (response: any) {
-          try {
-            // Verify payment with backend
-            const verifyResponse = await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              body: JSON.stringify({
-                orderId: orderData.data.orderId,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-                plan: planId
-              })
-            });
-
-            const verifyData = await verifyResponse.json();
-            
-            if (verifyData.success) {
-              toast({
-                title: "Payment Successful!",
-                description: "Your subscription has been activated",
-              });
-              // Redirect to dashboard
-              window.location.href = '/dashboard';
-            } else {
-              throw new Error(verifyData.error || 'Payment verification failed');
-            }
-          } catch (error: any) {
-            toast({
-              title: "Verification Error",
-              description: error.message || "Payment successful but verification failed. Contact support.",
-              variant: "destructive"
-            });
-          }
-        },
-        modal: {
-          ondismiss: function() {
-            setLoading(null);
-          }
-        }
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+        orderId: orderData.data.orderId,
+        planId: planId
+      });
       
     } catch (error: any) {
       toast({
@@ -572,7 +520,20 @@ export default function Pricing() {
         </div>
       </div>
 
-
+      {/* Custom Payment Modal */}
+      <CustomPaymentModal
+        isOpen={upiModal.isOpen}
+        onClose={() => setUpiModal({ ...upiModal, isOpen: false })}
+        amount={upiModal.amount}
+        description={upiModal.description}
+        orderId={upiModal.orderId}
+        onSuccess={handleUPIPaymentSuccess}
+        onError={handleUPIPaymentError}
+        userDetails={{
+          email: user?.email || '',
+          name: user?.name || ''
+        }}
+      />
     </div>
   );
 }
