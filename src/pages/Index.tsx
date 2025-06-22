@@ -1,3 +1,4 @@
+
 import { Download, Code, Camera, Brain, Shield, Zap, ArrowRight, Check, CreditCard, Activity, Settings, Timer, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +18,6 @@ const Index = () => {
       title: "Download Started",
       description: "Silently AI installer is being prepared for download...",
     });
-    // In a real app, this would trigger the actual download
     console.log("Download button clicked");
   };
 
@@ -35,7 +35,6 @@ const Index = () => {
       description: `You selected the ${planName} plan at ${price}. Redirecting to payment...`,
     });
     console.log(`Selected plan: ${planName} at ${price}`);
-    // In a real app, this would redirect to payment gateway
   };
 
   const handleContactUs = () => {
@@ -74,25 +73,25 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 circuit-pattern">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-slate-900/90 backdrop-blur-sm border-b border-slate-800">
+      <nav className="fixed top-0 w-full z-50 tech-border border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg"></div>
-              <span className="text-white font-bold text-xl">Silently AI</span>
+              <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg neon-glow"></div>
+              <span className="text-white font-bold text-xl neon-text">Silently AI</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <button onClick={() => scrollToSection('features')} className="text-slate-300 hover:text-white transition-colors">Features</button>
-              <button onClick={() => scrollToSection('pricing')} className="text-slate-300 hover:text-white transition-colors">Pricing</button>
-              <button onClick={() => scrollToSection('faq')} className="text-slate-300 hover:text-white transition-colors">FAQ</button>
+              <button onClick={() => scrollToSection('features')} className="text-slate-300 hover:text-cyan-400 transition-colors">Features</button>
+              <button onClick={() => scrollToSection('pricing')} className="text-slate-300 hover:text-cyan-400 transition-colors">Pricing</button>
+              <button onClick={() => scrollToSection('faq')} className="text-slate-300 hover:text-cyan-400 transition-colors">FAQ</button>
               {user ? (
-                <Button onClick={() => navigate('/dashboard')} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={() => navigate('/dashboard')} className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 neon-glow">
                   Dashboard
                 </Button>
               ) : (
-                <Button onClick={handleLogin} variant="outline" className="border-slate-600 text-white hover:bg-slate-800">
+                <Button onClick={handleLogin} variant="outline" className="tech-border text-cyan-400 hover:bg-cyan-500/10">
                   Login
                 </Button>
               )}
@@ -112,7 +111,7 @@ const Index = () => {
           <div className="mb-8">
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
               Convert Anything to
-              <span className="block bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent neon-text">
                 Clean Code
               </span>
             </h1>
@@ -126,7 +125,7 @@ const Index = () => {
             <Button 
               onClick={handleGetStarted}
               size="lg" 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold shadow-2xl transform hover:scale-105 transition-all duration-200"
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold neon-glow transform hover:scale-105 transition-all duration-200"
             >
               {user ? 'Go to Dashboard' : 'Get Started Free'}
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -135,7 +134,7 @@ const Index = () => {
               onClick={() => scrollToSection('pricing')}
               variant="outline" 
               size="lg"
-              className="border-slate-600 text-white hover:bg-slate-800 px-8 py-4 text-lg font-semibold"
+              className="tech-border text-cyan-400 hover:bg-cyan-500/10 px-8 py-4 text-lg font-semibold"
             >
               View Pricing
             </Button>
@@ -143,15 +142,15 @@ const Index = () => {
 
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 px-4">
             <div className="flex items-center gap-2">
-              <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
+              <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" />
               <span>Works 100% offline</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
+              <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" />
               <span>Undetectable typing simulation</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="h-3 md:h-4 w-3 md:w-4 text-green-400" />
+              <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400" />
               <span>Instant kill switch</span>
             </div>
           </div>
@@ -159,10 +158,10 @@ const Index = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="px-4 md:px-6 py-16 md:py-20 relative">
+      <section id="features" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
               Stealth Features That Actually Work
             </h2>
             <p className="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed px-4 md:px-0">
@@ -177,55 +176,55 @@ const Index = () => {
                 emoji: "⚡",
                 title: "Text → Code Magic",
                 description: "Select any text problem statement and instantly get clean, working code solutions",
-                gradient: "from-blue-500/20 to-cyan-500/20"
+                gradient: "from-cyan-500/20 to-blue-500/20"
               },
               {
                 icon: Camera,
                 emoji: "📸",
                 title: "Screenshot → Implementation",
                 description: "Upload any UI screenshot or long image and get pixel-perfect code implementation",
-                gradient: "from-purple-500/20 to-pink-500/20"
+                gradient: "from-blue-500/20 to-indigo-500/20"
               },
               {
                 icon: Brain,
                 emoji: "🧠",
                 title: "Aptitude Problem Solver",
                 description: "Crack quantitative aptitude, logical reasoning, and coding problems in seconds",
-                gradient: "from-green-500/20 to-emerald-500/20"
+                gradient: "from-indigo-500/20 to-purple-500/20"
               },
               {
                 icon: Timer,
                 emoji: "⌨️",
                 title: "Human-Like Typing",
                 description: "AI types your solutions with natural delays and corrections to avoid detection",
-                gradient: "from-yellow-500/20 to-orange-500/20"
+                gradient: "from-purple-500/20 to-pink-500/20"
               },
               {
                 icon: Shield,
                 emoji: "🔒",
                 title: "Master Kill Switch",
                 description: "Press Ctrl+Shift+K to instantly hide all AI activity and return to normal work",
-                gradient: "from-red-500/20 to-rose-500/20"
+                gradient: "from-pink-500/20 to-red-500/20"
               },
               {
                 icon: Zap,
                 emoji: "💾",
                 title: "100% Offline Mode",
                 description: "Download as .exe and work completely offline when internet monitoring is strict",
-                gradient: "from-indigo-500/20 to-blue-500/20"
+                gradient: "from-red-500/20 to-cyan-500/20"
               }
             ].map((feature, index) => (
-              <Card key={index} className="bg-slate-900/50 border-slate-700/50 hover:border-blue-400/50 transition-all duration-500 backdrop-blur-xl group hover:shadow-2xl hover:shadow-blue-500/10 rounded-2xl overflow-hidden">
+              <Card key={index} className="tech-border hover:neon-glow transition-all duration-500 group rounded-2xl overflow-hidden">
                 <CardHeader className="relative">
                   <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                    <div className={`w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <div className={`w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 pulse-glow`}>
                       <span className="text-xl md:text-2xl">{feature.emoji}</span>
                     </div>
-                    <Badge variant="secondary" className="bg-slate-800/50 text-slate-300 border-slate-600/50 text-xs">
+                    <Badge variant="secondary" className="bg-cyan-950/50 text-cyan-300 border-cyan-400/30 text-xs">
                       Core Feature
                     </Badge>
                   </div>
-                  <CardTitle className="text-white text-lg md:text-xl group-hover:text-blue-200 transition-colors">
+                  <CardTitle className="text-white text-lg md:text-xl group-hover:text-cyan-200 transition-colors">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
@@ -243,7 +242,7 @@ const Index = () => {
       {/* How It Works */}
       <section className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-5xl mx-auto relative z-10">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-16 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
             Get Started in 3 Minutes
           </h2>
           <div className="space-y-8 md:space-y-12">
@@ -268,12 +267,12 @@ const Index = () => {
               }
             ].map((item, index) => (
               <div key={index} className="flex flex-col md:flex-row items-start gap-6 md:gap-8 group">
-                <div className="flex-shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 font-bold text-xl md:text-2xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0">
+                <div className="flex-shrink-0 w-16 md:w-20 h-16 md:h-20 rounded-xl md:rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 tech-border flex items-center justify-center text-cyan-300 font-bold text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0 pulse-glow">
                   {item.step}
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 mb-3 md:mb-4">
-                    <h3 className="text-xl md:text-2xl font-semibold text-white group-hover:text-blue-200 transition-colors">
+                    <h3 className="text-xl md:text-2xl font-semibold text-white group-hover:text-cyan-200 transition-colors">
                       {item.title}
                     </h3>
                     <Badge variant="secondary" className="bg-green-950/50 text-green-300 border-green-400/30 text-xs">
@@ -294,7 +293,7 @@ const Index = () => {
       <section id="pricing" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
               Fair & Transparent Pricing
             </h2>
             <p className="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto px-4 md:px-0">
@@ -345,13 +344,13 @@ const Index = () => {
                 badge: "Flexible"
               }
             ].map((plan, index) => (
-              <Card key={index} className={`relative rounded-2xl overflow-hidden backdrop-blur-xl border transition-all duration-500 hover:shadow-2xl ${
+              <Card key={index} className={`relative rounded-2xl overflow-hidden tech-border transition-all duration-500 hover:neon-glow ${
                 plan.popular 
-                  ? 'bg-gradient-to-b from-blue-950/80 to-purple-950/80 border-blue-400/50 hover:border-blue-400 shadow-blue-500/20' 
-                  : 'bg-slate-900/50 border-slate-700/50 hover:border-blue-400/50 hover:shadow-blue-500/10'
+                  ? 'bg-gradient-to-b from-cyan-950/80 to-blue-950/80 border-cyan-400/50' 
+                  : 'hover:border-cyan-400/50'
               }`}>
                 {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 px-3 md:px-4 py-1 text-xs">
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0 px-3 md:px-4 py-1 text-xs neon-glow">
                     {plan.badge}
                   </Badge>
                 )}
@@ -372,7 +371,7 @@ const Index = () => {
                   <ul className="space-y-2 md:space-y-3">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-2 md:gap-3 text-slate-300 text-xs md:text-sm">
-                        <Check className="h-3 md:h-4 w-3 md:w-4 text-blue-400 flex-shrink-0" />
+                        <Check className="h-3 md:h-4 w-3 md:w-4 text-cyan-400 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}
@@ -381,8 +380,8 @@ const Index = () => {
                     onClick={() => handlePlanSelect(plan.name, plan.price + plan.period)}
                     className={`w-full rounded-xl py-2 md:py-3 text-sm md:text-base font-semibold transition-all duration-300 ${
                       plan.popular
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:via-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:shadow-blue-500/25'
-                        : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 hover:border-blue-400/50'
+                        ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:via-cyan-600 hover:to-blue-700 text-white neon-glow'
+                        : 'tech-border text-cyan-400 hover:bg-cyan-500/10'
                     }`}
                   >
                     {plan.buttonText}
@@ -394,7 +393,7 @@ const Index = () => {
 
           <div className="text-center mt-8 md:mt-12">
             <p className="text-slate-400 text-base md:text-lg px-4 md:px-0">
-              All plans include <span className="text-blue-300 font-semibold">undetectable typing simulation</span> and <span className="text-blue-300 font-semibold">master kill switch</span>
+              All plans include <span className="text-cyan-300 font-semibold">undetectable typing simulation</span> and <span className="text-cyan-300 font-semibold">master kill switch</span>
             </p>
           </div>
         </div>
@@ -403,7 +402,7 @@ const Index = () => {
       {/* Testimonials */}
       <section className="px-4 md:px-6 py-16 md:py-20">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
             Trusted by 10,000+ Users
           </h2>
           <p className="text-center text-slate-400 text-base md:text-lg mb-12 md:mb-16">Students, freelancers, and professionals love the stealth approach</p>
@@ -432,16 +431,16 @@ const Index = () => {
                 plan: "Top-up Credits"
               }
             ].map((testimonial, index) => (
-              <Card key={index} className="bg-slate-900/50 border-slate-700/50 backdrop-blur-xl rounded-2xl hover:border-blue-400/50 transition-all duration-500">
+              <Card key={index} className="tech-border rounded-2xl hover:neon-glow transition-all duration-500">
                 <CardContent className="pt-6 md:pt-8">
                   <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-                    <div className="w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg md:text-xl">
+                    <div className="w-12 md:w-16 h-12 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg md:text-xl pulse-glow">
                       {testimonial.initials}
                     </div>
                     <div>
                       <div className="font-semibold text-white text-base md:text-lg">{testimonial.name}</div>
                       <div className="text-slate-400 text-xs md:text-sm">{testimonial.role}</div>
-                      <Badge variant="secondary" className="bg-blue-950/50 text-blue-300 border-blue-400/30 text-xs mt-1">
+                      <Badge variant="secondary" className="bg-cyan-950/50 text-cyan-300 border-cyan-400/30 text-xs mt-1">
                         {testimonial.plan}
                       </Badge>
                     </div>
@@ -457,9 +456,9 @@ const Index = () => {
       </section>
 
       {/* FAQ */}
-      <section className="px-4 md:px-6 py-16 md:py-20 relative">
+      <section id="faq" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
             Frequently Asked Questions
           </h2>
           <p className="text-center text-slate-400 text-base md:text-lg mb-12 md:mb-16">Everything you need to know about using Silently AI</p>
@@ -497,8 +496,8 @@ const Index = () => {
                 answer: "Currently only Windows (.exe) is supported. Mac and Linux versions are in development. You can use Windows in a VM on Mac/Linux as a temporary solution."
               }
             ].map((item, index) => (
-              <AccordionItem key={index} value={item.value} className="border-slate-700/50 rounded-xl bg-slate-900/30 backdrop-blur-sm">
-                <AccordionTrigger className="text-white hover:text-blue-300 px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-medium">
+              <AccordionItem key={index} value={item.value} className="tech-border rounded-xl">
+                <AccordionTrigger className="text-white hover:text-cyan-300 px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-medium">
                   {item.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-slate-300 px-4 md:px-6 pb-4 md:pb-6 leading-relaxed text-sm md:text-base">
@@ -511,15 +510,15 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="px-4 md:px-6 py-12 md:py-16 border-t border-slate-800/50 backdrop-blur-xl relative">
+      <footer className="px-4 md:px-6 py-12 md:py-16 border-t border-cyan-800/50 tech-border relative">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div className="w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center neon-glow">
                   <Code className="w-5 md:w-6 h-5 md:h-6 text-white" />
                 </div>
-                <span className="text-xl md:text-2xl font-bold text-white">Silently AI</span>
+                <span className="text-xl md:text-2xl font-bold text-white neon-text">Silently AI</span>
               </div>
               <p className="text-slate-400 leading-relaxed mb-4 md:mb-6 text-sm md:text-base">
                 The undetectable desktop AI tool for students, developers, and professionals who need results without detection.
@@ -534,7 +533,7 @@ const Index = () => {
                 title: "Product",
                 links: [
                   { name: "Download", action: handleDownload },
-                  { name: "Features", action: () => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }) },
+                  { name: "Features", action: () => scrollToSection('features') },
                   { name: "Pricing", action: handlePricing },
                   { name: "Roadmap", action: () => handleSocialLink("Roadmap") }
                 ]
@@ -565,7 +564,7 @@ const Index = () => {
                     <li key={linkIndex}>
                       <button 
                         onClick={link.action}
-                        className="text-slate-400 hover:text-blue-300 transition-colors text-sm md:text-base text-left"
+                        className="text-slate-400 hover:text-cyan-300 transition-colors text-sm md:text-base text-left"
                       >
                         {link.name}
                       </button>
@@ -575,7 +574,7 @@ const Index = () => {
               </div>
             ))}
           </div>
-          <div className="border-t border-slate-800/50 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-slate-400 space-y-4 md:space-y-0">
+          <div className="border-t border-cyan-800/50 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-slate-400 space-y-4 md:space-y-0">
             <div className="text-sm md:text-base">© 2024 Silently AI. All rights reserved.</div>
             <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm">
               <span>Made in India 🇮🇳</span>
