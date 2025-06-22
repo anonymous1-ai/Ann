@@ -67,6 +67,17 @@ export default function CustomPaymentModal({
   
   const formattedAmount = (amount / 100).toFixed(0);
 
+  const validateUPI = (upi: string) => {
+    // Enhanced UPI validation with real provider checks
+    const upiRegex = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
+    const validProviders = ['paytm', 'gpay', 'phonepe', 'ybl', 'okhdfcbank', 'okaxis', 'oksbi', 'okicici', 'amazon', 'freecharge', 'mobikwik'];
+    
+    if (!upiRegex.test(upi)) return false;
+    
+    const provider = upi.split('@')[1]?.toLowerCase();
+    return validProviders.includes(provider);
+  };
+
   const handleUPIPayment = async () => {
     if (!upiId.trim()) {
       toast({
@@ -77,51 +88,136 @@ export default function CustomPaymentModal({
       return;
     }
 
+    if (!validateUPI(upiId)) {
+      toast({
+        title: "Invalid UPI ID",
+        description: "Please enter a valid UPI ID with supported provider (@paytm, @gpay, @phonepe, etc.)",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Step 1: Initiate UPI request
-      toast({
-        title: "UPI Request Initiated",
-        description: `Payment request sent to ${upiId}. Please check your UPI app.`,
+      // Create real Razorpay order for UPI
+      const response = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          plan: 'subscription',
+          amount: amount,
+          paymentMethod: 'upi',
+          upiId: upiId
+        })
       });
 
-      // Step 2: Simulate UPI request creation (2 seconds)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const orderData = await response.json();
       
-      // Step 3: Start 5-minute countdown timer
-      setPaymentTimer(300); // 5 minutes = 300 seconds
-      setShowTimer(true);
-      
-      toast({
-        title: "Payment Request Active",
-        description: "You have 5 minutes to complete payment in your UPI app.",
-      });
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to create UPI payment order');
+      }
 
-      // Step 4: Simulate user completing payment in UPI app (8 seconds for demo)
-      await new Promise(resolve => setTimeout(resolve, 8000));
-      
-      // Step 5: Payment confirmation
-      const mockResponse = {
-        razorpay_payment_id: `pay_${Math.random().toString(36).substr(2, 14)}`,
-        razorpay_order_id: orderId,
-        razorpay_signature: `signature_${Math.random().toString(36).substr(2, 20)}`
+      // Use Razorpay for real UPI payment
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: amount,
+        currency: 'INR',
+        name: "Subscription Plan",
+        description: description,
+        order_id: orderData.data.orderId,
+        method: {
+          upi: true
+        },
+        prefill: {
+          name: userDetails.name,
+          email: userDetails.email,
+          'vpa': upiId
+        },
+        theme: {
+          color: "#D4AF37",
+          hide_topbar: false
+        },
+        modal: {
+          backdrop_close: false,
+          escape: false,
+          handleback: false,
+          ondismiss: function() {
+            setLoading(false);
+            setShowTimer(false);
+          }
+        },
+        handler: async function (response: any) {
+          setShowTimer(false);
+          await handlePaymentSuccess(response);
+        }
       };
-      
+
+      // Start payment timer
+      setPaymentTimer(300);
+      setShowTimer(true);
+
       toast({
-        title: "Payment Received",
-        description: "UPI payment completed successfully!",
+        title: "UPI Payment Initiated",
+        description: `Payment request sent to ${upiId}. Complete in your UPI app.`,
       });
-      
-      await handlePaymentSuccess(mockResponse);
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (error: any) {
       setLoading(false);
+      setShowTimer(false);
       onError(error);
     }
   };
 
+  const validateCard = (cardNumber: string) => {
+    // Luhn algorithm for card validation
+    const num = cardNumber.replace(/\s/g, '');
+    if (!/^\d{13,19}$/.test(num)) return false;
+    
+    let sum = 0;
+    let isEven = false;
+    for (let i = num.length - 1; i >= 0; i--) {
+      let digit = parseInt(num[i]);
+      if (isEven) {
+        digit *= 2;
+        if (digit > 9) digit -= 9;
+      }
+      sum += digit;
+      isEven = !isEven;
+    }
+    return sum % 10 === 0;
+  };
+
+  const validateExpiry = (expiry: string) => {
+    const [month, year] = expiry.split('/').map(Number);
+    if (!month || !year || month < 1 || month > 12) return false;
+    
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear() % 100;
+    const currentMonth = currentDate.getMonth() + 1;
+    
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      return false;
+    }
+    return true;
+  };
+
+  const getCardType = (cardNumber: string) => {
+    const num = cardNumber.replace(/\s/g, '');
+    if (/^4/.test(num)) return 'Visa';
+    if (/^5[1-5]/.test(num)) return 'Mastercard';
+    if (/^3[47]/.test(num)) return 'American Express';
+    if (/^6/.test(num)) return 'Discover';
+    return 'Unknown';
+  };
+
   const handleCardPayment = async () => {
-    // Validate card details
+    // Enhanced card validation
     if (!cardDetails.name.trim()) {
       toast({
         title: "Cardholder Name Required",
@@ -131,28 +227,28 @@ export default function CustomPaymentModal({
       return;
     }
     
-    if (!cardDetails.number.trim()) {
+    if (!cardDetails.number.trim() || !validateCard(cardDetails.number)) {
       toast({
-        title: "Card Number Required",
-        description: "Please enter your card number",
+        title: "Invalid Card Number",
+        description: "Please enter a valid card number",
         variant: "destructive"
       });
       return;
     }
     
-    if (!cardDetails.expiry.trim()) {
+    if (!cardDetails.expiry.trim() || !validateExpiry(cardDetails.expiry)) {
       toast({
-        title: "Expiry Date Required",
-        description: "Please enter the card expiry date",
+        title: "Invalid Expiry Date",
+        description: "Please enter a valid expiry date (MM/YY)",
         variant: "destructive"
       });
       return;
     }
     
-    if (!cardDetails.cvv.trim()) {
+    if (!cardDetails.cvv.trim() || cardDetails.cvv.length < 3) {
       toast({
-        title: "CVV Required",
-        description: "Please enter the CVV code",
+        title: "Invalid CVV",
+        description: "Please enter a valid CVV code",
         variant: "destructive"
       });
       return;
@@ -161,25 +257,85 @@ export default function CustomPaymentModal({
     setLoading(true);
 
     try {
-      // Simulate successful payment without Razorpay interface
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
+      // Create real Razorpay order for card payment
+      const response = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          plan: 'subscription',
+          amount: amount,
+          paymentMethod: 'card'
+        })
+      });
+
+      const orderData = await response.json();
       
-      // Create mock payment response
-      const mockResponse = {
-        razorpay_payment_id: `pay_${Math.random().toString(36).substr(2, 14)}`,
-        razorpay_order_id: orderId,
-        razorpay_signature: `signature_${Math.random().toString(36).substr(2, 20)}`
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to create card payment order');
+      }
+
+      const cardType = getCardType(cardDetails.number);
+      
+      toast({
+        title: "Processing Card Payment",
+        description: `${cardType} ending in ${cardDetails.number.slice(-4)}`,
+      });
+
+      // Use Razorpay for real card payment
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: amount,
+        currency: 'INR',
+        name: "Subscription Plan",
+        description: description,
+        order_id: orderData.data.orderId,
+        method: {
+          card: true
+        },
+        prefill: {
+          name: cardDetails.name,
+          email: userDetails.email,
+          contact: ''
+        },
+        theme: {
+          color: "#D4AF37",
+          hide_topbar: false
+        },
+        modal: {
+          backdrop_close: false,
+          escape: false,
+          handleback: false,
+          ondismiss: function() {
+            setLoading(false);
+          }
+        },
+        handler: async function (response: any) {
+          await handlePaymentSuccess(response);
+        }
       };
-      
-      await handlePaymentSuccess(mockResponse);
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (error: any) {
       setLoading(false);
       onError(error);
     }
   };
 
+  const validateIFSC = (ifsc: string) => {
+    const ifscRegex = /^[A-Z]{4}[0][A-Z0-9]{6}$/;
+    return ifscRegex.test(ifsc.toUpperCase());
+  };
+
+  const validateAccountNumber = (accountNumber: string) => {
+    const accountRegex = /^\d{9,18}$/;
+    return accountRegex.test(accountNumber);
+  };
+
   const handleBankPayment = async () => {
-    // Validate bank details
     if (!bankDetails.accountName.trim()) {
       toast({
         title: "Account Holder Name Required",
@@ -189,19 +345,19 @@ export default function CustomPaymentModal({
       return;
     }
     
-    if (!bankDetails.accountNumber.trim()) {
+    if (!bankDetails.accountNumber.trim() || !validateAccountNumber(bankDetails.accountNumber)) {
       toast({
-        title: "Account Number Required",
-        description: "Please enter your account number",
+        title: "Invalid Account Number",
+        description: "Please enter a valid bank account number (9-18 digits)",
         variant: "destructive"
       });
       return;
     }
     
-    if (!bankDetails.ifsc.trim()) {
+    if (!bankDetails.ifsc.trim() || !validateIFSC(bankDetails.ifsc)) {
       toast({
-        title: "IFSC Code Required",
-        description: "Please enter the IFSC code",
+        title: "Invalid IFSC Code",
+        description: "Please enter a valid IFSC code (e.g., SBIN0001234)",
         variant: "destructive"
       });
       return;
@@ -210,17 +366,64 @@ export default function CustomPaymentModal({
     setLoading(true);
 
     try {
-      // Simulate successful payment without Razorpay interface
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
+      const response = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          plan: 'subscription',
+          amount: amount,
+          paymentMethod: 'netbanking'
+        })
+      });
+
+      const orderData = await response.json();
       
-      // Create mock payment response
-      const mockResponse = {
-        razorpay_payment_id: `pay_${Math.random().toString(36).substr(2, 14)}`,
-        razorpay_order_id: orderId,
-        razorpay_signature: `signature_${Math.random().toString(36).substr(2, 20)}`
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to create bank payment order');
+      }
+
+      toast({
+        title: "Initiating Bank Transfer",
+        description: `Account ending in ${bankDetails.accountNumber.slice(-4)}`,
+      });
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: amount,
+        currency: 'INR',
+        name: "Subscription Plan",
+        description: description,
+        order_id: orderData.data.orderId,
+        method: {
+          netbanking: true
+        },
+        prefill: {
+          name: bankDetails.accountName,
+          email: userDetails.email,
+          contact: ''
+        },
+        theme: {
+          color: "#D4AF37",
+          hide_topbar: false
+        },
+        modal: {
+          backdrop_close: false,
+          escape: false,
+          handleback: false,
+          ondismiss: function() {
+            setLoading(false);
+          }
+        },
+        handler: async function (response: any) {
+          await handlePaymentSuccess(response);
+        }
       };
-      
-      await handlePaymentSuccess(mockResponse);
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (error: any) {
       setLoading(false);
       onError(error);
@@ -229,23 +432,52 @@ export default function CustomPaymentModal({
 
   const handlePaymentSuccess = async (response: any) => {
     try {
-      // Bypass verification and directly trigger success
+      setLoading(true);
+      
+      // Verify payment with backend using real Razorpay response
+      const verificationResponse = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          plan: 'subscription',
+          paymentMethod: activeTab.toLowerCase()
+        })
+      });
+
+      const verificationData = await verificationResponse.json();
+      
+      if (!verificationData.success) {
+        throw new Error(verificationData.error || 'Payment verification failed');
+      }
+
+      // Reset states
+      setShowTimer(false);
+      setPaymentTimer(0);
       setLoading(false);
       
-      // Create successful response for subscription activation
-      const successData = {
-        success: true,
-        message: 'Payment completed successfully',
-        data: {
-          paymentId: response.razorpay_payment_id,
-          orderId: response.razorpay_order_id,
-          plan: 'subscription'
-        }
-      };
+      toast({
+        title: "Payment Verified Successfully!",
+        description: `Your ${activeTab} payment has been processed and verified.`,
+      });
       
-      onSuccess(successData);
+      onSuccess(verificationData.data);
     } catch (error: any) {
       setLoading(false);
+      setShowTimer(false);
+      console.error('Payment verification error:', error);
+      
+      toast({
+        title: "Payment Verification Failed",
+        description: error.message || "Please contact support if the amount was deducted.",
+        variant: "destructive"
+      });
+      
       onError(error);
     }
   };

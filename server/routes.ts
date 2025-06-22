@@ -270,44 +270,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create payment order (backend-only, no Razorpay UI)
+  // Enhanced payment order creation with real validation
   app.post("/api/create-order", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { plan } = req.body;
+      const { plan, amount, paymentMethod, upiId } = req.body;
       
-      if (!PRICING_PLANS[plan as keyof typeof PRICING_PLANS]) {
+      // Validate plan if provided
+      if (plan && !PRICING_PLANS[plan as keyof typeof PRICING_PLANS]) {
         return res.status(400).json({ success: false, error: "Invalid plan" });
       }
 
-      const planDetails = PRICING_PLANS[plan as keyof typeof PRICING_PLANS];
+      // Use plan details or custom amount
+      const orderAmount = plan ? PRICING_PLANS[plan as keyof typeof PRICING_PLANS].price * 100 : amount;
       
-      // Create Razorpay order (backend only)
+      if (!orderAmount || orderAmount <= 0) {
+        return res.status(400).json({ success: false, error: "Invalid amount" });
+      }
+
+      // Enhanced UPI validation
+      if (paymentMethod === 'upi' && upiId) {
+        const upiRegex = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
+        const validProviders = ['paytm', 'gpay', 'phonepe', 'ybl', 'okhdfcbank', 'okaxis', 'oksbi', 'okicici', 'amazon', 'freecharge', 'mobikwik'];
+        
+        if (!upiRegex.test(upiId)) {
+          return res.status(400).json({ success: false, error: "Invalid UPI ID format" });
+        }
+        
+        const provider = upiId.split('@')[1]?.toLowerCase();
+        if (!validProviders.includes(provider)) {
+          return res.status(400).json({ success: false, error: "Unsupported UPI provider" });
+        }
+      }
+      
+      // Create Razorpay order with enhanced options
       const options = {
-        amount: planDetails.price * 100, // Convert to paise
+        amount: orderAmount,
         currency: 'INR',
-        receipt: `receipt_${Date.now()}`,
+        receipt: `receipt_${Date.now()}_${req.user.userId}`,
         notes: {
-          plan: plan,
-          userId: req.user.userId
+          plan: plan || 'custom',
+          userId: req.user.userId.toString(),
+          paymentMethod: paymentMethod || 'card',
+          upiId: upiId || '',
+          timestamp: new Date().toISOString()
         }
       };
 
       const order = await razorpay.orders.create(options);
       
-      // Return payment link for seamless redirect with return URL
-      const returnUrl = `${process.env.CLIENT_URL || 'http://localhost:5000'}/api/payment-return`;
       res.json({
         success: true,
         data: {
           orderId: order.id,
           amount: order.amount,
           currency: order.currency,
-          plan,
-          paymentUrl: `https://checkout.razorpay.com/v1/checkout.js?order_id=${order.id}&key_id=${process.env.VITE_RAZORPAY_KEY_ID}&callback_url=${encodeURIComponent(returnUrl)}`
+          plan: plan || 'custom',
+          paymentMethod: paymentMethod,
+          upiId: upiId,
+          receipt: order.receipt
         }
       });
     } catch (error: any) {
-      console.error('Order creation error:', error);
+      console.error('Enhanced order creation error:', error);
       res.status(500).json({ 
         success: false, 
         error: error.message || "Failed to create payment order" 
@@ -358,22 +382,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Webhook handler for seamless payment verification
+  // Enhanced payment verification with real Razorpay integration
   app.post("/api/verify-payment", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { orderId, paymentId, signature, plan } = req.body;
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan, paymentMethod } = req.body;
       
-      // Verify Razorpay payment signature
-      const body = orderId + "|" + paymentId;
+      // Real Razorpay signature verification
+      const body = razorpay_order_id + "|" + razorpay_payment_id;
       const expectedSignature = crypto
         .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
         .update(body.toString())
         .digest("hex");
 
-      const isPaymentValid = expectedSignature === signature;
+      const isPaymentValid = expectedSignature === razorpay_signature;
       
       if (!isPaymentValid) {
+        console.error('Payment signature verification failed:', {
+          expected: expectedSignature,
+          received: razorpay_signature,
+          orderId: razorpay_order_id,
+          paymentId: razorpay_payment_id
+        });
         return res.status(400).json({ success: false, error: "Payment verification failed" });
+      }
+
+      // Fetch payment details from Razorpay for additional verification
+      try {
+        const payment = await razorpay.payments.fetch(razorpay_payment_id);
+        
+        if (payment.status !== 'captured' && payment.status !== 'authorized') {
+          return res.status(400).json({ 
+            success: false, 
+            error: "Payment not completed successfully" 
+          });
+        }
+
+        // Log payment details for audit
+        console.log('Payment verified successfully:', {
+          paymentId: razorpay_payment_id,
+          orderId: razorpay_order_id,
+          amount: payment.amount,
+          method: payment.method,
+          status: payment.status,
+          userId: req.user.userId
+        });
+
+      } catch (paymentFetchError) {
+        console.error('Failed to fetch payment details:', paymentFetchError);
+        return res.status(400).json({ 
+          success: false, 
+          error: "Unable to verify payment with Razorpay" 
+        });
       }
 
       // Handle subscription payments
@@ -384,23 +443,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const expiryDate = new Date(Date.now() + planDetails.duration * 24 * 60 * 60 * 1000);
 
-      // Generate UUID license key
-      const licenseKey = uuidv4();
-
       // Update user plan and create subscription
       await storage.updateUserPlan(req.user.userId, plan, planDetails.apiCalls, expiryDate);
-      await storage.createSubscription(req.user.userId, plan, paymentId, planDetails.price);
-      
-      // Store license key in user record (never expose to frontend)
-      await storage.updateUser(req.user.userId, { licenseKey });
+      await storage.createSubscription(req.user.userId, plan, razorpay_payment_id, planDetails.price);
 
-      // Return success without exposing license key
+      // Return success with detailed response
       res.json({
         success: true,
         data: {
           plan,
           apiCallsLeft: planDetails.apiCalls,
           expiryDate,
+          paymentId: razorpay_payment_id,
+          orderId: razorpay_order_id,
+          paymentMethod: paymentMethod || 'unknown',
           message: "Subscription activated successfully"
         }
       });
