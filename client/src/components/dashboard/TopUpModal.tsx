@@ -144,26 +144,28 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="luxury-card max-w-md">
+      <DialogContent className="max-w-md border border-yellow-600/30 shadow-2xl shadow-yellow-900/20" style={{
+        background: `radial-gradient(ellipse at top, hsl(218, 23%, 6%) 0%, hsl(218, 23%, 4%) 50%), linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%)`
+      }}>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gradient flex items-center gap-2">
-            <CreditCard className="w-6 h-6 text-gold" />
+          <DialogTitle className="text-2xl font-bold text-yellow-400 flex items-center gap-2">
+            <CreditCard className="w-6 h-6 text-yellow-400" />
             Top-up API Calls
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 pt-4">
           <div className="text-center">
-            <p className="text-yellow-200/80 mb-2">
+            <p className="text-yellow-300 mb-2">
               Purchase additional API calls at ₹{pricePerCall} per call
             </p>
-            <div className="bg-slate-800/50 rounded-lg p-4 border border-yellow-400/20">
-              <p className="text-gold font-semibold">Current Balance: {user?.apiCallsLeft || 0} calls</p>
+            <div className="bg-background/80 rounded-lg p-4 border border-yellow-400/20">
+              <p className="text-yellow-400 font-semibold">Current Balance: {user?.api_credits || 0} calls</p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <Label htmlFor="apiCalls" className="text-gold font-medium">
+            <Label htmlFor="apiCalls" className="text-yellow-400 font-medium">
               Number of API Calls (1-1000)
             </Label>
             
@@ -174,7 +176,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                 size="sm"
                 onClick={() => adjustApiCalls(-10)}
                 disabled={apiCalls <= 10}
-                className="luxury-button-outline"
+                className="bg-background/60 border border-yellow-600/30 text-yellow-200 hover:bg-background/80"
               >
                 <Minus className="w-4 h-4" />
               </Button>
@@ -186,7 +188,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                 max="1000"
                 value={apiCalls}
                 onChange={(e) => setApiCalls(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))}
-                className="text-center luxury-input"
+                className="text-center bg-background/80 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
               />
               
               <Button
@@ -195,25 +197,25 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                 size="sm"
                 onClick={() => adjustApiCalls(10)}
                 disabled={apiCalls >= 990}
-                className="luxury-button-outline"
+                className="bg-background/60 border border-yellow-600/30 text-yellow-200 hover:bg-background/80"
               >
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
 
-            <div className="bg-gradient-to-r from-yellow-900/20 to-yellow-800/20 rounded-lg p-4 border border-yellow-400/30">
+            <div className="bg-background/80 rounded-lg p-4 border border-yellow-400/30">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-yellow-200/80">API Calls:</span>
-                <span className="text-gold font-semibold">{apiCalls}</span>
+                <span className="text-yellow-300">API Calls:</span>
+                <span className="text-yellow-400 font-semibold">{apiCalls}</span>
               </div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-yellow-200/80">Price per call:</span>
-                <span className="text-gold font-semibold">₹{pricePerCall}</span>
+                <span className="text-yellow-300">Price per call:</span>
+                <span className="text-yellow-400 font-semibold">₹{pricePerCall}</span>
               </div>
               <div className="border-t border-yellow-400/30 pt-2 mt-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-gold font-semibold text-lg">Total Amount:</span>
-                  <span className="text-gradient font-bold text-xl">₹{totalAmount.toLocaleString()}</span>
+                  <span className="text-yellow-400 font-semibold text-lg">Total Amount:</span>
+                  <span className="text-yellow-300 font-bold text-xl">₹{totalAmount.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -224,7 +226,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
               variant="outline"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 luxury-button-outline"
+              className="flex-1 bg-background/60 border border-yellow-600/30 text-yellow-200 hover:bg-background/80"
             >
               Cancel
             </Button>
@@ -232,7 +234,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
             <Button
               onClick={handleTopUp}
               disabled={loading || apiCalls < 1}
-              className="flex-1 luxury-button"
+              className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold shadow-lg hover:shadow-yellow-500/20 transition-all"
             >
               {loading ? (
                 <div className="flex items-center space-x-2">
