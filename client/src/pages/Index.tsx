@@ -588,8 +588,8 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {plans.filter(plan => plan.id !== 'topup').map((plan, index) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {plans.map((plan, index) => (
               <Card key={index} className={`relative rounded-2xl overflow-hidden luxury-card transition-all duration-500 hover:golden-glow ${plan.popular ? 'bg-gradient-to-b from-yellow-950/30 to-amber-950/30 border-yellow-400/50' : 'hover:border-yellow-400/50'}`}>
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
@@ -641,74 +641,7 @@ const Index = () => {
             ))}
           </div>
 
-          {/* Top-up Section */}
-          <div className="mt-20 border-t border-yellow-400/20 pt-16">
-            <div className="text-center mb-12">
-              <h3 className="text-2xl font-bold text-gradient mb-4">
-                Need More API Calls?
-              </h3>
-              <p className="text-yellow-200/70 max-w-2xl mx-auto">
-                Top up your account with additional API calls. Credits never expire and work with any plan.
-              </p>
-            </div>
 
-            <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-              <Card className="luxury-card golden-glow ring-2 ring-gold/50">
-                <CardHeader className="text-center">
-                  <Badge className="mb-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold">
-                    Most Popular
-                  </Badge>
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
-                    <Crown className="w-6 h-6 text-black" />
-                  </div>
-                  <CardTitle className="text-gold text-xl">100 Calls</CardTitle>
-                  <CardDescription className="text-yellow-200/70">Best value</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-3xl font-bold text-gradient">₹800</span>
-                    <p className="text-yellow-200/70 text-sm">₹8 per call</p>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    onClick={() => handleTopUp('topup-100')}
-                    disabled={loading === 'topup-100'}
-                    className="w-full btn-luxury"
-                  >
-                    {loading === 'topup-100' ? 'Processing...' : 'Buy 100 Calls'}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="luxury-card hover:golden-glow transition-all duration-300">
-                <CardHeader className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                    <Star className="w-6 h-6 text-white" />
-                  </div>
-                  <CardTitle className="text-gold text-xl">250 Calls</CardTitle>
-                  <CardDescription className="text-yellow-200/70">Maximum value</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-3xl font-bold text-gradient">₹1750</span>
-                    <p className="text-yellow-200/70 text-sm">₹7 per call</p>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    onClick={() => handleTopUp('topup-250')}
-                    disabled={loading === 'topup-250'}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    {loading === 'topup-250' ? 'Processing...' : 'Buy 250 Calls'}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="text-center mt-8">
-              <p className="text-yellow-200/70 text-sm">
-                Top-up credits never expire and work with any subscription plan.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
