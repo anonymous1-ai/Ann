@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Smartphone, 
   CreditCard, 
@@ -115,7 +114,6 @@ export default function UniversalPaymentModal({
     setPaymentStatus('processing');
 
     try {
-      // Process using Razorpay (hidden from user)
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: amount,
@@ -168,7 +166,6 @@ export default function UniversalPaymentModal({
     setLoading(true);
     
     try {
-      // Submit bank transfer request
       const response = await fetch('/api/initiate-bank-transfer', {
         method: 'POST',
         headers: {
@@ -312,76 +309,102 @@ export default function UniversalPaymentModal({
           </div>
 
           {paymentStatus === 'pending' && (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-slate-800/50">
-                <TabsTrigger value="upi" className="data-[state=active]:bg-gold data-[state=active]:text-black">
+            <div className="w-full">
+              {/* Payment Method Selector */}
+              <div className="grid grid-cols-3 gap-2 mb-6 p-1 bg-slate-800/50 rounded-lg">
+                <button
+                  onClick={() => setActiveTab('upi')}
+                  className={`flex items-center justify-center p-3 rounded-md transition-all ${
+                    activeTab === 'upi' 
+                      ? 'bg-gold text-black font-semibold' 
+                      : 'text-yellow-200/70 hover:text-gold'
+                  }`}
+                >
                   <Smartphone className="w-4 h-4 mr-2" />
                   UPI
-                </TabsTrigger>
-                <TabsTrigger value="card" className="data-[state=active]:bg-gold data-[state=active]:text-black">
+                </button>
+                <button
+                  onClick={() => setActiveTab('card')}
+                  className={`flex items-center justify-center p-3 rounded-md transition-all ${
+                    activeTab === 'card' 
+                      ? 'bg-gold text-black font-semibold' 
+                      : 'text-yellow-200/70 hover:text-gold'
+                  }`}
+                >
                   <CreditCard className="w-4 h-4 mr-2" />
                   Card
-                </TabsTrigger>
-                <TabsTrigger value="bank" className="data-[state=active]:bg-gold data-[state=active]:text-black">
+                </button>
+                <button
+                  onClick={() => setActiveTab('bank')}
+                  className={`flex items-center justify-center p-3 rounded-md transition-all ${
+                    activeTab === 'bank' 
+                      ? 'bg-gold text-black font-semibold' 
+                      : 'text-yellow-200/70 hover:text-gold'
+                  }`}
+                >
                   <Building2 className="w-4 h-4 mr-2" />
                   Bank
-                </TabsTrigger>
-              </TabsList>
+                </button>
+              </div>
 
-              <TabsContent value="upi" className="space-y-4">
-                <div className="text-center">
-                  <h3 className="text-gold font-semibold mb-3">Choose UPI App</h3>
-                </div>
+              {/* UPI Payment Section */}
+              {activeTab === 'upi' && (
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-gold font-semibold mb-3">Choose UPI App</h3>
+                  </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <Button
-                    onClick={() => openUPIApp('gpay')}
-                    className="luxury-button-outline flex flex-col items-center p-4 h-auto"
-                  >
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg mb-2 flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">G</span>
-                    </div>
-                    <span className="text-xs">Google Pay</span>
-                  </Button>
-
-                  <Button
-                    onClick={() => openUPIApp('phonepe')}
-                    className="luxury-button-outline flex flex-col items-center p-4 h-auto"
-                  >
-                    <div className="w-8 h-8 bg-purple-600 rounded-lg mb-2 flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">P</span>
-                    </div>
-                    <span className="text-xs">PhonePe</span>
-                  </Button>
-
-                  <Button
-                    onClick={() => openUPIApp('paytm')}
-                    className="luxury-button-outline flex flex-col items-center p-4 h-auto"
-                  >
-                    <div className="w-8 h-8 bg-blue-500 rounded-lg mb-2 flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">P</span>
-                    </div>
-                    <span className="text-xs">Paytm</span>
-                  </Button>
-                </div>
-
-                <div className="border-t border-yellow-400/20 pt-4">
-                  <p className="text-yellow-200/80 text-sm mb-2">Or pay manually using UPI ID:</p>
-                  <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-3 border border-yellow-400/20">
-                    <span className="text-gold font-mono text-sm flex-1">{upiId}</span>
+                  <div className="grid grid-cols-3 gap-3">
                     <Button
-                      onClick={copyUPIId}
-                      size="sm"
-                      variant="outline"
-                      className="luxury-button-outline"
+                      onClick={() => openUPIApp('gpay')}
+                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
                     >
-                      {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      <div className="w-8 h-8 bg-blue-600 rounded-lg mb-2 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">G</span>
+                      </div>
+                      <span className="text-xs">Google Pay</span>
+                    </Button>
+
+                    <Button
+                      onClick={() => openUPIApp('phonepe')}
+                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
+                    >
+                      <div className="w-8 h-8 bg-purple-600 rounded-lg mb-2 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">P</span>
+                      </div>
+                      <span className="text-xs">PhonePe</span>
+                    </Button>
+
+                    <Button
+                      onClick={() => openUPIApp('paytm')}
+                      className="luxury-button-outline flex flex-col items-center p-4 h-auto"
+                    >
+                      <div className="w-8 h-8 bg-blue-500 rounded-lg mb-2 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">P</span>
+                      </div>
+                      <span className="text-xs">Paytm</span>
                     </Button>
                   </div>
-                </div>
-              </TabsContent>
 
-              <TabsContent value="card" className="space-y-4">
+                  <div className="border-t border-yellow-400/20 pt-4">
+                    <p className="text-yellow-200/80 text-sm mb-2">Or pay manually using UPI ID:</p>
+                    <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-3 border border-yellow-400/20">
+                      <span className="text-gold font-mono text-sm flex-1">{upiId}</span>
+                      <Button
+                        onClick={copyUPIId}
+                        size="sm"
+                        variant="outline"
+                        className="luxury-button-outline"
+                      >
+                        {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Card Payment Section */}
+              {activeTab === 'card' && (
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="cardNumber" className="text-gold">Card Number</Label>
@@ -445,9 +468,10 @@ export default function UniversalPaymentModal({
                     Pay ₹{formattedAmount}
                   </Button>
                 </div>
-              </TabsContent>
+              )}
 
-              <TabsContent value="bank" className="space-y-4">
+              {/* Bank Transfer Section */}
+              {activeTab === 'bank' && (
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="accountNumber" className="text-gold">Account Number</Label>
@@ -501,8 +525,8 @@ export default function UniversalPaymentModal({
                     Initiate Bank Transfer
                   </Button>
                 </div>
-              </TabsContent>
-            </Tabs>
+              )}
+            </div>
           )}
 
           {paymentStatus === 'processing' && (
