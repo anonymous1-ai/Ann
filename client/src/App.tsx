@@ -27,7 +27,11 @@ const LoadingScreen = () => (
       </div>
     </div>
     <div className="text-center relative z-10">
-      <div className="w-16 h-16 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin mx-auto mb-4 golden-glow"></div>
+      <img 
+        src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+        alt="Silently AI Logo" 
+        className="w-16 h-16 object-contain mx-auto mb-4 animate-pulse"
+      />
       <div className="text-gold text-xl font-semibold">Loading...</div>
       <div className="text-yellow-200/70 text-sm mt-2">Initializing your luxury workspace</div>
     </div>

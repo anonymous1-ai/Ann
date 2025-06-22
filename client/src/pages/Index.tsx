@@ -88,8 +88,12 @@ const Index = () => {
       <nav className="fixed top-0 w-full z-50 luxury-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 gold-gradient rounded-lg golden-glow"></div>
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+                alt="Silently AI Logo" 
+                className="w-8 h-8 object-contain"
+              />
               <span className="text-gold font-bold text-xl">Silently AI</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
@@ -450,9 +454,11 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div className="w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl gold-gradient flex items-center justify-center golden-glow">
-                  <Code className="w-5 md:w-6 h-5 md:h-6 text-black" />
-                </div>
+                <img 
+                  src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+                  alt="Silently AI Logo" 
+                  className="w-10 md:w-12 h-10 md:h-12 object-contain"
+                />
                 <span className="text-xl md:text-2xl font-bold text-gold">Silently AI</span>
               </div>
               <p className="text-yellow-200/70 leading-relaxed mb-4 md:mb-6 text-sm md:text-base">

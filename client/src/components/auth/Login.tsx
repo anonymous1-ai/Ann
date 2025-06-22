@@ -39,9 +39,11 @@ export const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
     <Card className="w-full max-w-md mx-auto luxury-card golden-glow">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-xl gold-gradient flex items-center justify-center golden-glow">
-            <Code className="w-6 h-6 text-black" />
-          </div>
+          <img 
+            src="/attached_assets/20250622_1244_Silently AI Emblem_simple_compose_01jyb7s2hme26ajk4rcxbpe3se_1750587992544.png" 
+            alt="Silently AI Logo" 
+            className="w-12 h-12 object-contain"
+          />
         </div>
         <CardTitle className="text-2xl text-gradient">
           Welcome Back
