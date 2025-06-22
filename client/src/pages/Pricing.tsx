@@ -253,78 +253,24 @@ export default function Pricing() {
 
     setLoading(topupType);
 
-    const topupPlans = {
-      'topup-50': { calls: 50, price: 200 },
-      'topup-100': { calls: 100, price: 350 },
-      'topup-250': { calls: 250, price: 750 }
-    };
-
-    const topup = topupPlans[topupType as keyof typeof topupPlans];
-
-    try {
-      // Create top-up order
-      const orderResponse = await fetch('/api/create-topup-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ 
-          topupType,
-          calls: topup.calls,
-          price: topup.price
-        })
-      });
-
-      const orderData = await orderResponse.json();
-
-      if (!orderData.success) {
-        throw new Error(orderData.error);
-      }
-
-      // Simulate payment process
-      const mockPaymentSuccess = await simulatePayment(orderData.data);
-
-      if (mockPaymentSuccess) {
-        // Verify top-up payment
-        const verifyResponse = await fetch('/api/verify-topup-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            orderId: orderData.data.orderId,
-            paymentId: `pay_${Date.now()}`,
-            signature: 'mock_signature',
-            topupType,
-            calls: topup.calls
-          })
-        });
-
-        const verifyData = await verifyResponse.json();
-
-        if (verifyData.success) {
-          toast({
-            title: "Top-up Successful!",
-            description: `Added ${topup.calls} API calls to your account. Your new balance: ${verifyData.data.newBalance} calls.`,
-          });
-
-          // Refresh user data
-          window.location.reload();
-        } else {
-          throw new Error(verifyData.error);
-        }
-      }
-    } catch (error) {
+    if (topupType !== 'topup-9') {
       toast({
-        title: "Top-up Failed",
-        description: error instanceof Error ? error.message : "Top-up processing failed. Please try again.",
+        title: "Invalid Top-up",
+        description: "Invalid top-up option selected",
         variant: "destructive"
       });
-    } finally {
       setLoading(null);
+      return;
     }
+
+    // For ₹9 per call, we'll use payment modal to let user choose amount
+    setPaymentModal({
+      isOpen: true,
+      amount: 900, // ₹9 in paise
+      description: "API Credits - ₹9 per call",
+      planId: 'topup-9'
+    });
+    setLoading(null);
   };
 
   const simulatePayment = (orderData: any): Promise<boolean> => {
@@ -511,94 +457,41 @@ export default function Pricing() {
           <div className="mt-20">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gradient mb-4">
-                Need More API Calls?
+                Top-up API Credits
               </h2>
               <p className="text-xl text-yellow-200/70 max-w-2xl mx-auto">
-                Top up your account with additional API calls anytime. Perfect for unexpected high usage periods.
+                Purchase additional API calls at ₹9 per call. Perfect for scaling your usage on demand.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              {/* Small Top-up */}
+            <div className="max-w-md mx-auto">
               <Card className="luxury-card">
                 <CardHeader className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-white" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
+                    <Zap className="w-8 h-8 text-black" />
                   </div>
-                  <CardTitle className="text-gold text-xl">50 API Calls</CardTitle>
-                  <CardDescription className="text-yellow-200/70">Quick boost for light usage</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-3xl font-bold text-gradient">₹200</span>
-                    <p className="text-yellow-200/70 text-sm">₹4 per call</p>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    onClick={() => handleTopUp('topup-50')}
-                    disabled={loading === 'topup-50'}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    {loading === 'topup-50' ? 'Processing...' : 'Buy 50 Calls'}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Medium Top-up */}
-              <Card className="luxury-card golden-glow ring-2 ring-gold/50">
-                <CardHeader className="text-center">
-                  <Badge className="mb-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold">
-                    Best Value
-                  </Badge>
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
-                    <Crown className="w-6 h-6 text-black" />
-                  </div>
-                  <CardTitle className="text-gold text-xl">100 API Calls</CardTitle>
-                  <CardDescription className="text-yellow-200/70">Most popular top-up option</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-3xl font-bold text-gradient">₹350</span>
-                    <p className="text-yellow-200/70 text-sm">₹3.50 per call</p>
+                  <CardTitle className="text-gold text-2xl">API Credits</CardTitle>
+                  <CardDescription className="text-yellow-200/70">Pay per call - No minimum purchase</CardDescription>
+                  <div className="mt-6">
+                    <span className="text-4xl font-bold text-gradient">₹9</span>
+                    <p className="text-yellow-200/70 text-lg">per API call</p>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-yellow-200/70 text-sm mb-4">
+                      Buy exactly what you need. Credits never expire.
+                    </p>
+                  </div>
                   <Button 
-                    onClick={() => handleTopUp('topup-100')}
-                    disabled={loading === 'topup-100'}
+                    onClick={() => handleTopUp('topup-9')}
+                    disabled={loading === 'topup-9'}
                     className="w-full btn-luxury"
                   >
-                    {loading === 'topup-100' ? 'Processing...' : 'Buy 100 Calls'}
+                    {loading === 'topup-9' ? 'Processing...' : 'Buy API Credits'}
                   </Button>
                 </CardContent>
               </Card>
-
-              {/* Large Top-up */}
-              <Card className="luxury-card">
-                <CardHeader className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                    <Star className="w-6 h-6 text-white" />
-                  </div>
-                  <CardTitle className="text-gold text-xl">250 API Calls</CardTitle>
-                  <CardDescription className="text-yellow-200/70">Maximum value bulk purchase</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-3xl font-bold text-gradient">₹750</span>
-                    <p className="text-yellow-200/70 text-sm">₹3 per call</p>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    onClick={() => handleTopUp('topup-250')}
-                    disabled={loading === 'topup-250'}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    {loading === 'topup-250' ? 'Processing...' : 'Buy 250 Calls'}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="text-center mt-8">
-              <p className="text-yellow-200/70 text-sm">
-                Top-up credits never expire and are added to your current plan allocation.
-              </p>
             </div>
           </div>
         )}

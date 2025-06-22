@@ -65,14 +65,7 @@ const Dashboard = () => {
       return;
     }
 
-    const topupOptions = {
-      'topup-50': { calls: 50, price: 450 },
-      'topup-100': { calls: 100, price: 800 },
-      'topup-250': { calls: 250, price: 1750 }
-    };
-
-    const selected = topupOptions[topupType as keyof typeof topupOptions];
-    if (!selected) {
+    if (topupType !== 'topup-9') {
       toast({
         title: "Invalid Option",
         description: "Please select a valid top-up option",
@@ -83,8 +76,8 @@ const Dashboard = () => {
 
     setPaymentModal({
       isOpen: true,
-      amount: selected.price * 100, // Convert to paise
-      description: `${selected.calls} API Credits Top-up`,
+      amount: 900, // ₹9 in paise per call
+      description: "API Credits - ₹9 per call",
       type: topupType
     });
   };
@@ -390,13 +383,13 @@ const Dashboard = () => {
               <Button
                 onClick={(e) => {
                   e.preventDefault();
-                  handleTopUp('topup-100');
+                  handleTopUp('topup-9');
                 }}
-                disabled={loading === 'topup-100'}
+                disabled={loading === 'topup-9'}
                 className="w-full btn-luxury"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
-                {loading === 'topup-100' ? 'Processing...' : 'Buy More Credits'}
+                {loading === 'topup-9' ? 'Processing...' : 'Buy Credits (₹9/call)'}
               </Button>
             </CardContent>
           </Card>
