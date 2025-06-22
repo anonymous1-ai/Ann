@@ -102,57 +102,57 @@ const Dashboard = () => {
 
         {/* Top Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
+          <Card className="luxury-card golden-glow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Credits Remaining</p>
-                  <p className="text-2xl font-bold text-cyan-300 neon-text">{user.api_credits}</p>
+                  <p className="text-yellow-200/70 text-sm">Credits Remaining</p>
+                  <p className="text-2xl font-bold text-gold">{user.api_credits}</p>
                 </div>
-                <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-cyan-400" />
+                <div className="w-12 h-12 gold-gradient rounded-lg flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-black" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
+          <Card className="luxury-card golden-glow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Today's Calls</p>
-                  <p className="text-2xl font-bold text-green-300">{apiStats.todayCalls}</p>
+                  <p className="text-yellow-200/70 text-sm">Today's Calls</p>
+                  <p className="text-2xl font-bold text-gold">{apiStats.todayCalls}</p>
                 </div>
-                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-green-400" />
+                <div className="w-12 h-12 gold-gradient rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-black" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
+          <Card className="luxury-card golden-glow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Success Rate</p>
-                  <p className="text-2xl font-bold text-blue-300">{apiStats.successRate}%</p>
+                  <p className="text-yellow-200/70 text-sm">Success Rate</p>
+                  <p className="text-2xl font-bold text-gold">{apiStats.successRate}%</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-blue-400" />
+                <div className="w-12 h-12 gold-gradient rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-black" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
+          <Card className="luxury-card golden-glow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Avg Response</p>
-                  <p className="text-2xl font-bold text-purple-300">{apiStats.avgResponseTime}</p>
+                  <p className="text-yellow-200/70 text-sm">Avg Response</p>
+                  <p className="text-2xl font-bold text-gold">{apiStats.avgResponseTime}</p>
                 </div>
-                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-purple-400" />
+                <div className="w-12 h-12 gold-gradient rounded-lg flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-black" />
                 </div>
               </div>
             </CardContent>
@@ -162,48 +162,48 @@ const Dashboard = () => {
         {/* Main Content Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* API Usage Tracker */}
-          <Card className="lg:col-span-1 tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
+          <Card className="lg:col-span-1 luxury-card golden-glow">
             <CardHeader>
-              <CardTitle className="text-white neon-text">API Usage</CardTitle>
-              <CardDescription className="text-slate-300">Track your API consumption</CardDescription>
+              <CardTitle className="text-gradient">API Usage</CardTitle>
+              <CardDescription className="text-yellow-200/70">Track your API consumption</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-300">Current Plan</span>
-                  <Badge variant="secondary" className="capitalize bg-cyan-950/50 text-cyan-300 border-cyan-400/30">
+                  <span className="text-yellow-200/70">Current Plan</span>
+                  <Badge variant="secondary" className="capitalize bg-yellow-900/50 text-gold border-yellow-400/30">
                     {user.plan}
                   </Badge>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-300">Credits Usage</span>
-                    <span className="text-white font-bold text-cyan-300 neon-text">
+                    <span className="text-yellow-200/70">Credits Usage</span>
+                    <span className="text-gold font-bold">
                       {planLimits[user.plan] - user.api_credits}/{planLimits[user.plan]}
                     </span>
                   </div>
                   <Progress 
                     value={((planLimits[user.plan] - user.api_credits) / planLimits[user.plan]) * 100} 
-                    className="h-3 bg-slate-800/50 [&>div]:bg-gradient-to-r [&>div]:from-cyan-500 [&>div]:to-blue-600 [&>div]:shadow-[0_0_10px_rgba(34,211,238,0.5)]" 
+                    className="h-3 bg-slate-800/50 [&>div]:bg-gradient-to-r [&>div]:from-yellow-500 [&>div]:to-yellow-600 [&>div]:shadow-[0_0_10px_rgba(212,175,55,0.5)]" 
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="text-center p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
-                    <p className="text-cyan-400 text-lg font-semibold">{apiStats.weekCalls}</p>
-                    <p className="text-slate-400 text-xs">This Week</p>
+                  <div className="text-center p-3 bg-yellow-900/20 rounded-lg border border-yellow-400/30">
+                    <p className="text-gold text-lg font-semibold">{apiStats.weekCalls}</p>
+                    <p className="text-yellow-200/70 text-xs">This Week</p>
                   </div>
-                  <div className="text-center p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
-                    <p className="text-cyan-400 text-lg font-semibold">{apiStats.monthCalls}</p>
-                    <p className="text-slate-400 text-xs">This Month</p>
+                  <div className="text-center p-3 bg-yellow-900/20 rounded-lg border border-yellow-400/30">
+                    <p className="text-gold text-lg font-semibold">{apiStats.monthCalls}</p>
+                    <p className="text-yellow-200/70 text-xs">This Month</p>
                   </div>
                 </div>
               </div>
 
               <Button
                 onClick={handleTopUp}
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 rounded-xl neon-glow transition-all duration-300 hover:scale-105"
+                className="w-full btn-luxury"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
                 Buy More Credits
@@ -212,44 +212,44 @@ const Dashboard = () => {
           </Card>
 
           {/* Recent Activity */}
-          <Card className="lg:col-span-2 tech-border neon-glow bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-lg">
+          <Card className="lg:col-span-2 luxury-card golden-glow">
             <CardHeader>
-              <CardTitle className="text-white neon-text">Recent Activity</CardTitle>
-              <CardDescription className="text-slate-300">Your recent API calls and activity</CardDescription>
+              <CardTitle className="text-gradient">Recent Activity</CardTitle>
+              <CardDescription className="text-yellow-200/70">Your recent API calls and activity</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {recentActivity.map((activity) => (
                   <div
                     key={activity.id}
-                    className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700/50 hover:bg-slate-700/30 transition-all duration-300"
+                    className="flex items-center justify-between p-4 bg-yellow-900/20 rounded-lg border border-yellow-400/30 hover:bg-yellow-900/30 transition-all duration-300"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_6px_rgba(34,211,238,0.8)] pulse-glow"></div>
+                      <div className="w-3 h-3 bg-gold rounded-full shadow-[0_0_6px_rgba(212,175,55,0.8)]"></div>
                       <div>
-                        <span className="text-white font-medium">{activity.feature}</span>
-                        <p className="text-slate-400 text-sm">API call completed successfully</p>
+                        <span className="text-gold font-medium">{activity.feature}</span>
+                        <p className="text-yellow-200/70 text-sm">API call completed successfully</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <Badge variant="outline" className="text-cyan-400 border-cyan-400/50 bg-cyan-950/30">
+                      <Badge variant="outline" className="text-gold border-yellow-400/50 bg-yellow-900/30">
                         {activity.status}
                       </Badge>
-                      <span className="text-slate-400 text-sm">{activity.timestamp}</span>
+                      <span className="text-yellow-200/70 text-sm">{activity.timestamp}</span>
                     </div>
                   </div>
                 ))}
               </div>
               
-              <div className="mt-6 p-4 bg-slate-800/20 rounded-lg border border-slate-700/30">
+              <div className="mt-6 p-4 bg-yellow-900/20 rounded-lg border border-yellow-400/30">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-white font-medium">Last API Call</p>
-                    <p className="text-slate-400 text-sm">{apiStats.lastCall}</p>
+                    <p className="text-gold font-medium">Last API Call</p>
+                    <p className="text-yellow-200/70 text-sm">{apiStats.lastCall}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-cyan-400 font-semibold">Response: {apiStats.avgResponseTime}</p>
-                    <p className="text-green-400 text-sm">Status: Active</p>
+                    <p className="text-gold font-semibold">Response: {apiStats.avgResponseTime}</p>
+                    <p className="text-gold text-sm">Status: Active</p>
                   </div>
                 </div>
               </div>
