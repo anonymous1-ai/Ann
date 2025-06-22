@@ -269,8 +269,13 @@ const BuyCredits = () => {
                   className={`cursor-pointer transition-all duration-300 ${
                     selectedPackage?.id === pkg.id 
                       ? 'border-yellow-500 bg-yellow-500/10 ring-2 ring-yellow-500/20' 
-                      : 'border-yellow-600/30 bg-background/80 hover:border-yellow-500/50'
+                      : 'border-yellow-600/30 hover:border-yellow-500/50'
                   } ${pkg.popular ? 'relative' : ''}`}
+                  style={{
+                    background: selectedPackage?.id === pkg.id 
+                      ? 'radial-gradient(ellipse at top, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 50%), linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%)'
+                      : `radial-gradient(ellipse at top, hsl(218, 23%, 6%) 0%, hsl(218, 23%, 4%) 50%), linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%)`
+                  }}
                   onClick={() => setSelectedPackage(pkg)}
                 >
                   {pkg.popular && (
@@ -324,7 +329,9 @@ const BuyCredits = () => {
             <h2 className="text-2xl font-semibold text-yellow-400 mb-6">Payment Details</h2>
             
             {selectedPackage && (
-              <Card className="border-yellow-600/30 bg-background/80">
+              <Card className="border-yellow-600/30" style={{
+                background: `radial-gradient(ellipse at top, hsl(218, 23%, 6%) 0%, hsl(218, 23%, 4%) 50%), linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%)`
+              }}>
                 <CardHeader>
                   <CardTitle className="text-yellow-400">Order Summary</CardTitle>
                 </CardHeader>
@@ -354,7 +361,9 @@ const BuyCredits = () => {
             )}
 
             {/* Payment Method Selection */}
-            <Card className="border-yellow-600/30 bg-background/80">
+            <Card className="border-yellow-600/30" style={{
+              background: `radial-gradient(ellipse at top, hsl(218, 23%, 6%) 0%, hsl(218, 23%, 4%) 50%), linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%)`
+            }}>
               <CardHeader>
                 <CardTitle className="text-yellow-400">Payment Method</CardTitle>
               </CardHeader>
@@ -407,7 +416,10 @@ const BuyCredits = () => {
                         placeholder="yourname@paytm"
                         value={upiId}
                         onChange={(e) => setUpiId(e.target.value)}
-                        className="bg-background/60 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
+                        style={{
+                          background: `radial-gradient(ellipse at top, hsl(218, 23%, 8%) 0%, hsl(218, 23%, 6%) 50%), linear-gradient(135deg, hsl(218, 23%, 6%) 0%, hsl(218, 25%, 5%) 50%, hsl(218, 23%, 7%) 100%)`
+                        }}
+                        className="border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
                       />
                     </div>
                     <p className="text-yellow-300/60 text-sm">
@@ -425,7 +437,10 @@ const BuyCredits = () => {
                         placeholder="John Doe"
                         value={cardDetails.name}
                         onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
-                        className="bg-background/60 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
+                        style={{
+                          background: `radial-gradient(ellipse at top, hsl(218, 23%, 8%) 0%, hsl(218, 23%, 6%) 50%), linear-gradient(135deg, hsl(218, 23%, 6%) 0%, hsl(218, 25%, 5%) 50%, hsl(218, 23%, 7%) 100%)`
+                        }}
+                        className="border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
                       />
                     </div>
                     <div>
@@ -434,7 +449,10 @@ const BuyCredits = () => {
                         placeholder="1234 5678 9012 3456"
                         value={cardDetails.number}
                         onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
-                        className="bg-background/60 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
+                        style={{
+                          background: `radial-gradient(ellipse at top, hsl(218, 23%, 8%) 0%, hsl(218, 23%, 6%) 50%), linear-gradient(135deg, hsl(218, 23%, 6%) 0%, hsl(218, 25%, 5%) 50%, hsl(218, 23%, 7%) 100%)`
+                        }}
+                        className="border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
