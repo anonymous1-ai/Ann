@@ -273,9 +273,9 @@ const Index = () => {
     setLoading(topupType);
 
     const topupPlans = {
-      'topup-50': { calls: 50, price: 200 },
-      'topup-100': { calls: 100, price: 350 },
-      'topup-250': { calls: 250, price: 750 }
+      'topup-50': { calls: 50, price: 450 },
+      'topup-100': { calls: 100, price: 900 },
+      'topup-250': { calls: 250, price: 2250 }
     };
 
     const topup = topupPlans[topupType as keyof typeof topupPlans];
@@ -598,26 +598,26 @@ const Index = () => {
           </div>
 
           {/* Billing Period Toggle */}
-          <div className="flex justify-center mb-12">
-            <div className="luxury-card p-1 rounded-lg">
-              <div className="flex items-center gap-2 relative">
-                <div className="flex items-center gap-4">
-                  <span className={`text-lg font-medium ${billingPeriod === 'monthly' ? 'text-gold' : 'text-yellow-200/70'}`}>
-                    Monthly
-                  </span>
-                  <button
-                    onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
-                    className="relative w-14 h-7 bg-yellow-400/20 rounded-full transition-colors focus:outline-none"
-                  >
-                    <div className={`absolute top-1 w-5 h-5 bg-gold rounded-full transition-transform ${billingPeriod === 'yearly' ? 'translate-x-7' : 'translate-x-1'}`} />
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-lg font-medium ${billingPeriod === 'yearly' ? 'text-gold' : 'text-yellow-200/70'}`}>
-                      Yearly
-                    </span>
-                    <Badge className="bg-green-500 text-white text-xs">Save up to 17%</Badge>
-                  </div>
-                </div>
+          <div className="flex justify-center items-center mb-12">
+            <div className="flex items-center gap-4">
+              <span className={`text-lg font-medium transition-colors ${billingPeriod === 'monthly' ? 'text-gold' : 'text-yellow-200/70'}`}>
+                Monthly
+              </span>
+              <div className="relative">
+                <button
+                  onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
+                  className="relative w-16 h-8 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-full transition-all duration-300 focus:outline-none shadow-lg"
+                >
+                  <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-md ${billingPeriod === 'yearly' ? 'translate-x-8' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-lg font-medium transition-colors ${billingPeriod === 'yearly' ? 'text-gold' : 'text-yellow-200/70'}`}>
+                  Yearly
+                </span>
+                <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-1 rounded-full">
+                  Save up to 17%
+                </Badge>
               </div>
             </div>
           </div>
@@ -764,7 +764,7 @@ const Index = () => {
           }, {
             value: "item-3",
             question: "What happens when I run out of API calls?",
-            answer: "You'll get notified when you have 10 calls remaining. You can instantly top-up with ₹10 per call or upgrade your plan. The app works offline for basic features even without API credits."
+            answer: "You'll get notified when you have 10 calls remaining. You can instantly top-up with ₹9 per call or upgrade your plan. The app works offline for basic features even without API credits."
           }, {
             value: "item-4",
             question: "Is Razorpay payment safe and do you store card details?",
