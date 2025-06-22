@@ -30,7 +30,7 @@ const Dashboard = () => {
 
   if (!user) return null;
 
-  const creditPercentage = (user.apiCredits / 100) * 100;
+  const creditPercentage = (user.api_credits / 100) * 100;
   const planLimits = {
     free: 10,
     pro: 100,
@@ -52,7 +52,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 circuit-pattern p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -89,7 +89,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-sm">Credits Remaining</p>
-                  <p className="text-2xl font-bold text-cyan-300 neon-text">{user.apiCredits}</p>
+                  <p className="text-2xl font-bold text-cyan-300 neon-text">{user.api_credits}</p>
                 </div>
                 <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center">
                   <CreditCard className="w-6 h-6 text-cyan-400" />
@@ -162,11 +162,11 @@ const Dashboard = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-slate-300">Credits Usage</span>
                     <span className="text-white font-bold text-cyan-300 neon-text">
-                      {planLimits[user.plan] - user.apiCredits}/{planLimits[user.plan]}
+                      {planLimits[user.plan] - user.api_credits}/{planLimits[user.plan]}
                     </span>
                   </div>
                   <Progress 
-                    value={((planLimits[user.plan] - user.apiCredits) / planLimits[user.plan]) * 100} 
+                    value={((planLimits[user.plan] - user.api_credits) / planLimits[user.plan]) * 100} 
                     className="h-3 bg-slate-800/50 [&>div]:bg-gradient-to-r [&>div]:from-cyan-500 [&>div]:to-blue-600 [&>div]:shadow-[0_0_10px_rgba(34,211,238,0.5)]" 
                   />
                 </div>

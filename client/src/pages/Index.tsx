@@ -69,7 +69,7 @@ const Index = () => {
   const handleLogin = () => {
     setLocation('/auth');
   };
-  return <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 circuit-pattern">
+  return <div className="min-h-screen">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 tech-border border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
