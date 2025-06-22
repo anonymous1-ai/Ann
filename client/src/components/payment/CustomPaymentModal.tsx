@@ -219,9 +219,7 @@ export default function CustomPaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div className="rounded-2xl max-w-md w-full mx-4 border border-yellow-600/30 shadow-2xl shadow-yellow-900/20" style={{
-        background: `radial-gradient(ellipse at top, hsl(218, 23%, 6%) 0%, hsl(218, 23%, 4%) 50%), linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%)`
-      }}>
+      <div className="bg-black rounded-2xl max-w-md w-full mx-4 border border-yellow-600/30 shadow-2xl shadow-yellow-900/20">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -238,7 +236,7 @@ export default function CustomPaymentModal({
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex bg-background/50 rounded-lg p-1 mb-6 border border-yellow-600/20">
+          <div className="flex bg-black/80 rounded-lg p-1 mb-6 border border-yellow-600/20">
             <button
               onClick={() => setActiveTab('UPI')}
               className={`flex-1 py-3 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${
