@@ -395,7 +395,7 @@ const Index = () => {
       {/* FAQ */}
       <section id="faq" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">Frequently Asked Questions
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text py-[10px] lg:text-5xl">Frequently Asked Questions
 
         </h2>
           
