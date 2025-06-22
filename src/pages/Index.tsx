@@ -306,9 +306,7 @@ const Index = () => {
             popular: false,
             badge: "Flexible"
           }].map((plan, index) => <Card key={index} className={`relative rounded-2xl overflow-hidden tech-border transition-all duration-500 hover:neon-glow ${plan.popular ? 'bg-gradient-to-b from-cyan-950/80 to-blue-950/80 border-cyan-400/50' : 'hover:border-cyan-400/50'}`}>
-                {plan.popular && <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0 px-3 md:px-4 py-1 text-xs neon-glow">
-                    {plan.badge}
-                  </Badge>}
+                {plan.popular}
                 <CardHeader className="text-center pb-4 md:pb-6">
                   <div className="mb-3 md:mb-4">
                     <CardTitle className="text-lg md:text-xl text-white mb-2">{plan.name}</CardTitle>
@@ -397,10 +395,10 @@ const Index = () => {
       {/* FAQ */}
       <section id="faq" className="px-4 md:px-6 py-16 md:py-20 relative">
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-center text-slate-400 text-base md:text-lg mb-12 md:mb-16">Everything you need to know about using Silently AI</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 md:mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent neon-text">Frequently Asked Questions
+
+        </h2>
+          
           
           <Accordion type="single" collapsible className="space-y-4 md:space-y-6">
             {[{
