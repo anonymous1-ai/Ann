@@ -144,9 +144,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md border border-yellow-600/30 shadow-2xl shadow-yellow-900/20" style={{
-        background: `radial-gradient(ellipse at top, hsl(218, 23%, 6%) 0%, hsl(218, 23%, 4%) 50%), linear-gradient(135deg, hsl(218, 23%, 4%) 0%, hsl(218, 25%, 3%) 50%, hsl(218, 23%, 5%) 100%)`
-      }}>
+      <DialogContent className="bg-black max-w-md border border-yellow-600/30 shadow-2xl shadow-yellow-900/20">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-yellow-400 flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-yellow-400" />
@@ -176,7 +174,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                 size="sm"
                 onClick={() => adjustApiCalls(-10)}
                 disabled={apiCalls <= 10}
-                className="bg-background/60 border border-yellow-600/30 text-yellow-200 hover:bg-background/80"
+                className="bg-black/60 border border-yellow-600/30 text-yellow-200 hover:bg-black/80"
               >
                 <Minus className="w-4 h-4" />
               </Button>
@@ -188,7 +186,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                 max="1000"
                 value={apiCalls}
                 onChange={(e) => setApiCalls(Math.max(1, Math.min(1000, parseInt(e.target.value) || 1)))}
-                className="text-center bg-background/80 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
+                className="text-center bg-black/80 border-yellow-600/30 text-yellow-100 placeholder:text-yellow-400/60"
               />
               
               <Button
@@ -197,13 +195,13 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
                 size="sm"
                 onClick={() => adjustApiCalls(10)}
                 disabled={apiCalls >= 990}
-                className="bg-background/60 border border-yellow-600/30 text-yellow-200 hover:bg-background/80"
+                className="bg-black/60 border border-yellow-600/30 text-yellow-200 hover:bg-black/80"
               >
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
 
-            <div className="bg-background/80 rounded-lg p-4 border border-yellow-400/30">
+            <div className="bg-black/80 rounded-lg p-4 border border-yellow-400/30">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-yellow-300">API Calls:</span>
                 <span className="text-yellow-400 font-semibold">{apiCalls}</span>
@@ -226,7 +224,7 @@ export default function TopUpModal({ isOpen, onClose, onSuccess }: TopUpModalPro
               variant="outline"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 bg-background/60 border border-yellow-600/30 text-yellow-200 hover:bg-background/80"
+              className="flex-1 bg-black/60 border border-yellow-600/30 text-yellow-200 hover:bg-black/80"
             >
               Cancel
             </Button>
