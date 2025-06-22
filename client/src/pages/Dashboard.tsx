@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { LogOut, Download, CreditCard, TrendingUp, Calendar, Clock, ExternalLink } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { getLogoPath } from '@/assets/logo-config';
+import { PaymentModal } from '@/components/payment/PaymentModal';
 
 // Add Razorpay type declaration
 declare global {
@@ -22,6 +23,12 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
   const [, setLocation] = useLocation();
+  const [paymentModal, setPaymentModal] = useState({
+    isOpen: false,
+    amount: 0,
+    description: '',
+    type: ''
+  });
   const [recentActivity] = useState([
     { id: 1, feature: 'Screenshot to Code', timestamp: '2 minutes ago', status: 'success' },
     { id: 2, feature: 'Text to Code', timestamp: '15 minutes ago', status: 'success' },
@@ -48,7 +55,7 @@ const Dashboard = () => {
     advanced: 300
   };
 
-  const handleTopUp = async (topupType: string) => {
+  const handleTopUp = (topupType: string) => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -58,127 +65,31 @@ const Dashboard = () => {
       return;
     }
 
-    setLoading(topupType);
+    const topupOptions = {
+      'topup-50': { calls: 50, price: 450 },
+      'topup-100': { calls: 100, price: 800 },
+      'topup-250': { calls: 250, price: 1750 }
+    };
 
-    try {
-      const topupOptions = {
-        'topup-50': { calls: 50, price: 450 },
-        'topup-100': { calls: 100, price: 800 },
-        'topup-250': { calls: 250, price: 1750 }
-      };
-
-      const selected = topupOptions[topupType as keyof typeof topupOptions];
-      if (!selected) {
-        throw new Error('Invalid top-up option');
-      }
-
-      // Create top-up order
-      const response = await fetch('/api/create-topup-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          topupType,
-          calls: selected.calls,
-          price: selected.price
-        })
-      });
-
-      const orderData = await response.json();
-      
-      if (!orderData.success) {
-        throw new Error(orderData.error || 'Failed to create top-up order');
-      }
-
-      // Initialize Razorpay payment for top-up
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key',
-        amount: orderData.data.amount,
-        currency: orderData.data.currency,
-        name: 'Silently AI',
-        description: `${selected.calls} API Credits Top-up`,
-        order_id: orderData.data.orderId,
-        handler: async function (response: any) {
-          try {
-            // Verify top-up payment
-            const verifyResponse = await fetch('/api/verify-topup-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              body: JSON.stringify({
-                orderId: orderData.data.orderId,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-                topupType,
-                calls: selected.calls
-              })
-            });
-
-            const verifyData = await verifyResponse.json();
-            
-            if (verifyData.success) {
-              toast({
-                title: "Top-up Successful!",
-                description: `${selected.calls} API credits added to your account.`
-              });
-              
-              // Refresh user data
-              await refreshUser();
-            } else {
-              throw new Error(verifyData.error || 'Top-up verification failed');
-            }
-          } catch (error: any) {
-            toast({
-              title: "Top-up Verification Failed",
-              description: error.message || "Please contact support if payment was deducted.",
-              variant: "destructive"
-            });
-          }
-        },
-        prefill: {
-          email: user.email,
-          name: user.name
-        },
-        theme: {
-          color: '#D4AF37'
-        },
-        modal: {
-          ondismiss: function() {
-            setLoading(null);
-          }
-        }
-      };
-
-      // Load Razorpay script if not already loaded
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = () => {
-          const rzp = new window.Razorpay(options);
-          rzp.open();
-        };
-        document.body.appendChild(script);
-      } else {
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      }
-
-    } catch (error: any) {
+    const selected = topupOptions[topupType as keyof typeof topupOptions];
+    if (!selected) {
       toast({
-        title: "Top-up Failed",
-        description: error.message || "Unable to process top-up. Please try again.",
+        title: "Invalid Option",
+        description: "Please select a valid top-up option",
         variant: "destructive"
       });
-    } finally {
-      setLoading(null);
+      return;
     }
+
+    setPaymentModal({
+      isOpen: true,
+      amount: selected.price * 100, // Convert to paise
+      description: `${selected.calls} API Credits Top-up`,
+      type: topupType
+    });
   };
 
-  const handleSubscription = async (planType: string) => {
+  const handleSubscription = (planType: string) => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -188,122 +99,103 @@ const Dashboard = () => {
       return;
     }
 
-    setLoading(planType);
+    const planOptions = {
+      'pro-monthly': { plan: 'pro', price: 800, duration: 'monthly' },
+      'pro-annual': { plan: 'pro', price: 9500, duration: 'annual' },
+      'advanced-monthly': { plan: 'advanced', price: 2000, duration: 'monthly' },
+      'advanced-annual': { plan: 'advanced', price: 20000, duration: 'annual' }
+    };
 
-    try {
-      const planOptions = {
-        'pro-monthly': { plan: 'pro', price: 800, duration: 'monthly' },
-        'pro-annual': { plan: 'pro', price: 9500, duration: 'annual' },
-        'advanced-monthly': { plan: 'advanced', price: 2000, duration: 'monthly' },
-        'advanced-annual': { plan: 'advanced', price: 20000, duration: 'annual' }
-      };
-
-      const selected = planOptions[planType as keyof typeof planOptions];
-      if (!selected) {
-        throw new Error('Invalid subscription plan');
-      }
-
-      // Create subscription order
-      const response = await fetch('/api/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          plan: planType
-        })
-      });
-
-      const orderData = await response.json();
-      
-      if (!orderData.success) {
-        throw new Error(orderData.error || 'Failed to create subscription order');
-      }
-
-      // Initialize Razorpay payment for subscription
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key',
-        amount: orderData.data.amount,
-        currency: orderData.data.currency,
-        name: 'Silently AI',
-        description: `${selected.plan.toUpperCase()} Plan - ${selected.duration}`,
-        order_id: orderData.data.orderId,
-        handler: async function (response: any) {
-          try {
-            // Verify subscription payment
-            const verifyResponse = await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              body: JSON.stringify({
-                orderId: orderData.data.orderId,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-                plan: planType
-              })
-            });
-
-            const verifyData = await verifyResponse.json();
-            
-            if (verifyData.success) {
-              toast({
-                title: "Subscription Successful!",
-                description: `Welcome to ${selected.plan.toUpperCase()} plan! Your account has been upgraded.`
-              });
-              
-              // Refresh user data
-              await refreshUser();
-            } else {
-              throw new Error(verifyData.error || 'Subscription verification failed');
-            }
-          } catch (error: any) {
-            toast({
-              title: "Subscription Verification Failed",
-              description: error.message || "Please contact support if payment was deducted.",
-              variant: "destructive"
-            });
-          }
-        },
-        prefill: {
-          email: user.email,
-          name: user.name
-        },
-        theme: {
-          color: '#D4AF37'
-        },
-        modal: {
-          ondismiss: function() {
-            setLoading(null);
-          }
-        }
-      };
-
-      // Load Razorpay script if not already loaded
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = () => {
-          const rzp = new window.Razorpay(options);
-          rzp.open();
-        };
-        document.body.appendChild(script);
-      } else {
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      }
-
-    } catch (error: any) {
+    const selected = planOptions[planType as keyof typeof planOptions];
+    if (!selected) {
       toast({
-        title: "Subscription Failed",
-        description: error.message || "Unable to process subscription. Please try again.",
+        title: "Invalid Plan",
+        description: "Please select a valid subscription plan",
         variant: "destructive"
       });
-    } finally {
-      setLoading(null);
+      return;
     }
+
+    setPaymentModal({
+      isOpen: true,
+      amount: selected.price * 100, // Convert to paise
+      description: `${selected.plan.toUpperCase()} Plan - ${selected.duration}`,
+      type: planType
+    });
+  };
+
+  const handlePaymentSuccess = async (response: any) => {
+    try {
+      const paymentType = paymentModal.type;
+      
+      if (paymentType.startsWith('topup-')) {
+        // Handle top-up verification
+        const verifyResponse = await fetch('/api/verify-topup-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            paymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature,
+            topupType: paymentType
+          })
+        });
+
+        const verifyData = await verifyResponse.json();
+        
+        if (verifyData.success) {
+          toast({
+            title: "Top-up Successful!",
+            description: "API credits have been added to your account."
+          });
+          await refreshUser();
+        } else {
+          throw new Error(verifyData.error || 'Top-up verification failed');
+        }
+      } else {
+        // Handle subscription verification
+        const verifyResponse = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            paymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature,
+            plan: paymentType
+          })
+        });
+
+        const verifyData = await verifyResponse.json();
+        
+        if (verifyData.success) {
+          toast({
+            title: "Subscription Successful!",
+            description: "Your account has been upgraded successfully."
+          });
+          await refreshUser();
+        } else {
+          throw new Error(verifyData.error || 'Subscription verification failed');
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Payment Verification Failed",
+        description: error.message || "Please contact support if payment was deducted.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePaymentError = (error: any) => {
+    toast({
+      title: "Payment Failed",
+      description: error.description || "Payment was unsuccessful. Please try again.",
+      variant: "destructive"
+    });
   };
 
   const handleDownloadLogs = () => {
@@ -556,6 +448,21 @@ const Dashboard = () => {
         </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={paymentModal.isOpen}
+        onClose={() => setPaymentModal({ ...paymentModal, isOpen: false })}
+        amount={paymentModal.amount}
+        currency="INR"
+        description={paymentModal.description}
+        onSuccess={handlePaymentSuccess}
+        onError={handlePaymentError}
+        userDetails={{
+          email: user?.email || '',
+          name: user?.name || ''
+        }}
+      />
     </div>
   );
 };

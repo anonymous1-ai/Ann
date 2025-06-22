@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Download, Zap, Crown, Star } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { PaymentModal } from '@/components/payment/PaymentModal';
 
 interface PricingPlan {
   id: string;
@@ -138,6 +139,12 @@ export default function Pricing() {
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
+  const [paymentModal, setPaymentModal] = useState({
+    isOpen: false,
+    amount: 0,
+    description: '',
+    planId: ''
+  });
 
   const handleSubscribe = async (planId: string) => {
     if (!user) {
@@ -173,67 +180,65 @@ export default function Pricing() {
       return;
     }
 
-    setLoading(planId);
+    const plan = PRICING_PLANS.find(p => p.id === planId);
+    if (!plan || plan.price === 0) {
+      toast({
+        title: "Invalid Plan",
+        description: "Please select a valid subscription plan",
+        variant: "destructive"
+      });
+      return;
+    }
 
+    setPaymentModal({
+      isOpen: true,
+      amount: plan.price * 100, // Convert to paise
+      description: `${plan.name} - ${plan.description}`,
+      planId: planId
+    });
+  };
+
+  const handlePaymentSuccess = async (response: any) => {
     try {
-      // Create order
-      const orderResponse = await fetch('/api/create-order', {
+      const verifyResponse = await fetch('/api/verify-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ plan: planId })
+        body: JSON.stringify({
+          paymentId: response.razorpay_payment_id,
+          signature: response.razorpay_signature,
+          plan: paymentModal.planId
+        })
       });
 
-      const orderData = await orderResponse.json();
-
-      if (!orderData.success) {
-        throw new Error(orderData.error);
-      }
-
-      // Mock Razorpay payment process (replace with actual Razorpay integration)
-      const mockPaymentSuccess = await simulatePayment(orderData.data);
-
-      if (mockPaymentSuccess) {
-        // Verify payment
-        const verifyResponse = await fetch('/api/verify-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            orderId: orderData.data.orderId,
-            paymentId: `pay_${Date.now()}`,
-            signature: 'mock_signature',
-            plan: planId
-          })
+      const verifyData = await verifyResponse.json();
+      
+      if (verifyData.success) {
+        toast({
+          title: "Subscription Successful!",
+          description: "Your account has been upgraded successfully. License key generated!"
         });
-
-        const verifyData = await verifyResponse.json();
-
-        if (verifyData.success) {
-          toast({
-            title: "Payment Successful!",
-            description: `You've successfully subscribed to the ${planId} plan. Your license key has been generated.`,
-          });
-
-          // Refresh user data
-          window.location.reload();
-        } else {
-          throw new Error(verifyData.error);
-        }
+        window.location.reload();
+      } else {
+        throw new Error(verifyData.error || 'Payment verification failed');
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
-        title: "Payment Failed",
-        description: error instanceof Error ? error.message : "Payment processing failed. Please try again.",
+        title: "Payment Verification Failed",
+        description: error.message || "Please contact support if payment was deducted.",
         variant: "destructive"
       });
-    } finally {
-      setLoading(null);
     }
+  };
+
+  const handlePaymentError = (error: any) => {
+    toast({
+      title: "Payment Failed",
+      description: error.description || "Payment was unsuccessful. Please try again.",
+      variant: "destructive"
+    });
   };
 
   const handleTopUp = async (topupType: string) => {
@@ -655,6 +660,21 @@ export default function Pricing() {
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={paymentModal.isOpen}
+        onClose={() => setPaymentModal({ ...paymentModal, isOpen: false })}
+        amount={paymentModal.amount}
+        currency="INR"
+        description={paymentModal.description}
+        onSuccess={handlePaymentSuccess}
+        onError={handlePaymentError}
+        userDetails={{
+          email: user?.email || '',
+          name: user?.name || ''
+        }}
+      />
     </div>
   );
 }
