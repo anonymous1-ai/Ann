@@ -257,7 +257,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <div className="space-y-6">
           {/* Payment Method Tabs */}
           <Tabs value={paymentMethod} onValueChange={setPaymentMethod}>
-            <TabsList className="grid w-full grid-cols-3 bg-slate-800">
+            <TabsList className="h-10 items-center justify-center rounded-md p-1 grid w-full grid-cols-3 bg-[#000000cc] text-[#ffecb3]">
               <TabsTrigger value="upi" className="data-[state=active]:bg-yellow-600">
                 <Smartphone className="w-4 h-4 mr-1" />
                 UPI
