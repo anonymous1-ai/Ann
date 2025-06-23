@@ -14,7 +14,7 @@ import {
 } from "@shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const connectionString = process.env.DATABASE_URL!;
 const client = postgres(connectionString);
