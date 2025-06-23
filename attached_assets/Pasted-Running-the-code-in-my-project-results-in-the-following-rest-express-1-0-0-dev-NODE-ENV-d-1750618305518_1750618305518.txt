@@ -1,0 +1,67 @@
+Running the code in my project results in the following:
+
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+node:internal/process/promises:391
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+PostgresError: Control plane request failed: endpoint is disabled
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23)
+    at cachedError (file:///home/runner/workspace/node_modules/postgres/src/query.js:170:23)
+    at new Query (file:///home/runner/workspace/node_modules/postgres/src/query.js:36:24)
+    at sql (file:///home/runner/workspace/node_modules/postgres/src/index.js:112:11)
+    at PostgresStorage.initDatabase (/home/runner/workspace/server/storage.ts:55:11) {
+  severity_local: 'ERROR',
+  code: 'XX000'
+}
+
+Node.js v20.18.1
+If applicable, propose a fix immediately.
+
+Just now
+HR
+
+harshrathod1849
+Checkpoint made
+just now
+•
+Free
+Saved your changes before starting work
+Running the code in my project results in the following:
+
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+node:internal/process/promises:391
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+PostgresError: Control plane request failed: endpoint is disabled
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23)
+    at cachedError (file:///home/runner/workspace/node_modules/postgres/src/query.js:170:23)
+    at new Query (file:///home/runner/workspace/node_modules/postgres/src/query.js:36:24)
+    at sql (file:///home/runner/workspace/node_modules/postgres/src/index.js:112:11)
+    at PostgresStorage.initDatabase (/home/runner/workspace/server/storage.ts:55:11) {
+  severity_local: 'ERROR',
+  code: 'XX000'
+}
+
+Node.js v20.18.1

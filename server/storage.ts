@@ -1,6 +1,17 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { users, subscriptions, apiUsage, licenseValidations, type User, type InsertUser, type LoginUser, type Subscription, type ApiUsage, type LicenseValidationLog } from "@shared/schema";
+import {
+  users,
+  subscriptions,
+  apiUsage,
+  licenseValidations,
+  type User,
+  type InsertUser,
+  type LoginUser,
+  type Subscription,
+  type ApiUsage,
+  type LicenseValidationLog,
+} from "@shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import bcrypt from "bcrypt";
@@ -17,26 +28,53 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   verifyPassword(email: string, password: string): Promise<User | undefined>;
-  
+
   // License management
   generateLicenseKey(userId: number): Promise<string>;
-  validateLicense(licenseKey: string, hardwareHash: string, ipAddress?: string, userAgent?: string): Promise<{
+  validateLicense(
+    licenseKey: string,
+    hardwareHash: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<{
     valid: boolean;
     apiCallsLeft?: number;
     daysRemaining?: number;
     message?: string;
   }>;
-  
+
   // Subscription management
-  createSubscription(userId: number, plan: string, razorpayPaymentId: string, amount: number): Promise<void>;
-  updateUserPlan(userId: number, plan: string, apiCallsLeft: number, expiryDate: Date): Promise<void>;
-  
+  createSubscription(
+    userId: number,
+    plan: string,
+    razorpayPaymentId: string,
+    amount: number,
+  ): Promise<void>;
+  updateUserPlan(
+    userId: number,
+    plan: string,
+    apiCallsLeft: number,
+    expiryDate: Date,
+  ): Promise<void>;
+
   // API usage tracking
   decrementApiCalls(userId: number): Promise<void>;
-  trackApiUsage(userId: number, endpoint: string, creditsUsed: number): Promise<void>;
+  trackApiUsage(
+    userId: number,
+    endpoint: string,
+    creditsUsed: number,
+  ): Promise<void>;
   getApiUsageHistory(userId: number, limit?: number): Promise<ApiUsage[]>;
-  logLicenseValidation(userId: number, licenseKey: string, hardwareHash: string, success: boolean, apiCallsLeft?: number, ipAddress?: string, userAgent?: string): Promise<void>;
-  
+  logLicenseValidation(
+    userId: number,
+    licenseKey: string,
+    hardwareHash: string,
+    success: boolean,
+    apiCallsLeft?: number,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<void>;
+
   // Dashboard data
   getDashboardStats(userId: number): Promise<{
     totalCalls: number;
@@ -45,7 +83,7 @@ export interface IStorage {
     expiryDate: Date | null;
     recentUsage: ApiUsage[];
   }>;
-  
+
   initDatabase(): Promise<void>;
 }
 
@@ -113,81 +151,133 @@ export class PostgresStorage implements IStorage {
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    const result = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
     return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    const result = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
     return result[0];
   }
 
   async getUserByLicenseKey(licenseKey: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.licenseKey, licenseKey)).limit(1);
+    const result = await db
+      .select()
+      .from(users)
+      .where(eq(users.licenseKey, licenseKey))
+      .limit(1);
     return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
-    
-    const result = await db.insert(users).values({
-      email: insertUser.email,
-      name: insertUser.name,
-      password: hashedPassword,
-    }).returning();
-    
+
+    const result = await db
+      .insert(users)
+      .values({
+        email: insertUser.email,
+        name: insertUser.name,
+        password: hashedPassword,
+      })
+      .returning();
+
     return result[0];
   }
 
-  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
-    const result = await db.update(users)
+  async updateUser(
+    id: number,
+    updates: Partial<User>,
+  ): Promise<User | undefined> {
+    const result = await db
+      .update(users)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
-    
+
     return result[0];
   }
 
-  async verifyPassword(email: string, password: string): Promise<User | undefined> {
+  async verifyPassword(
+    email: string,
+    password: string,
+  ): Promise<User | undefined> {
     const user = await this.getUserByEmail(email);
     if (!user) return undefined;
-    
+
     const isValid = await bcrypt.compare(password, user.password);
     return isValid ? user : undefined;
   }
 
   async generateLicenseKey(userId: number): Promise<string> {
     const licenseKey = `LIC-${nanoid(16).toUpperCase()}`;
-    
-    await db.update(users)
+
+    await db
+      .update(users)
       .set({ licenseKey, updatedAt: new Date() })
       .where(eq(users.id, userId));
-    
+
     return licenseKey;
   }
 
-  async validateLicense(licenseKey: string, hardwareHash: string, ipAddress?: string, userAgent?: string): Promise<{
+  async validateLicense(
+    licenseKey: string,
+    hardwareHash: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<{
     valid: boolean;
     apiCallsLeft?: number;
     daysRemaining?: number;
     message?: string;
   }> {
     const user = await this.getUserByLicenseKey(licenseKey);
-    
+
     if (!user) {
-      await this.logLicenseValidation(0, licenseKey, hardwareHash, false, undefined, ipAddress, userAgent);
+      await this.logLicenseValidation(
+        0,
+        licenseKey,
+        hardwareHash,
+        false,
+        undefined,
+        ipAddress,
+        userAgent,
+      );
       return { valid: false, message: "Invalid license key" };
     }
 
     // Check if license has expired
     if (user.expiryDate && new Date() > user.expiryDate) {
-      await this.logLicenseValidation(user.id, licenseKey, hardwareHash, false, user.apiCallsLeft, ipAddress, userAgent);
+      await this.logLicenseValidation(
+        user.id,
+        licenseKey,
+        hardwareHash,
+        false,
+        user.apiCallsLeft,
+        ipAddress,
+        userAgent,
+      );
       return { valid: false, message: "License expired" };
     }
 
     // Check if user has API calls left
     if (user.apiCallsLeft <= 0) {
-      await this.logLicenseValidation(user.id, licenseKey, hardwareHash, false, user.apiCallsLeft, ipAddress, userAgent);
+      await this.logLicenseValidation(
+        user.id,
+        licenseKey,
+        hardwareHash,
+        false,
+        user.apiCallsLeft,
+        ipAddress,
+        userAgent,
+      );
       return { valid: false, message: "No API calls remaining" };
     }
 
@@ -198,12 +288,26 @@ export class PostgresStorage implements IStorage {
 
     // Decrement API calls
     await this.decrementApiCalls(user.id);
-    
-    const daysRemaining = user.expiryDate 
-      ? Math.max(0, Math.ceil((user.expiryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+
+    const daysRemaining = user.expiryDate
+      ? Math.max(
+          0,
+          Math.ceil(
+            (user.expiryDate.getTime() - new Date().getTime()) /
+              (1000 * 60 * 60 * 24),
+          ),
+        )
       : null;
 
-    await this.logLicenseValidation(user.id, licenseKey, hardwareHash, true, user.apiCallsLeft - 1, ipAddress, userAgent);
+    await this.logLicenseValidation(
+      user.id,
+      licenseKey,
+      hardwareHash,
+      true,
+      user.apiCallsLeft - 1,
+      ipAddress,
+      userAgent,
+    );
 
     return {
       valid: true,
@@ -212,10 +316,16 @@ export class PostgresStorage implements IStorage {
     };
   }
 
-  async createSubscription(userId: number, plan: string, razorpayPaymentId: string, amount: number): Promise<void> {
-    const endDate = plan === 'advanced' 
-      ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);  // 1 month
+  async createSubscription(
+    userId: number,
+    plan: string,
+    razorpayPaymentId: string,
+    amount: number,
+  ): Promise<void> {
+    const endDate =
+      plan === "advanced"
+        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 1 month
 
     await db.insert(subscriptions).values({
       userId,
@@ -226,28 +336,39 @@ export class PostgresStorage implements IStorage {
     });
   }
 
-  async updateUserPlan(userId: number, plan: string, apiCallsLeft: number, expiryDate: Date): Promise<void> {
-    await db.update(users)
-      .set({ 
-        plan, 
-        apiCallsLeft, 
+  async updateUserPlan(
+    userId: number,
+    plan: string,
+    apiCallsLeft: number,
+    expiryDate: Date,
+  ): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        plan,
+        apiCallsLeft,
         expiryDate,
-        updatedAt: new Date() 
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
   }
 
   async decrementApiCalls(userId: number): Promise<void> {
-    await db.update(users)
-      .set({ 
+    await db
+      .update(users)
+      .set({
         apiCallsLeft: sql`${users.apiCallsLeft} - 1`,
         totalCalls: sql`${users.totalCalls} + 1`,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
   }
 
-  async trackApiUsage(userId: number, endpoint: string, creditsUsed: number): Promise<void> {
+  async trackApiUsage(
+    userId: number,
+    endpoint: string,
+    creditsUsed: number,
+  ): Promise<void> {
     await db.insert(apiUsage).values({
       userId,
       endpoint,
@@ -256,14 +377,23 @@ export class PostgresStorage implements IStorage {
   }
 
   async getApiUsageHistory(userId: number, limit = 50): Promise<ApiUsage[]> {
-    return await db.select()
+    return await db
+      .select()
       .from(apiUsage)
       .where(eq(apiUsage.userId, userId))
       .orderBy(desc(apiUsage.createdAt))
       .limit(limit);
   }
 
-  async logLicenseValidation(userId: number, licenseKey: string, hardwareHash: string, success: boolean, apiCallsLeft?: number, ipAddress?: string, userAgent?: string): Promise<void> {
+  async logLicenseValidation(
+    userId: number,
+    licenseKey: string,
+    hardwareHash: string,
+    success: boolean,
+    apiCallsLeft?: number,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<void> {
     await db.insert(licenseValidations).values({
       userId,
       licenseKey,
